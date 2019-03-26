@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.FXController">
+   <right>
+		<VBox alignment="CENTER" spacing="10">
+			<padding>
+				<Insets right="10" left="10" />
+			</padding>
+			<Label text="Hue Start" />
+			<Slider fx:id="hueStart" min="0" max="180" value="20" blockIncrement="1" />
+			<Label text="Hue Stop" />
+			<Slider fx:id="hueStop" min="0" max="180" value="50" blockIncrement="1" />
+			<Label text="Saturation Start" />
+			<Slider fx:id="saturationStart" min="0" max="255" value="60" blockIncrement="1" />
+			<Label text="Saturation Stop" />
+			<Slider fx:id="saturationStop" min="0" max="255" value="200" blockIncrement="1" />
+			<Label text="Value Start" />
+			<Slider fx:id="valueStart" min="0" max="255" value="50" blockIncrement="1" />
+			<Label text="Value Stop" />
+			<Slider fx:id="valueStop" min="0" max="255" value="255" blockIncrement="1" />
+		</VBox>
+   </right>
+   <center>
+      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fx:id="videoFrame" fitHeight="480.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true" />
+            <VBox prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <ImageView fx:id="maskImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </ImageView>
+                  <ImageView fx:id="morphImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </ImageView>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </center>
+	<bottom>
+		<VBox alignment="CENTER" spacing="15">
+			<padding>
+				<Insets top="25" right="25" bottom="25" left="25" />
+			</padding>
+			<Button fx:id="cameraButton" alignment="center" text="Start camera" onAction="#startCamera" />
+			<Separator />
+			<Label fx:id="hsvCurrentValues" />
+		</VBox>
+	</bottom>
+</BorderPane>
