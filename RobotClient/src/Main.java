@@ -16,10 +16,9 @@ public class Main {
             }
         });
 			
+		
 			*/
-		Connection con = new Connection();
-		con.Connect("", 4444);
-	 
+		 
 			
 	}
 	
