@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Connection {
 	private int port  = 4444;
-	private String ip = "IP HERE";
+	private String ip = "10.0.1.1";
 	
 	public Socket Connect()  {			
 	

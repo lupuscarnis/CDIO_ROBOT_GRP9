@@ -42,7 +42,7 @@ public class DAO {
 		out.println(data.getAsString());
 		
 		
-		while
+	
 		
 		
 		
