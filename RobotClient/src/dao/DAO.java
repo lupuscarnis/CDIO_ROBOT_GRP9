@@ -21,7 +21,7 @@ public class DAO {
 	s =	c.Connect();
 	}
 	
-	public DTO  sendData(DTO data) throws IOException {
+	public void sendData(DTO data) throws IOException {
 			
 		try {
 			
@@ -39,14 +39,8 @@ public class DAO {
 		}
 		
 		
-		out.println(data.getAsString());
+		out.println(data.toString());
 		
-		
-	
-		
-		
-		
-		return data;
 	}
 	
 	

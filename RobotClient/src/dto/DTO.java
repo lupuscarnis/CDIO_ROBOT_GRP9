@@ -52,8 +52,8 @@ public class DTO {
 	}
 	
 	
-	
-	public String getAsString()
+	@Override
+	public String toString()
 	{
 		String s;
 		
