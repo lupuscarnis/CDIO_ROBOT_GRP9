@@ -227,7 +227,7 @@ public class FXController
 	
 	/**
 	 * Given a binary image containing one or more closed surfaces, use it as a
-	 * mask to find and highlight the objects contours
+	 * mask to find and highlight the objects contours. Prints the coordinates of each contour.
 	 * 
 	 * @param maskedImage
 	 *            the binary image to be used as a mask
