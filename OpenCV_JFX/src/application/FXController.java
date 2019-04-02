@@ -2,16 +2,23 @@ package application;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
 import application.Utils;
@@ -30,6 +37,7 @@ import javafx.scene.image.ImageView;
 
 public class FXController
 {
+	private Random rand = new Random(12345);
 	// FXML camera button
 	@FXML
 	private Button cameraButton;
@@ -88,7 +96,7 @@ public class FXController
 		if (!this.cameraActive)
 		{
 			// start the video capture
-			this.capture.open(2);
+			this.capture.open(1);
 			
 			// is the video stream available?
 			if (this.capture.isOpened())
@@ -165,6 +173,9 @@ public class FXController
 					// convert the frame to HSV
 					Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
 					
+					// Experimental grayscale --> http://answers.opencv.org/question/34970/detection-of-table-tennis-balls-and-color-correction/
+					//Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2GRAY);
+					
 					// get thresholding values from the UI
 					// remember: H ranges 0-180, S and V range 0-255
 					Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
@@ -230,20 +241,57 @@ public class FXController
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
+		Mat output = new Mat();
 		
-		// find contours
+		// find contours based on the masked image
 		Imgproc.findContours(maskedImage, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 		
+		// Moments can be used to find the center of an image/polygon
+		List<Moments> m = new ArrayList<>(contours.size());
+		
+		for (int i = 0; i < contours.size(); i++) {
+			m.add(Imgproc.moments(contours.get(i)));
+		}
+		
+		//Stores the points of each centroid
+		List<Point> p = new ArrayList<>(contours.size());
+		
+		for (int i = 0; i < contours.size(); i++) {
+            //add 1e-5 to avoid division by zero
+            p.add(new Point(m.get(i).m10 / (m.get(i).m00 + 1e-5), m.get(i).m01 / (m.get(i).m00 + 1e-5)));
+		}
+		
+		Mat drawing = Mat.zeros(output.size(), CvType.CV_8UC3);
+		
+		//Draws the centroid and contour around the object
+        for (int i = 0; i < contours.size(); i++) {
+            Scalar color = new Scalar(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
+            //Imgproc.drawContours(drawing, contours, i, color, 2);
+            Imgproc.drawContours(frame, contours, i, new Scalar(250, 0, 0), 2);
+            Imgproc.circle(frame, p.get(i), 4, color, -1);
+        }
+        
+        //System.out.println("\t Info: Area and Contour Length \n");
+        for (int i = 0; i < contours.size(); i++) {
+        	System.out.println("Point (X,Y): "+p.get(i));
+            /*System.out.format(" * Contour[%d] - Area (M_00) = %.2f - Area OpenCV: %.2f - Length: %.2f\n", i,
+                    m.get(i).m00, Imgproc.contourArea(contours.get(i)),
+                    Imgproc.arcLength(new MatOfPoint2f(contours.get(i).toArray()), true));*/
+        }
+		
 		// if any contour exist...
-		if (hierarchy.size().height > 0 && hierarchy.size().width > 0)
+		/*if (hierarchy.size().height > 0 && hierarchy.size().width > 0)
 		{
 			// for each contour, display it in blue
 			for (int idx = 0; idx >= 0; idx = (int) hierarchy.get(0, idx)[0])
-			{
+			{	
 				// https://www.programcreek.com/java-api-examples/?class=org.opencv.imgproc.Imgproc&method=drawContours
 				Imgproc.drawContours(frame, contours, idx, new Scalar(0, 250, 0), 2);
+				Converters.Mat_to_vector_Point(contours.get(idx), p);	
+				System.out.println(p.size());
 			}
-		}
+
+		}*/
 		
 		return frame;
 	}
