@@ -13,15 +13,16 @@ import connection.Connection;
 import dto.DTO;
 
 public class DAO {
-	private Connection c;
+	private Connection c = null;
 	private Socket s;
 	private BufferedReader	in;
 	private PrintWriter out;
 	public DAO() {
+	c = new Connection();
 	s =	c.Connect();
 	}
 	
-	public void sendData(DTO data) throws IOException {
+	public void sendData(DTO data) {
 			
 		try {
 			
