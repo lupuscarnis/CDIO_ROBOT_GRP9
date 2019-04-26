@@ -12,6 +12,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.osgi.OpenCVInterface;
 import org.opencv.videoio.VideoCapture;
 
 import application.Utils;
@@ -23,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import nu.pattern.OpenCV;
 
 /**
  * https://github.com/opencv-java
@@ -196,10 +198,11 @@ public class FXController
 					
 					// show the partial output
 					this.updateImageView(this.morphImage, Utils.mat2Image(morphOutput));
-					
+					frame = findBackAndFront(frame);
 					// find the tennis ball(s) contours and show them
-					frame = this.findAndDrawBalls(morphOutput, frame);
-
+					//frame = this.findAndDrawBalls(morphOutput, frame);
+				
+					
 				}
 				
 			}
@@ -311,6 +314,23 @@ public class FXController
 	protected void setClosed()
 	{
 		this.stopAcquisition();
+	}
+	
+	private Mat findBackAndFront(Mat frame) {
+	Mat hsvImage = null; 
+	Mat output = null;
+	Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
+	
+	
+	
+	
+	Scalar minValues = new Scalar(210, 50,
+			50);
+	Scalar maxValues = new Scalar(260, 100,
+			100);	
+			Core.inRange(hsvImage, minValues, maxValues, output);
+			
+		return output;
 	}
 	
 }
