@@ -178,6 +178,7 @@ public class FXController
 					String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0]
 							+ "\tSaturation range: " + minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: "
 							+ minValues.val[2] + "-" + maxValues.val[2];
+					
 					Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
 					
 					// threshold HSV image to select tennis balls
@@ -198,9 +199,9 @@ public class FXController
 					
 					// show the partial output
 					this.updateImageView(this.morphImage, Utils.mat2Image(morphOutput));
-					frame = findBackAndFront(frame);
+					//frame = findBackAndFront(frame);
 					// find the tennis ball(s) contours and show them
-					//frame = this.findAndDrawBalls(morphOutput, frame);
+					frame = this.findAndDrawBalls(morphOutput, frame);
 				
 					
 				}
@@ -317,18 +318,31 @@ public class FXController
 	}
 	
 	private Mat findBackAndFront(Mat frame) {
-	Mat hsvImage = null; 
-	Mat output = null;
+	Mat hsvImage = new Mat(); 
+	Mat output = new Mat();
+	Mat replace = new Mat();
 	Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
+
 	
 	
+	Scalar minValues = new Scalar(147, 22,
+			182);
+	Scalar maxValues = new Scalar(180, 255,
+			255);	
+	Core.inRange(hsvImage, minValues, maxValues,output);
 	
 	
-	Scalar minValues = new Scalar(210, 50,
-			50);
-	Scalar maxValues = new Scalar(260, 100,
-			100);	
-			Core.inRange(hsvImage, minValues, maxValues, output);
+		for (int i = (int) output.size().height; i > 0; i++)
+		{
+			for(int b = (int) output.size().width; b > 0 ; b++)
+			{
+				if(output.get(i, b)[0] == 0) {
+					output.put(i, b,new double[]{180.0,255.0,255.0});
+				}
+			}
+		
+		}
+	
 			
 		return output;
 	}
