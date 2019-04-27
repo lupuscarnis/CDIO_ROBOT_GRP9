@@ -186,7 +186,7 @@ public class FXController {
 
 					// show the partial output
 					this.updateImageView(this.morphImage, Utils.mat2Image(morphOutput));
-					//frame = findBackAndFront(frame);
+					
 					// find the tennis ball(s) contours and show them
 					frame = this.findAndDrawBalls(morphOutput, frame);
 
