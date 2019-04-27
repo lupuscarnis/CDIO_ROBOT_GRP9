@@ -62,13 +62,13 @@ public class Main extends Application {
 		//System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		// Load the library from maven instead of native (userlib)
-		DAO dao = new DAO();
-		DTO Danny = new DTO();
-		Danny.setDistance(0);
-		Danny.setRotation(0);
-		Danny.setBallpickup(false);
-		dao.sendData(Danny);
-		
+//		DAO dao = new DAO();
+//		DTO Danny = new DTO();
+//		Danny.setDistance(0);
+//		Danny.setRotation(0);
+//		Danny.setBallpickup(false);
+//		dao.sendData(Danny);
+//		
 		nu.pattern.OpenCV.loadShared();
 		
 		launch(args);
