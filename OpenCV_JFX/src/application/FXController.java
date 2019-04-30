@@ -164,17 +164,44 @@ public class FXController
 					// init
 					Mat blurredImage = new Mat();
 					Mat hsvImage = new Mat();
+					Mat grayImage = new Mat();
+					Mat adaptImage = new Mat();
 					Mat mask = new Mat();
 					Mat morphOutput = new Mat();
 					
-					// remove some noise
-					Imgproc.blur(frame, blurredImage, new Size(7, 7));
+
+					/*
+					 * NOISE REMOVAL
+					 * 
+					 */
 					
+					//Normal Blur
+					//Imgproc.blur(frame, blurredImage, new Size(7, 7));
+					
+				    // Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
+				    Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
+					
+				    /*
+				     * The below function call is to be used with a grayscale image.
+				     */
+				    //Imgproc.adaptiveThreshold(blurredImage, adaptImage, 255, 0, 1, 51, -25);
+
+				    /* 
+				     * COLOR SPACE CONVERSION
+				     * 
+				     * When using grayscale only the hue min/max slider have an effect on the detection.
+				     */
+				    
 					// convert the frame to HSV
-					Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
+					//Imgproc.cvtColor(adaptImage, hsvImage, Imgproc.COLOR_BGR2HSV);
 					
-					// Experimental grayscale --> http://answers.opencv.org/question/34970/detection-of-table-tennis-balls-and-color-correction/
-					//Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2GRAY);
+					/* Experimental grayscale --> http://answers.opencv.org/question/34970/detection-of-table-tennis-balls-and-color-correction/
+					 * When using grayscale only the hue min/max slider have an effect on the detection.
+					 */
+				    // convert the frame to HSV
+				    Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
+					//Imgproc.cvtColor(blurredImage, grayImage, Imgproc.COLOR_BGR2GRAY);
+					
 					
 					// get thresholding values from the UI
 					// remember: H ranges 0-180, S and V range 0-255
