@@ -1,9 +1,11 @@
 package application;
 	
 import java.io.IOException;
+import java.util.Scanner;
 
 import org.opencv.core.Core;
 
+import connection.ConsoleOutput;
 import dao.DAO;
 import dto.DTO;
 import javafx.application.Application;
@@ -70,8 +72,19 @@ public class Main extends Application {
 //		dao.sendData(Danny);
 //		
 		nu.pattern.OpenCV.loadShared();
-		
+		Thread console = new Thread( new ConsoleOutput());
+		console.start();
 		launch(args);
+		try {
+			console.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		
 		
 		
 		

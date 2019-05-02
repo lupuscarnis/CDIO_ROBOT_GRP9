@@ -90,7 +90,7 @@ public class FXController
 		if (!this.cameraActive)
 		{
 			// start the video capture
-			this.capture.open(0);
+			this.capture.open(1);
 			
 			// is the video stream available?
 			if (this.capture.isOpened())
@@ -330,18 +330,18 @@ public class FXController
 	Scalar maxValues = new Scalar(180, 255,
 			255);	
 	Core.inRange(hsvImage, minValues, maxValues,output);
-	
-	
-		for (int i = (int) output.size().height; i > 0; i++)
-		{
-			for(int b = (int) output.size().width; b > 0 ; b++)
-			{
-				if(output.get(i, b)[0] == 0) {
-					output.put(i, b,new double[]{180.0,255.0,255.0});
-				}
-			}
-		
-		}
+	Scalar color = new Scalar(0,128,0);
+//	Imgproc.line(output, pt1, pt2, color, 1, 1, shift);
+//		for (int i = (int) output.size().height; i > 0; i++)
+//		{
+//			for(int b = (int) output.size().width; b > 0 ; b++)
+//			{
+//				if(output.get(i, b)[0] == 0) {
+//					output.put(i, b,new double[]{180.0,255.0,255.0});
+//				}
+//			}
+//		
+//		}
 	
 			
 		return output;

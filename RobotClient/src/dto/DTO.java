@@ -78,7 +78,7 @@ public class DTO {
 			substring.get(1).replaceAll("{", "");
 			substring.get(1).replaceAll("}", "");
 			if (substring.get(1).equals("true") || substring.get(1).equals("false")) {
-				if (substring.equals("true")) {
+				if (substring.get(1).equals("true")) {
 					map.put(substring.get(0), (float) 1.0);
 
 				} else {
