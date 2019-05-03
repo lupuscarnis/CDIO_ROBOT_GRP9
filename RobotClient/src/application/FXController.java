@@ -162,8 +162,16 @@ public class FXController
 					Mat morphOutput = new Mat();
 					
 					// remove some noise
-					Imgproc.blur(frame, blurredImage, new Size(7, 7));
+					// Imgproc.blur(frame, blurredImage, new Size(7, 7));
 					
+					// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
+				    Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
+					
+					/* Experimental grayscale --> http://answers.opencv.org/question/34970/detection-of-table-tennis-balls-and-color-correction/
+					 * When using grayscale only the hue min/max slider have an effect on the detection.
+					 */
+				    //Imgproc.cvtColor(blurredImage, grayImage, Imgproc.COLOR_BGR2GRAY);
+				    
 					// convert the frame to HSV
 					Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
 					
@@ -203,7 +211,6 @@ public class FXController
 					// find the tennis ball(s) contours and show them
 					frame = this.findAndDrawBalls(morphOutput, frame);
 				
-					
 				}
 				
 			}
