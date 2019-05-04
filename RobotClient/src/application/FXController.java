@@ -7,10 +7,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.osgi.OpenCVInterface;
 import org.opencv.videoio.VideoCapture;
@@ -71,6 +75,9 @@ public class FXController
 	// property for object binding
 	private ObjectProperty<String> hsvValuesProp;
 		
+	
+	// FOR TESTING ONLY!
+	String localImg = "Pictures/pic01.jpg";
 	/**
 	 * The action triggered by pushing the button on the GUI
 	 */
@@ -86,16 +93,12 @@ public class FXController
 		this.imageViewProperties(this.videoFrame, 400);
 		this.imageViewProperties(this.maskImage, 200);
 		this.imageViewProperties(this.morphImage, 200);
+	
 		
-		if (!this.cameraActive)
-		{
-			// start the video capture
-			this.capture.open(1);
 			
 			// is the video stream available?
-			if (this.capture.isOpened())
-			{
-				this.cameraActive = true;
+
+				//this.cameraActive = true;
 				
 				// grab a frame every 33 ms (30 frames/sec)
 				Runnable frameGrabber = new Runnable() {
@@ -103,11 +106,10 @@ public class FXController
 					@Override
 					public void run()
 					{
-						// effectively grab and process a single frame
-						Mat frame = grabFrame();
-						// convert and show the frame
-						Image imageToShow = Utils.mat2Image(frame);
-						updateImageView(videoFrame, imageToShow);
+										
+						  Mat frame = grabFrame();
+						  Image imageToShow = Utils.mat2Image(frame);
+						  updateImageView(videoFrame, imageToShow);
 					}
 				};
 				
@@ -117,23 +119,10 @@ public class FXController
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
 			}
-			else
-			{
-				// log the error
-				System.err.println("Failed to open the camera connection...");
-			}
-		}
-		else
-		{
-			// the camera is not active at this point
-			this.cameraActive = false;
-			// update again the button content
-			this.cameraButton.setText("Start Camera");
-			
-			// stop the timer
-			this.stopAcquisition();
-		}
-	}
+
+	
+
+	
 	
 	/**
 	 * Get a frame from the opened video stream (if any)
@@ -142,15 +131,17 @@ public class FXController
 	 */
 	private Mat grabFrame()
 	{
-		Mat frame = new Mat();
 		
+		Mat frame = new Mat();
+	      
 		// check if the capture is open
-		if (this.capture.isOpened())
-		{
+
 			try
 			{
-				// read the current frame
-				this.capture.read(frame);
+				  String file = localImg;
+			      frame = Imgcodecs.imread(file);
+			      Image imageToShow = Utils.mat2Image(frame);
+				 
 				
 				// if the frame is not empty, process it
 				if (!frame.empty())
@@ -162,10 +153,10 @@ public class FXController
 					Mat morphOutput = new Mat();
 					
 					// remove some noise
-					// Imgproc.blur(frame, blurredImage, new Size(7, 7));
+					Imgproc.blur(frame, blurredImage, new Size(7, 7));
 					
 					// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
-				    Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
+				    //Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
 					
 					/* Experimental grayscale --> http://answers.opencv.org/question/34970/detection-of-table-tennis-balls-and-color-correction/
 					 * When using grayscale only the hue min/max slider have an effect on the detection.
@@ -220,7 +211,7 @@ public class FXController
 				System.err.print("Exception during the image elaboration...");
 				e.printStackTrace();
 			}
-		}
+
 		
 		return frame;
 	}
