@@ -65,6 +65,19 @@ public class FXController
 	@FXML
 	private Label hsvCurrentValues;
 	
+	// Hough
+	
+	@FXML
+	private Slider H_minDist;
+	@FXML
+	private Slider H_uThresh;
+	@FXML
+	private Slider H_cTresh;
+	@FXML
+	private Slider H_minRad;
+	@FXML
+	private Slider H_maxRad;
+	
 	// a timer for acquiring the video stream
 	private ScheduledExecutorService timer;
 	// the OpenCV object that performs the video capture
@@ -78,6 +91,7 @@ public class FXController
 	
 	// FOR TESTING ONLY!
 	String localImg = "Pictures/pic01.jpg";
+	boolean UseHSVImgDetection = false;
 	/**
 	 * The action triggered by pushing the button on the GUI
 	 */
@@ -87,7 +101,7 @@ public class FXController
 		// bind a text property with the string containing the current range of
 		// HSV values for object detection
 		hsvValuesProp = new SimpleObjectProperty<>();
-		//this.hsvCurrentValues.textProperty().bind(hsvValuesProp);
+		this.hsvCurrentValues.textProperty().bind(hsvValuesProp);
 				
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
@@ -106,11 +120,18 @@ public class FXController
 					@Override
 					public void run()
 					{
-										
-						  //Mat frame = grabFrameHSV();
-						  Mat frame = grabFrameHough();
-						  Image imageToShow = Utils.mat2Image(frame);
-						  updateImageView(videoFrame, imageToShow);
+								
+						Mat frame = new Mat();
+						  // Method of ball detection grabFrameHSV/grabFrameHough
+						if (UseHSVImgDetection) {
+						  frame = grabFrameHSV();
+						} else {
+						  frame = grabFrameHough();
+						}
+						
+						Image imageToShow = Utils.mat2Image(frame);
+						updateImageView(videoFrame, imageToShow); 
+						  
 					}
 				};
 				
@@ -126,6 +147,8 @@ public class FXController
 	
 	
 	/**
+	 * HSV IMAGE ANALYSIS
+	 * 
 	 * Get a frame from the opened video stream (if any)
 	 * 
 	 * @return the {@link Image} to show
@@ -154,10 +177,10 @@ public class FXController
 					Mat morphOutput = new Mat();
 					
 					// remove some noise
-					Imgproc.blur(frame, blurredImage, new Size(7, 7));
+					//Imgproc.blur(frame, blurredImage, new Size(7, 7));
 					
 					// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
-				    //Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
+				    Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
 					
 					/* Experimental grayscale --> http://answers.opencv.org/question/34970/detection-of-table-tennis-balls-and-color-correction/
 					 * When using grayscale only the hue min/max slider have an effect on the detection.
@@ -253,6 +276,8 @@ public class FXController
 	
 	
 	/**
+	 * HOUGH IMAGE ANALYSIS
+	 * 
 	 * Get a frame from the opened video stream (if any)
 	 * 
 	 * @return the {@link Image} to show
@@ -267,24 +292,34 @@ public class FXController
 			try
 			{
 				  String file = localImg;
-			      frame = Imgcodecs.imread(file);
-			      Image imageToShow = Utils.mat2Image(frame);
-				 
+			      frame = Imgcodecs.imread(file);		 
 				
 				// if the frame is not empty, process it
 				if (!frame.empty())
 				{
 					// init
-					Mat blurredImage = new Mat();
+
 					Mat grayImage = new Mat();
-					Mat mask = new Mat();
-					Mat morphOutput = new Mat();
+
 					
 					Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
 					
 					Imgproc.medianBlur(grayImage, grayImage, 5);
 					
 					Mat circles = new Mat();
+					
+					int min_dist = new Integer((int) this.H_minDist.getValue());
+					double uThresh = new Double(this.H_uThresh.getValue());
+					double cTresh = new Double(this.H_cTresh.getValue());
+					int minRad = new Integer((int) this.H_minRad.getValue());
+					int maxRad = new Integer((int) this.H_maxRad.getValue());
+
+					// show the current selected HSV range
+					String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh
+							+ ", Center Threshold: " + cTresh + ", Min Radius: " + minRad + ", Max Radius: "
+							+ maxRad;
+					
+					Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
 					
 			        /*grayImage: Input image (grayscale).
 			        circles: A vector that stores sets of 3 values: xc,yc,r for each detected circle.
@@ -295,7 +330,7 @@ public class FXController
 			        param_2 = 100*: Threshold for center detection.
 			        min_radius = 0: Minimum radius to be detected. If unknown, put zero as default.
 			        max_radius = 0: Maximum radius to be detected. If unknown, put zero as default.*/
-			        Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0,(double)grayImage.rows()/64,50.0, 28.0, 1, 15);
+			        Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0,(double)grayImage.rows()/min_dist,uThresh, cTresh, minRad, maxRad);
 
 			        for (int x = 0; x < circles.cols(); x++) {
 			            double[] c = circles.get(0, x);
