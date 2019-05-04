@@ -107,7 +107,8 @@ public class FXController
 					public void run()
 					{
 										
-						  Mat frame = grabFrame();
+						  //Mat frame = grabFrameHSV();
+						  Mat frame = grabFrameHough();
 						  Image imageToShow = Utils.mat2Image(frame);
 						  updateImageView(videoFrame, imageToShow);
 					}
@@ -129,7 +130,7 @@ public class FXController
 	 * 
 	 * @return the {@link Image} to show
 	 */
-	private Mat grabFrame()
+	private Mat grabFrameHSV()
 	{
 		
 		Mat frame = new Mat();
@@ -246,6 +247,76 @@ public class FXController
 				Imgproc.drawContours(frame, contours, idx, new Scalar(0, 250, 0), 2);
 			}
 		}
+		
+		return frame;
+	}
+	
+	
+	/**
+	 * Get a frame from the opened video stream (if any)
+	 * 
+	 * @return the {@link Image} to show
+	 */
+	private Mat grabFrameHough()
+	{
+		
+		Mat frame = new Mat();
+	      
+		// check if the capture is open
+
+			try
+			{
+				  String file = localImg;
+			      frame = Imgcodecs.imread(file);
+			      Image imageToShow = Utils.mat2Image(frame);
+				 
+				
+				// if the frame is not empty, process it
+				if (!frame.empty())
+				{
+					// init
+					Mat blurredImage = new Mat();
+					Mat grayImage = new Mat();
+					Mat mask = new Mat();
+					Mat morphOutput = new Mat();
+					
+					Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
+					
+					Imgproc.medianBlur(grayImage, grayImage, 5);
+					
+					Mat circles = new Mat();
+					
+			        /*grayImage: Input image (grayscale).
+			        circles: A vector that stores sets of 3 values: xc,yc,r for each detected circle.
+			        HOUGH_GRADIENT: Define the detection method. Currently this is the only one available in OpenCV.
+			        dp = 1: The inverse ratio of resolution.
+			        min_dist = gray.rows/16: Minimum distance between detected centers.
+			        param_1 = 200: Upper threshold for the internal Canny edge detector.
+			        param_2 = 100*: Threshold for center detection.
+			        min_radius = 0: Minimum radius to be detected. If unknown, put zero as default.
+			        max_radius = 0: Maximum radius to be detected. If unknown, put zero as default.*/
+			        Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0,(double)grayImage.rows()/64,50.0, 28.0, 1, 15);
+
+			        for (int x = 0; x < circles.cols(); x++) {
+			            double[] c = circles.get(0, x);
+			            Point center = new Point(Math.round(c[0]), Math.round(c[1]));
+			            // circle center
+			            Imgproc.circle(frame, center, 1, new Scalar(0,100,100), 3, 8, 0 );
+			            // circle outline
+			            int radius = (int) Math.round(c[2]);
+			            Imgproc.circle(frame, center, radius, new Scalar(255,0,255), 3, 8, 0 );
+			        }
+				
+				}
+				
+			}
+			catch (Exception e)
+			{
+				// log the (full) error
+				System.err.print("Exception during the image elaboration...");
+				e.printStackTrace();
+			}
+
 		
 		return frame;
 	}
