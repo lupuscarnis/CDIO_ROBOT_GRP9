@@ -25,6 +25,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import nu.pattern.OpenCV;
+import objects.Robot;
 
 /**
  * https://github.com/opencv-java
@@ -90,7 +91,7 @@ public class FXController
 		if (!this.cameraActive)
 		{
 			// start the video capture
-			this.capture.open(1);
+			this.capture.open(0);
 			
 			// is the video stream available?
 			if (this.capture.isOpened())
@@ -394,7 +395,11 @@ public class FXController
 			org.opencv.core.Point backCenter = new org.opencv.core.Point(x / iter, y / iter);
 			/*System.out.println("Front" + frontCenter.x+","+frontCenter.y +" "+ "Back:" + frontCenter.x+","+frontCenter.y);*/
 			Imgproc.line(frame, backCenter, frontCenter, new Scalar(350, 255, 255));
-		
+			Robot s = Robot.getInstance();
+			s.setBackX(backCenter.x);
+			s.setBackY(backCenter.y);
+			s.setFrontX(frontCenter.x);
+			s.setFrontY(frontCenter.y);
 		return frame;
 	}
 
