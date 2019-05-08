@@ -72,6 +72,9 @@ public class FXController
 	// a flag to change the button behavior
 	private boolean cameraActive;
 	
+	// Sets the frames per second (33 = 33 frames persecond)
+	private int captureRate = 1000;
+	
 	// property for object binding
 	private ObjectProperty<String> hsvValuesProp;
 		
@@ -119,7 +122,7 @@ public class FXController
 				};
 				
 				this.timer = Executors.newSingleThreadScheduledExecutor();
-				this.timer.scheduleAtFixedRate(frameGrabber, 0, 33, TimeUnit.MILLISECONDS);
+				this.timer.scheduleAtFixedRate(frameGrabber, 0, captureRate, TimeUnit.MILLISECONDS);
 				
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
