@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import org.opencv.core.Core;
 
+import behavior.RouteFinder;
 import connection.ConsoleOutput;
 import dao.DAO;
 import dto.DTO;
@@ -73,15 +74,19 @@ public class Main extends Application {
 //		
 		nu.pattern.OpenCV.loadShared();
 		Thread console = new Thread( new ConsoleOutput());
-		console.start();
+		
+		//console.start();
 		launch(args);
-		try {
+		RouteFinder s = new RouteFinder();
+	
+		
+		/*try {
 			console.join();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		*/
 		
 		
 		

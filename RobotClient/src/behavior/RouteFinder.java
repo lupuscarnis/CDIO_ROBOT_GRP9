@@ -5,7 +5,12 @@ public class RouteFinder{
 	static int test = 0;
 	 private static ArrayList nodes = new ArrayList<Node>();
 
-
+	 public RouteFinder() {
+		 
+		 
+	 }
+	 
+	 
 	    public static void add(Node node) {
 	        nodes.add(node);
 	    }

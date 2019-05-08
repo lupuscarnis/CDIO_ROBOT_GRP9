@@ -100,7 +100,7 @@ public class FXController
 		if (!this.cameraActive)
 		{
 			// start the video capture
-			this.capture.open(0);
+			this.capture.open(1);
 			
 			// is the video stream available?
 			if (this.capture.isOpened())
@@ -116,7 +116,7 @@ public class FXController
 						// effectively grab and process a single frame
 						Mat frame = grabFrame();
 						// Find robot vector
-						frame = findBackAndFront(frame,frame);
+						frame = findBackAndFront(frame);
 						
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
@@ -382,13 +382,14 @@ public class FXController
 	 * 
 	 * 
 	 */
-	private Mat findBackAndFront(Mat filtered, Mat frame) {
- 
+	private Mat findBackAndFront(Mat frame) {
+		
 		Mat hsvImage = new Mat();
 		Mat output1 = new Mat();
 		Mat output2 = new Mat();
 
-		Mat replace = new Mat();
+		Mat filtered = new Mat();
+		 Imgproc.GaussianBlur(frame, filtered, new Size(45, 45), 0);
 		Imgproc.cvtColor(filtered, hsvImage, Imgproc.COLOR_BGR2HSV);
 
 		Scalar minValues = new Scalar(130, 50, 140);
