@@ -94,7 +94,7 @@ public class FXController {
 	 ******************************************/
 
 // Use HSV or Hough for image analysis?
-	boolean UseHSVImgDetection = false;
+	boolean UseHSVImgDetection = true;
 
 // Sets the frames per second (33 = 33 frames per second)
 	private int captureRate = 250;
@@ -139,7 +139,7 @@ public class FXController {
 							  frame = grabFrameHough();
 							}
 						// Find robot vector
-						frame = findBackAndFront(frame);
+							frame = findBackAndFront(frame);
 
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
@@ -202,7 +202,7 @@ public class FXController {
 					 * effect on the detection.
 					 */
 					// Imgproc.cvtColor(blurredImage, grayImage, Imgproc.COLOR_BGR2GRAY);
-
+					frame = findBackAndFront(frame);
 					// convert the frame to HSV
 					Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
 
@@ -328,7 +328,7 @@ public class FXController {
 			            // Print center coordinates 
 			            
 			            for (int i = 0; i < p.size(); i++) {
-			            	System.out.println("Point (X,Y): "+p.get(i));
+			            	//System.out.println("Point (X,Y): "+p.get(i));
 
 			            }
 			        }
@@ -488,11 +488,11 @@ public class FXController {
 		Imgproc.cvtColor(filtered, hsvImage, Imgproc.COLOR_BGR2HSV);
 
 		Scalar minValues = new Scalar(130, 50, 140);
-		Scalar maxValues = new Scalar(150, 70, 180);
+		Scalar maxValues = new Scalar(150, 70, 160);
 		Core.inRange(hsvImage, minValues, maxValues, output1);
 
-		minValues.set(new double[] { 70, 90, 180 });
-		maxValues.set(new double[] { 88, 110, 190 });
+		minValues.set(new double[] { 70, 130, 170 });
+		maxValues.set(new double[] { 90, 150, 190 });
 		Core.inRange(hsvImage, minValues, maxValues, output2);
 
 		// init
@@ -503,6 +503,7 @@ public class FXController {
 		// find contours
 		Imgproc.findContours(output1, contours1, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 		Imgproc.findContours(output2, contours2, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+System.out.println(""+contours1.size()+":"+ contours2);
 		// if (contours1.size() > 0 && contours2.size() > 0) {
 		List<org.opencv.core.Point> front = new ArrayList<>();
 		List<org.opencv.core.Point> back = new ArrayList<>();
