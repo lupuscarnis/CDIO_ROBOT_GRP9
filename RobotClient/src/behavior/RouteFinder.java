@@ -44,7 +44,12 @@ public class RouteFinder{
 	
 	 }
 
-
+	 public RouteFinder() {
+		 
+		 
+	 }
+	 
+	 
 	    public static void add(Node node) {
 	        nodes.add(node);
 	    }

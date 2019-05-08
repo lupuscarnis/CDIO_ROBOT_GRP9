@@ -26,11 +26,11 @@ public class ConsoleOutput implements Runnable{
 			
 			ArrayList<String> splitString= new ArrayList<String>(Arrays.asList(input.split(":")));
 			sheet.setDistance(Float.parseFloat(splitString.get(0)));
-			sheet.setRotation(Float.parseFloat(splitString.get(0)));
-			
+			sheet.setRotation(Float.parseFloat(splitString.get(1)));
+			sheet.setClawMove(Float.parseFloat(splitString.get(2)));
 			sheet.setBallpickup(false);
 			dao.sendData(sheet);
-			System.out.println(splitString.get(0));
+			
 			}
 	
 	}
