@@ -7,6 +7,7 @@ import java.util.List;
 public class DTO {
 	private float distance;
 	private float rotation;
+	private float clawMove;
 	private boolean ballpickup;
 	
 	
@@ -25,6 +26,7 @@ public class DTO {
 	public DTO() {
 		distance = 0;
 		rotation = 0;
+		clawMove = 0;
 		ballpickup = false;
 	}
 
@@ -38,6 +40,14 @@ public class DTO {
 
 	public void setDistance(float distance) {
 		this.distance = distance;
+	}
+	
+	public void setClawMove(float clawMove) {
+		this.clawMove = clawMove;
+	}
+	
+	public float getClawMove() {
+		return clawMove;
 	}
 
 
@@ -59,9 +69,9 @@ public class DTO {
 		String s;
 		
 		if(ballpickup == true) {
-			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},BallPickUp:{true}"; 
+			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},"+"clawMove:{"+clawMove+"},BallPickUp:{true}"; 
 		}else {
-			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},BallPickUp:{false}";
+			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},"+"clawMove:{"+clawMove+"},BallPickUp:{false}";
 		}
 		
 		
@@ -92,7 +102,7 @@ public class DTO {
 			}
 
 		}
-
+		s.setClawMove(map.get("clawMove"));
 		s.setDistance(map.get("Distance"));
 		s.setRotation(map.get("Rotation"));
 

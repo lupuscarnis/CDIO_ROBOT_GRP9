@@ -18,7 +18,7 @@ public class RouteFinder{
 	        return nodes.size();
 	    }
 	    
-	    
+	    /* just used for testing, it got in nicolais way... now it is no more
 	    public static void main(String[] args) {
 	    	System.out.println("start");
 	    	for(int i =0; i<3628800;i++) {
@@ -28,6 +28,7 @@ public class RouteFinder{
 	    	}
 	    	System.out.println(test);
 	    }
+	    */
 	    
 	    public Node[] findRoute(Node[] nodes, double angle/*maybe its own poisition, if not first in array*/) {
 	    	Node robot = nodes[0];
