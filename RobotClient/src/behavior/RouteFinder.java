@@ -1,6 +1,8 @@
 package behavior;
 import java.util.ArrayList;
 
+import dao.DAO;
+import dto.DTO;
 import objects.Ball;
 import objects.Robot;
 
@@ -9,8 +11,9 @@ public class RouteFinder{
 	 private static ArrayList nodes = new ArrayList<Node>();
 	 
 	 public void getABall(Ball ball, Robot robot) {
-	double ballX = ball.getX();
-	double ballY = ball.getY();
+		 //this method should be called on the next ball to collect
+	double ballX = 1500;//ball.getX();
+	double ballY = 1500;// ball.getY();
 	// front = x1, y1
 	double robotDir = Math.toDegrees(Math.atan((robot.getBackY()-robot.getFrontY())/(robot.getBackX()-robot.getFrontX())));
 	
@@ -22,7 +25,22 @@ public class RouteFinder{
 	//actual distance may have to be converted to a different unit
 	double dist = Math.sqrt(doubleDist);
 	
+	dist = dist/1000;
 	
+	dto.DTO dtoo = new DTO();
+	dtoo.setRotation((float) dir);
+	dtoo.setDistance((float) dist-100);
+	dtoo.setClawMove(180);
+	
+	dao.DAO data = new DAO();  
+	data.sendData(dtoo);
+	
+	dtoo.setRotation((float) 0);
+	dtoo.setDistance((float) 100);
+	dtoo.setClawMove(-180);
+	
+	
+	data.sendData(dtoo);
 	
 	
 	
