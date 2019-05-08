@@ -85,8 +85,8 @@ public class DTO {
 		for (String subtask : information) {
 			List<String> substring;
 			substring = Arrays.asList(subtask.split(":"));
-			substring.get(1).replaceAll("{", "");
-			substring.get(1).replaceAll("}", "");
+			substring.get(1).replace("{", "");
+			substring.get(1).replace("}", "");
 			if (substring.get(1).equals("true") || substring.get(1).equals("false")) {
 				if (substring.get(1).equals("true")) {
 					map.put(substring.get(0), (float) 1.0);

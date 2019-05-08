@@ -2,16 +2,20 @@ package application;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
 import org.opencv.osgi.OpenCVInterface;
 import org.opencv.videoio.VideoCapture;
 
@@ -25,6 +29,9 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import nu.pattern.OpenCV;
+import objects.Ball;
+import objects.BallList;
+import objects.Robot;
 
 /**
  * https://github.com/opencv-java
@@ -68,6 +75,9 @@ public class FXController
 	// a flag to change the button behavior
 	private boolean cameraActive;
 	
+	// Sets the frames per second (33 = 33 frames persecond)
+	private int captureRate = 1000;
+	
 	// property for object binding
 	private ObjectProperty<String> hsvValuesProp;
 		
@@ -90,7 +100,7 @@ public class FXController
 		if (!this.cameraActive)
 		{
 			// start the video capture
-			this.capture.open(1);
+			this.capture.open(0);
 			
 			// is the video stream available?
 			if (this.capture.isOpened())
@@ -105,6 +115,9 @@ public class FXController
 					{
 						// effectively grab and process a single frame
 						Mat frame = grabFrame();
+						// Find robot vector
+						frame = findBackAndFront(frame,frame);
+						
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
 						updateImageView(videoFrame, imageToShow);
@@ -112,7 +125,7 @@ public class FXController
 				};
 				
 				this.timer = Executors.newSingleThreadScheduledExecutor();
-				this.timer.scheduleAtFixedRate(frameGrabber, 0, 33, TimeUnit.MILLISECONDS);
+				this.timer.scheduleAtFixedRate(frameGrabber, 0, captureRate, TimeUnit.MILLISECONDS);
 				
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
@@ -238,12 +251,52 @@ public class FXController
 	 */
 	private Mat findAndDrawBalls(Mat maskedImage, Mat frame)
 	{
+		Random rand = new Random(12345);
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
+		Mat output = new Mat();
 		
 		// find contours
 		Imgproc.findContours(maskedImage, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		
+		// Moments can be used to find the center of an image/polygon
+		List<Moments> m = new ArrayList<>(contours.size());
+
+		for (int i = 0; i < contours.size(); i++) {
+			m.add(Imgproc.moments(contours.get(i)));
+		}
+
+		//Stores the points of each centroid
+		List<Point> p = new ArrayList<>(contours.size());
+		BallList s =  BallList.getInstance();
+		s.clearList();
+		for(Point B : p) {
+		s.add(new Ball(B.x, B.y));	
+		}
+		
+		for (int i = 0; i < contours.size(); i++) {
+            //add 1e-5 to avoid division by zero
+            p.add(new Point(m.get(i).m10 / (m.get(i).m00 + 1e-5), m.get(i).m01 / (m.get(i).m00 + 1e-5)));
+		}
+
+		Mat drawing = Mat.zeros(output.size(), CvType.CV_8UC3);
+
+		//Draws the centroid and contour around the object
+        for (int i = 0; i < contours.size(); i++) {
+            Scalar color = new Scalar(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
+            //Imgproc.drawContours(drawing, contours, i, color, 2);
+            Imgproc.drawContours(frame, contours, i, new Scalar(250, 0, 0), 2);
+            Imgproc.circle(frame, p.get(i), 4, color, -1);
+        }
+
+        //System.out.println("\t Info: Area and Contour Length \n");
+        for (int i = 0; i < contours.size(); i++) {
+        	System.out.println("Point (X,Y): "+p.get(i));
+            /*System.out.format(" * Contour[%d] - Area (M_00) = %.2f - Area OpenCV: %.2f - Length: %.2f\n", i,
+                    m.get(i).m00, Imgproc.contourArea(contours.get(i)),
+                    Imgproc.arcLength(new MatOfPoint2f(contours.get(i).toArray()), true));*/
+        }
 		
 		// if any contour exist...
 		if (hierarchy.size().height > 0 && hierarchy.size().width > 0)
@@ -324,34 +377,80 @@ public class FXController
 		this.stopAcquisition();
 	}
 	
-	private Mat findBackAndFront(Mat frame) {
-	Mat hsvImage = new Mat(); 
-	Mat output = new Mat();
-	Mat replace = new Mat();
-	Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
+	/*
+	 * Finds the Front and back and draws a arrow
+	 * 
+	 * 
+	 */
+	private Mat findBackAndFront(Mat filtered, Mat frame) {
+ 
+		Mat hsvImage = new Mat();
+		Mat output1 = new Mat();
+		Mat output2 = new Mat();
 
-	
-	
-	Scalar minValues = new Scalar(147, 22,
-			182);
-	Scalar maxValues = new Scalar(180, 255,
-			255);	
-	Core.inRange(hsvImage, minValues, maxValues,output);
-	Scalar color = new Scalar(0,128,0);
-//	Imgproc.line(output, pt1, pt2, color, 1, 1, shift);
-//		for (int i = (int) output.size().height; i > 0; i++)
-//		{
-//			for(int b = (int) output.size().width; b > 0 ; b++)
-//			{
-//				if(output.get(i, b)[0] == 0) {
-//					output.put(i, b,new double[]{180.0,255.0,255.0});
-//				}
-//			}
-//		
-//		}
-	
-			
-		return output;
+		Mat replace = new Mat();
+		Imgproc.cvtColor(filtered, hsvImage, Imgproc.COLOR_BGR2HSV);
+
+		Scalar minValues = new Scalar(130, 50, 140);
+		Scalar maxValues = new Scalar(150, 70, 180);
+		Core.inRange(hsvImage, minValues, maxValues, output1);
+
+		minValues.set(new double[] { 70, 90, 180 });
+		maxValues.set(new double[] { 88, 110, 190 });
+		Core.inRange(hsvImage, minValues, maxValues, output2);
+
+		// init
+		List<MatOfPoint> contours1 = new ArrayList<>();
+		List<MatOfPoint> contours2 = new ArrayList<>();
+		Mat hierarchy = new Mat();
+
+		// find contours
+		Imgproc.findContours(output1, contours1, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(output2, contours2, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		//if (contours1.size() > 0 && contours2.size() > 0) {
+		List<org.opencv.core.Point> front = new ArrayList<>();
+		List<org.opencv.core.Point> back = new ArrayList<>();
+		System.out.println(""+ contours1.size() + ":" + contours2.size());
+		for (MatOfPoint s : contours1) {
+				for (int i = 0; i < s.toList().size(); i++)
+					front.add(s.toList().get(i));
+
+			}
+			for (MatOfPoint s : contours2) {
+				for (int i = 0; i < s.toList().size(); i++)
+					back.add(s.toList().get(i));
+
+			}
+
+			double x = 0;
+			double y = 0;
+			int iter = 0;
+			for (org.opencv.core.Point b : front) {
+				iter++;
+				x += b.x;
+				y += b.y;
+
+			}
+			org.opencv.core.Point frontCenter = new org.opencv.core.Point(x / iter, y / iter);
+
+			iter = 0;
+			x = 0;
+			y = 0;
+			for (org.opencv.core.Point b : back) {
+				iter++;
+				x += b.x;
+				y += b.y;
+			}
+			org.opencv.core.Point backCenter = new org.opencv.core.Point(x / iter, y / iter);
+			/*System.out.println("Front" + frontCenter.x+","+frontCenter.y +" "+ "Back:" + frontCenter.x+","+frontCenter.y);*/
+			Imgproc.line(frame, backCenter, frontCenter, new Scalar(350, 255, 255));
+			Robot s = Robot.getInstance();
+			s.setBackX(backCenter.x);
+			s.setBackY(backCenter.y);
+			s.setFrontX(frontCenter.x);
+			s.setFrontY(frontCenter.y);
+		return frame;
 	}
+
 	
 }

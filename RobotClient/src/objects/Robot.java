@@ -1,39 +1,52 @@
 package objects;
 
 public class Robot {
-	private float x;
-	private float y;
-	private float rotation;
+	private static Robot robot;
+
+	private double frontX;
+	private double frontY;
+	private double backX;
+	private double backY;
+	private Robot() {
 	
-	public Robot(float x, float y, float rotation) {
-		this.x = x;
-		this.y = y;
-		this.rotation = rotation;
+	}
+	public static Robot getInstance() {
 	
+	if(robot == null) {
+		return new Robot();
+	}else {
+		return robot;
 	}
-
-	public float getX() {
-		return x;
+	
+	
+}
+	
+	public double getFrontX() {
+		return frontX;
 	}
-
-	public void setX(float x) {
-		this.x = x;
+	public void setFrontX(double frontX) {
+		this.frontX = frontX;
 	}
-
-	public float getY() {
-		return y;
+	public double getFrontY() {
+		return frontY;
 	}
-
-	public void setY(float y) {
-		this.y = y;
+	public void setFrontY(double frontY) {
+		this.frontY = frontY;
 	}
-
-	public float getRotation() {
-		return rotation;
+	public double getBackX() {
+		return backX;
 	}
-
-	public void setRotation(float rotation) {
-		this.rotation = rotation;
+	public void setBackX(double backX) {
+		this.backX = backX;
 	}
-
+	public double getBackY() {
+		return backY;
+	}
+	public void setBackY(double backY) {
+		this.backY = backY;
+	}
+	
+	
+	
+	
 }
