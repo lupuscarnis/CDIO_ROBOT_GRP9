@@ -324,34 +324,76 @@ public class FXController
 		this.stopAcquisition();
 	}
 	
-	private Mat findBackAndFront(Mat frame) {
-	Mat hsvImage = new Mat(); 
-	Mat output = new Mat();
-	Mat replace = new Mat();
-	Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
+	/*
+	 * Finds the Front and back and draws a arrow
+	 * 
+	 * 
+	 */
+	private Mat findBackAndFront(Mat filtered, Mat frame) {
+ 
+		Mat hsvImage = new Mat();
+		Mat output1 = new Mat();
+		Mat output2 = new Mat();
 
-	
-	
-	Scalar minValues = new Scalar(147, 22,
-			182);
-	Scalar maxValues = new Scalar(180, 255,
-			255);	
-	Core.inRange(hsvImage, minValues, maxValues,output);
-	Scalar color = new Scalar(0,128,0);
-//	Imgproc.line(output, pt1, pt2, color, 1, 1, shift);
-//		for (int i = (int) output.size().height; i > 0; i++)
-//		{
-//			for(int b = (int) output.size().width; b > 0 ; b++)
-//			{
-//				if(output.get(i, b)[0] == 0) {
-//					output.put(i, b,new double[]{180.0,255.0,255.0});
-//				}
-//			}
-//		
-//		}
-	
-			
-		return output;
+		Mat replace = new Mat();
+		Imgproc.cvtColor(filtered, hsvImage, Imgproc.COLOR_BGR2HSV);
+
+		Scalar minValues = new Scalar(130, 50, 140);
+		Scalar maxValues = new Scalar(150, 70, 180);
+		Core.inRange(hsvImage, minValues, maxValues, output1);
+
+		minValues.set(new double[] { 70, 90, 180 });
+		maxValues.set(new double[] { 88, 110, 190 });
+		Core.inRange(hsvImage, minValues, maxValues, output2);
+
+		// init
+		List<MatOfPoint> contours1 = new ArrayList<>();
+		List<MatOfPoint> contours2 = new ArrayList<>();
+		Mat hierarchy = new Mat();
+
+		// find contours
+		Imgproc.findContours(output1, contours1, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(output2, contours2, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		//if (contours1.size() > 0 && contours2.size() > 0) {
+		List<org.opencv.core.Point> front = new ArrayList<>();
+		List<org.opencv.core.Point> back = new ArrayList<>();
+		System.out.println(""+ contours1.size() + ":" + contours2.size());
+		for (MatOfPoint s : contours1) {
+				for (int i = 0; i < s.toList().size(); i++)
+					front.add(s.toList().get(i));
+
+			}
+			for (MatOfPoint s : contours2) {
+				for (int i = 0; i < s.toList().size(); i++)
+					back.add(s.toList().get(i));
+
+			}
+
+			double x = 0;
+			double y = 0;
+			int iter = 0;
+			for (org.opencv.core.Point b : front) {
+				iter++;
+				x += b.x;
+				y += b.y;
+
+			}
+			org.opencv.core.Point frontCenter = new org.opencv.core.Point(x / iter, y / iter);
+
+			iter = 0;
+			x = 0;
+			y = 0;
+			for (org.opencv.core.Point b : back) {
+				iter++;
+				x += b.x;
+				y += b.y;
+			}
+			org.opencv.core.Point backCenter = new org.opencv.core.Point(x / iter, y / iter);
+			/*System.out.println("Front" + frontCenter.x+","+frontCenter.y +" "+ "Back:" + frontCenter.x+","+frontCenter.y);*/
+			Imgproc.line(frame, backCenter, frontCenter, new Scalar(350, 255, 255));
+		
+		return frame;
 	}
+
 	
 }
