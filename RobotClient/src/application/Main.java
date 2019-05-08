@@ -73,7 +73,7 @@ public class Main extends Application {
 //		
 		nu.pattern.OpenCV.loadShared();
 		Thread console = new Thread( new ConsoleOutput());
-		console.start();
+		//console.start();
 		launch(args);
 		try {
 			console.join();

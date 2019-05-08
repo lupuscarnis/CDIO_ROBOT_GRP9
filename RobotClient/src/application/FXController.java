@@ -1,5 +1,6 @@
 package application;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -30,8 +31,7 @@ import nu.pattern.OpenCV;
  * https://github.com/opencv-java
  */
 
-public class FXController
-{
+public class FXController {
 	// FXML camera button
 	@FXML
 	private Button cameraButton;
@@ -60,49 +60,45 @@ public class FXController
 	// FXML label to show the current values set with the sliders
 	@FXML
 	private Label hsvCurrentValues;
-	
+
 	// a timer for acquiring the video stream
 	private ScheduledExecutorService timer;
 	// the OpenCV object that performs the video capture
 	private VideoCapture capture = new VideoCapture();
 	// a flag to change the button behavior
 	private boolean cameraActive;
-	
+
 	// property for object binding
 	private ObjectProperty<String> hsvValuesProp;
-		
+
 	/**
 	 * The action triggered by pushing the button on the GUI
 	 */
 	@FXML
-	private void startCamera()
-	{
+	private void startCamera() {
 		// bind a text property with the string containing the current range of
 		// HSV values for object detection
 		hsvValuesProp = new SimpleObjectProperty<>();
-		//this.hsvCurrentValues.textProperty().bind(hsvValuesProp);
-				
+		// this.hsvCurrentValues.textProperty().bind(hsvValuesProp);
+
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
 		this.imageViewProperties(this.maskImage, 200);
 		this.imageViewProperties(this.morphImage, 200);
-		
-		if (!this.cameraActive)
-		{
+
+		if (!this.cameraActive) {
 			// start the video capture
 			this.capture.open(1);
-			
+
 			// is the video stream available?
-			if (this.capture.isOpened())
-			{
+			if (this.capture.isOpened()) {
 				this.cameraActive = true;
-				
+
 				// grab a frame every 33 ms (30 frames/sec)
 				Runnable frameGrabber = new Runnable() {
-					
+
 					@Override
-					public void run()
-					{
+					public void run() {
 						// effectively grab and process a single frame
 						Mat frame = grabFrame();
 						// convert and show the frame
@@ -110,192 +106,172 @@ public class FXController
 						updateImageView(videoFrame, imageToShow);
 					}
 				};
-				
+
 				this.timer = Executors.newSingleThreadScheduledExecutor();
 				this.timer.scheduleAtFixedRate(frameGrabber, 0, 33, TimeUnit.MILLISECONDS);
-				
+
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
-			}
-			else
-			{
+			} else {
 				// log the error
 				System.err.println("Failed to open the camera connection...");
 			}
-		}
-		else
-		{
+		} else {
 			// the camera is not active at this point
 			this.cameraActive = false;
 			// update again the button content
 			this.cameraButton.setText("Start Camera");
-			
+
 			// stop the timer
 			this.stopAcquisition();
 		}
 	}
-	
+
 	/**
 	 * Get a frame from the opened video stream (if any)
 	 * 
 	 * @return the {@link Image} to show
 	 */
-	private Mat grabFrame()
-	{
+	private Mat grabFrame() {
 		Mat frame = new Mat();
-		
+
 		// check if the capture is open
-		if (this.capture.isOpened())
-		{
-			try
-			{
+		if (this.capture.isOpened()) {
+			try {
 				// read the current frame
 				this.capture.read(frame);
-				
+
 				// if the frame is not empty, process it
-				if (!frame.empty())
-				{
+				if (!frame.empty()) {
 					// init
 					Mat blurredImage = new Mat();
 					Mat hsvImage = new Mat();
 					Mat mask = new Mat();
 					Mat morphOutput = new Mat();
-					
+
 					// remove some noise
 					Imgproc.blur(frame, blurredImage, new Size(7, 7));
-					
+
 					// convert the frame to HSV
 					Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
-					
+
 					// get thresholding values from the UI
 					// remember: H ranges 0-180, S and V range 0-255
 					Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
 							this.valueStart.getValue());
 					Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(),
 							this.valueStop.getValue());
-					
+
 					// show the current selected HSV range
 					String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0]
 							+ "\tSaturation range: " + minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: "
 							+ minValues.val[2] + "-" + maxValues.val[2];
-					
+
 					Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
-					
+
 					// threshold HSV image to select tennis balls
 					Core.inRange(hsvImage, minValues, maxValues, mask);
 					// show the partial output
 					this.updateImageView(this.maskImage, Utils.mat2Image(mask));
-					
+
 					// morphological operators
 					// dilate with large element, erode with small ones
 					Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
 					Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
-					
+
 					Imgproc.erode(mask, morphOutput, erodeElement);
 					Imgproc.erode(morphOutput, morphOutput, erodeElement);
-					
+
 					Imgproc.dilate(morphOutput, morphOutput, dilateElement);
 					Imgproc.dilate(morphOutput, morphOutput, dilateElement);
-					
+
 					// show the partial output
-					this.updateImageView(this.morphImage, Utils.mat2Image(morphOutput));
-					//frame = findBackAndFront(frame);
+					this.updateImageView(this.morphImage, Utils.mat2Image(findBackAndFront(blurredImage, frame)));
+					// frame = findBackAndFront(frame);
 					// find the tennis ball(s) contours and show them
 					frame = this.findAndDrawBalls(morphOutput, frame);
-				
+					
 					
 				}
-				
-			}
-			catch (Exception e)
-			{
+
+			} catch (Exception e) {
 				// log the (full) error
 				System.err.print("Exception during the image elaboration...");
 				e.printStackTrace();
 			}
 		}
-		
+
 		return frame;
 	}
-	
+
 	/**
-	 * Given a binary image containing one or more closed surfaces, use it as a
-	 * mask to find and highlight the objects contours
+	 * Given a binary image containing one or more closed surfaces, use it as a mask
+	 * to find and highlight the objects contours
 	 * 
 	 * @param maskedImage
 	 *            the binary image to be used as a mask
 	 * @param frame
-	 *            the original {@link Mat} image to be used for drawing the
-	 *            objects contours
+	 *            the original {@link Mat} image to be used for drawing the objects
+	 *            contours
 	 * @return the {@link Mat} image with the objects contours framed
 	 */
-	private Mat findAndDrawBalls(Mat maskedImage, Mat frame)
-	{
+	private Mat findAndDrawBalls(Mat maskedImage, Mat frame) {
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
-		
+
 		// find contours
 		Imgproc.findContours(maskedImage, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
-		
+
 		// if any contour exist...
-		if (hierarchy.size().height > 0 && hierarchy.size().width > 0)
-		{
+		if (hierarchy.size().height > 0 && hierarchy.size().width > 0) {
 			// for each contour, display it in blue
-			for (int idx = 0; idx >= 0; idx = (int) hierarchy.get(0, idx)[0])
-			{
+			for (int idx = 0; idx >= 0; idx = (int) hierarchy.get(0, idx)[0]) {
 				// https://www.programcreek.com/java-api-examples/?class=org.opencv.imgproc.Imgproc&method=drawContours
 				Imgproc.drawContours(frame, contours, idx, new Scalar(0, 250, 0), 2);
 			}
 		}
-		
+
 		return frame;
 	}
-	
+
 	/**
-	 * Set typical {@link ImageView} properties: a fixed width and the
-	 * information to preserve the original image ration
+	 * Set typical {@link ImageView} properties: a fixed width and the information
+	 * to preserve the original image ration
 	 * 
 	 * @param image
 	 *            the {@link ImageView} to use
 	 * @param dimension
 	 *            the width of the image to set
 	 */
-	private void imageViewProperties(ImageView image, int dimension)
-	{
+	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
 		image.setFitWidth(dimension);
 		// preserve the image ratio
 		image.setPreserveRatio(true);
 	}
-	
+
 	/**
 	 * Stop the acquisition from the camera and release all the resources
 	 */
-	private void stopAcquisition()
-	{
-		if (this.timer!=null && !this.timer.isShutdown())
-		{
-			try
-			{
+	private void stopAcquisition() {
+		if (this.timer != null && !this.timer.isShutdown()) {
+			try {
 				// stop the timer
 				this.timer.shutdown();
 				this.timer.awaitTermination(33, TimeUnit.MILLISECONDS);
-			}
-			catch (InterruptedException e)
-			{
+			} catch (InterruptedException e) {
 				// log any exception
 				System.err.println("Exception in stopping the frame capture, trying to release the camera now... " + e);
 			}
 		}
-		
-		if (this.capture.isOpened())
-		{
+
+		if (this.capture.isOpened()) {
 			// release the camera
 			this.capture.release();
 		}
 	}
-	
+
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
@@ -304,47 +280,86 @@ public class FXController
 	 * @param image
 	 *            the {@link Image} to show
 	 */
-	private void updateImageView(ImageView view, Image image)
-	{
+	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
 	}
-	
+
 	/**
 	 * On application close, stop the acquisition from the camera
 	 */
-	protected void setClosed()
-	{
+	protected void setClosed() {
 		this.stopAcquisition();
 	}
-	
-	private Mat findBackAndFront(Mat frame) {
-	Mat hsvImage = new Mat(); 
-	Mat output = new Mat();
-	Mat replace = new Mat();
-	Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 
-	
-	
-	Scalar minValues = new Scalar(147, 22,
-			182);
-	Scalar maxValues = new Scalar(180, 255,
-			255);	
-	Core.inRange(hsvImage, minValues, maxValues,output);
-	Scalar color = new Scalar(0,128,0);
-//	Imgproc.line(output, pt1, pt2, color, 1, 1, shift);
-//		for (int i = (int) output.size().height; i > 0; i++)
-//		{
-//			for(int b = (int) output.size().width; b > 0 ; b++)
-//			{
-//				if(output.get(i, b)[0] == 0) {
-//					output.put(i, b,new double[]{180.0,255.0,255.0});
-//				}
-//			}
-//		
-//		}
-	
-			
-		return output;
+	/*
+	 * Finds the Front and back and draws a arrow
+	 * 
+	 * 
+	 */
+	private Mat findBackAndFront(Mat filtered, Mat frame) {
+ 
+		Mat hsvImage = new Mat();
+		Mat output1 = new Mat();
+		Mat output2 = new Mat();
+
+		Mat replace = new Mat();
+		Imgproc.cvtColor(filtered, hsvImage, Imgproc.COLOR_BGR2HSV);
+
+		Scalar minValues = new Scalar(130, 50, 140);
+		Scalar maxValues = new Scalar(150, 70, 180);
+		Core.inRange(hsvImage, minValues, maxValues, output1);
+
+		minValues.set(new double[] { 70, 90, 180 });
+		maxValues.set(new double[] { 88, 110, 190 });
+		Core.inRange(hsvImage, minValues, maxValues, output2);
+
+		// init
+		List<MatOfPoint> contours1 = new ArrayList<>();
+		List<MatOfPoint> contours2 = new ArrayList<>();
+		Mat hierarchy = new Mat();
+
+		// find contours
+		Imgproc.findContours(output1, contours1, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(output2, contours2, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		//if (contours1.size() > 0 && contours2.size() > 0) {
+		List<org.opencv.core.Point> front = new ArrayList<>();
+		List<org.opencv.core.Point> back = new ArrayList<>();
+		System.out.println(""+ contours1.size() + ":" + contours2.size());
+		for (MatOfPoint s : contours1) {
+				for (int i = 0; i < s.toList().size(); i++)
+					front.add(s.toList().get(i));
+
+			}
+			for (MatOfPoint s : contours2) {
+				for (int i = 0; i < s.toList().size(); i++)
+					back.add(s.toList().get(i));
+
+			}
+
+			double x = 0;
+			double y = 0;
+			int iter = 0;
+			for (org.opencv.core.Point b : front) {
+				iter++;
+				x += b.x;
+				y += b.y;
+
+			}
+			org.opencv.core.Point frontCenter = new org.opencv.core.Point(x / iter, y / iter);
+
+			iter = 0;
+			x = 0;
+			y = 0;
+			for (org.opencv.core.Point b : back) {
+				iter++;
+				x += b.x;
+				y += b.y;
+			}
+			org.opencv.core.Point backCenter = new org.opencv.core.Point(x / iter, y / iter);
+			/*System.out.println("Front" + frontCenter.x+","+frontCenter.y +" "+ "Back:" + frontCenter.x+","+frontCenter.y);*/
+			Imgproc.line(frame, backCenter, frontCenter, new Scalar(350, 255, 255));
+		
+		return frame;
 	}
-	
+
 }
