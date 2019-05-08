@@ -2,22 +2,22 @@ package objects;
 
 public class Ball {
 	
-	private float x;
-	private float y;
+	private double x;
+	private double y;
 	private boolean collected;
 	
 
 	
-	public Ball(float x, float y) {
-		this.x = x;
-		this.y = y;
+	public Ball(double x2, double y2) {
+		this.x = x2;
+		this.y = y2;
 		collected = false;
 		
 	}
 
 
 
-	public float getX() {
+	public double getX() {
 		return x;
 	}
 
@@ -29,7 +29,7 @@ public class Ball {
 
 
 
-	public float getY() {
+	public double getY() {
 		return y;
 	}
 

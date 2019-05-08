@@ -34,6 +34,9 @@ public Ball getIndex(int index) {
 	return list.get(index);
 	
 }
+public void clearList() {
+	list.clear();
+}
 	
 	
 

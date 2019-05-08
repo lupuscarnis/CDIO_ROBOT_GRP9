@@ -29,6 +29,8 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import nu.pattern.OpenCV;
+import objects.Ball;
+import objects.BallList;
 import objects.Robot;
 
 /**
@@ -267,8 +269,12 @@ public class FXController
 
 		//Stores the points of each centroid
 		List<Point> p = new ArrayList<>(contours.size());
+		BallList s =  BallList.getInstance();
+		s.clearList();
+		for(Point B : p) {
+		s.add(new Ball(B.x, B.y));	
+		}
 		
-
 		for (int i = 0; i < contours.size(); i++) {
             //add 1e-5 to avoid division by zero
             p.add(new Point(m.get(i).m10 / (m.get(i).m00 + 1e-5), m.get(i).m01 / (m.get(i).m00 + 1e-5)));
