@@ -105,6 +105,9 @@ public class FXController
 					{
 						// effectively grab and process a single frame
 						Mat frame = grabFrame();
+						// Find robot vector
+						frame = findBackAndFront(frame,frame);
+						
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
 						updateImageView(videoFrame, imageToShow);
