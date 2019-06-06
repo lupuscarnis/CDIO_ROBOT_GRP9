@@ -12,8 +12,8 @@ public class RouteFinder{
 	 
 	 public void getABall(Ball ball, Robot robot) {
 		 //this method should be called on the next ball to collect
-	double ballX = 1500;//ball.getX();
-	double ballY = 1500;// ball.getY();
+	double ballX = ball.getX();
+	double ballY = ball.getY();
 	// front = x1, y1
 	double robotDir = Math.toDegrees(Math.atan((robot.getBackY()-robot.getFrontY())/(robot.getBackX()-robot.getFrontX())));
 	
@@ -34,14 +34,14 @@ public class RouteFinder{
 	
 	dao.DAO data = new DAO();  
 	data.sendData(dtoo);
-	
+	/*
 	dtoo.setRotation((float) 0);
 	dtoo.setDistance((float) 100);
 	dtoo.setClawMove(-180);
 	
 	
 	data.sendData(dtoo);
-	
+	*/
 	
 	
 	 }

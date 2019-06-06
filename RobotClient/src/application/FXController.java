@@ -94,7 +94,7 @@ public class FXController {
 	 ******************************************/
 
 // Use HSV or Hough for image analysis?
-	boolean UseHSVImgDetection = true;
+	boolean UseHSVImgDetection = false;
 
 // Sets the frames per second (33 = 33 frames per second)
 	private int captureRate = 250;
@@ -202,7 +202,7 @@ public class FXController {
 					 * effect on the detection.
 					 */
 					// Imgproc.cvtColor(blurredImage, grayImage, Imgproc.COLOR_BGR2GRAY);
-					frame = findBackAndFront(frame);
+					
 					// convert the frame to HSV
 					Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
 
@@ -314,11 +314,17 @@ public class FXController {
 			        for (int x = 0; x < circles.cols(); x++) {
 			        	
 			            List<Point> p = new ArrayList<>();
-			        	
+			            
 			            double[] c = circles.get(0, x);
 			            Point center = new Point(Math.round(c[0]), Math.round(c[1]));
 			            p.add(center);
 			            // circle center
+			    		BallList s = BallList.getInstance();
+			    		s.clearList();
+			    		for (Point B : p) {
+			    			s.add(new Ball(B.x, B.y));
+			    		}
+
 			            Imgproc.circle(frame, center, 1, new Scalar(0,100,100), 3, 8, 0 );
 			            // circle outline
 			            int radius = (int) Math.round(c[2]);
@@ -484,17 +490,16 @@ public class FXController {
 		Mat output2 = new Mat();
 
 		Mat filtered = new Mat();
-		Imgproc.GaussianBlur(frame, filtered, new Size(45, 45), 0);
+		Imgproc.blur(frame, filtered, new Size(7, 7));
 		Imgproc.cvtColor(filtered, hsvImage, Imgproc.COLOR_BGR2HSV);
-
-		Scalar minValues = new Scalar(130, 50, 140);
-		Scalar maxValues = new Scalar(150, 70, 160);
+		Scalar minValues = new Scalar(30, 110, 230);
+		Scalar maxValues = new Scalar(40, 120, 255);
 		Core.inRange(hsvImage, minValues, maxValues, output1);
 
-		minValues.set(new double[] { 70, 130, 170 });
-		maxValues.set(new double[] { 90, 150, 190 });
+		minValues.set(new double[] { 20, 185, 245 });
+		maxValues.set(new double[] { 30, 195, 255 });
 		Core.inRange(hsvImage, minValues, maxValues, output2);
-
+		
 		// init
 		List<MatOfPoint> contours1 = new ArrayList<>();
 		List<MatOfPoint> contours2 = new ArrayList<>();
@@ -503,7 +508,7 @@ public class FXController {
 		// find contours
 		Imgproc.findContours(output1, contours1, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 		Imgproc.findContours(output2, contours2, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
-System.out.println(""+contours1.size()+":"+ contours2);
+		//System.out.println(""+contours1.size()+":"+ contours2.size());
 		// if (contours1.size() > 0 && contours2.size() > 0) {
 		List<org.opencv.core.Point> front = new ArrayList<>();
 		List<org.opencv.core.Point> back = new ArrayList<>();
@@ -539,10 +544,10 @@ System.out.println(""+contours1.size()+":"+ contours2);
 			y += b.y;
 		}
 		org.opencv.core.Point backCenter = new org.opencv.core.Point(x / iter, y / iter);
-		/*
-		 * System.out.println("Front" + frontCenter.x+","+frontCenter.y +" "+ "Back:" +
-		 * frontCenter.x+","+frontCenter.y);
-		 */
+		
+		  System.out.println("Front" + frontCenter.x+","+frontCenter.y +" "+ "Back:" +
+		  frontCenter.x+","+frontCenter.y);
+		 
 		Imgproc.line(frame, backCenter, frontCenter, new Scalar(350, 255, 255));
 		Robot s = Robot.getInstance();
 		s.setBackX(backCenter.x);

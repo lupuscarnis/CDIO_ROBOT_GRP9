@@ -13,6 +13,8 @@ import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import objects.BallList;
+import objects.Robot;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.fxml.FXMLLoader;
@@ -75,10 +77,10 @@ public class Main extends Application {
 		nu.pattern.OpenCV.loadShared();
 		Thread console = new Thread( new ConsoleOutput());
 		
-		//console.start();
+		console.start();
 		launch(args);
 		RouteFinder s = new RouteFinder();
-	
+		s.getABall(BallList.getInstance().getIndex(0), Robot.getInstance());
 		
 		/*try {
 			console.join();
