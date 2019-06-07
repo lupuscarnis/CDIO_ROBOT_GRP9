@@ -11,9 +11,12 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.osgi.OpenCVInterface;
@@ -93,15 +96,21 @@ public class FXController {
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
 
-// Use HSV or Hough for image analysis?
-	boolean UseHSVImgDetection = false;
+    // Use HSV or Hough for image analysis?
+	private boolean useHSVImgDetection = false;
 
-// Sets the frames per second (33 = 33 frames per second)
+    // Sets the frames per second (33 = 33 frames per second)
 	private int captureRate = 250;
 
-// Sets the id of the systems webcam
+    // Sets the id of the systems webcam
 	private int webcamID = 0;
 
+	// Switch between debug/production mode
+	private boolean isDebug = true;
+	
+	// Debug image file
+	private String debugImg = "Debugging/pic01.jpg";
+	
 	/**
 	 * The action triggered by pushing the button on the GUI
 	 */
@@ -117,15 +126,16 @@ public class FXController {
 		this.imageViewProperties(this.maskImage, 200);
 		this.imageViewProperties(this.morphImage, 200);
 
+		
 		if (!this.cameraActive) {
 			// start the video capture
-			this.capture.open(1);
+			this.capture.open(webcamID);
 
 			// is the video stream available?
 			if (this.capture.isOpened()) {
 				this.cameraActive = true;
 
-				// grab a frame every 33 ms (30 frames/sec)
+				// grabs frames from webcam
 				Runnable frameGrabber = new Runnable() {
 
 					@Override
@@ -133,8 +143,8 @@ public class FXController {
 						
 						Mat frame = new Mat();
 						
-						if (UseHSVImgDetection) {
-							  frame = grabFrame();
+						if (useHSVImgDetection) {
+							  frame = grabFrame();						
 							} else {
 							  frame = grabFrameHough();
 							}
@@ -152,6 +162,7 @@ public class FXController {
 
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
+				
 			} else {
 				// log the error
 				System.err.println("Failed to open the camera connection...");
@@ -178,9 +189,19 @@ public class FXController {
 		// check if the capture is open
 		if (this.capture.isOpened()) {
 			try {
-				// read the current frame
-				this.capture.read(frame);
+			
+				if (isDebug == true) {
+					
+					// read from from test image
+					frame = Imgcodecs.imread(debugImg);
 
+				} else {
+					
+					// read the current frame
+					this.capture.read(frame);
+					
+				}
+				
 				// if the frame is not empty, process it
 				if (!frame.empty()) {
 					// init
@@ -271,8 +292,18 @@ public class FXController {
 
 			try
 			{
-				// read the current frame
-				this.capture.read(frame);
+				
+				if (isDebug == true) {
+					
+					// read from from test image
+					frame = Imgcodecs.imread(debugImg);
+
+				} else {
+					
+					// read the current frame
+					this.capture.read(frame);
+					
+				}
 				
 				// if the frame is not empty, process it
 				if (!frame.empty())
@@ -281,6 +312,7 @@ public class FXController {
 
 					Mat grayImage = new Mat();
 
+					
 					Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
 					
 					Imgproc.medianBlur(grayImage, grayImage, 5);
@@ -311,6 +343,9 @@ public class FXController {
 			        max_radius = 0: Maximum radius to be detected. If unknown, put zero as default.*/
 			        Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0,(double)grayImage.rows()/min_dist,uThresh, cTresh, minRad, maxRad);
 
+			        
+			        
+			        
 			        for (int x = 0; x < circles.cols(); x++) {
 			        	
 			            List<Point> p = new ArrayList<>();
@@ -403,6 +438,7 @@ public class FXController {
 			Imgproc.circle(frame, p.get(i), 4, color, -1);
 		}
 
+		
 		// System.out.println("\t Info: Area and Contour Length \n");
 		for (int i = 0; i < contours.size(); i++) {
 			System.out.println("Point (X,Y): " + p.get(i));
@@ -426,6 +462,7 @@ public class FXController {
 		return frame;
 	}
 
+	
 	/**
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
