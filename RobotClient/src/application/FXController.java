@@ -148,9 +148,13 @@ public class FXController {
 							} else {
 							  frame = grabFrameHough();
 							}
-						// Find robot vector
+						
+						    // Find robot vector
 							frame = findBackAndFront(frame);
 
+							// Find the rectangle of the playing field
+							frame = findAndDrawRect(frame);
+							
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
 						updateImageView(videoFrame, imageToShow);
@@ -462,6 +466,14 @@ public class FXController {
 		return frame;
 	}
 
+	
+	private Mat findAndDrawRect(Mat frame) {
+		
+		
+		
+		return frame;
+		
+	}
 	
 	/**
 	 * Set typical {@link ImageView} properties: a fixed width and the information
