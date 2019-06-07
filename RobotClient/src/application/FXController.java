@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -153,7 +154,7 @@ public class FXController {
 						frame = findBackAndFront(frame);
 
 						// Find the rectangle of the playing field
-						findAndDrawRect(frame);
+						frame = findAndDrawRect(frame);
 
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
@@ -464,107 +465,141 @@ public class FXController {
 	 * @param frame
 	 *            the original {@link Mat} image to be used for drawing the objects
 	 *            contours
+	 * @return 
+	 * @return 
+	 * @return 
 	 * @return the {@link Mat} image with the playing field framed
 	 */
-	private void findAndDrawRect(Mat frame) {
+	private Mat findAndDrawRect(Mat frame) {
 
-		Mat blurred = frame.clone();
-		Imgproc.medianBlur(frame, blurred, 9);
-
-		Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();
-		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-
-		List<Mat> blurredChannel = new ArrayList<Mat>();
-		blurredChannel.add(blurred);
-		List<Mat> gray0Channel = new ArrayList<Mat>();
-		gray0Channel.add(gray0);
 		
-		MatOfPoint2f approxCurve;
-
-		double maxArea = 0;
-		int maxId = -1;
-
-		for (int c = 0; c < 3; c++) {
-			int ch[] = { c, 0 };
-			Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
-
-			int thresholdLevel = 1;
-			for (int t = 0; t < thresholdLevel; t++) {
-				if (t == 0) {
-					Imgproc.Canny(gray0, gray, 10, 20, 3, true); // true ?
-					Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 1); // 1
-					// ?
-				} else {
-					Imgproc.adaptiveThreshold(gray0, gray, thresholdLevel, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
-							Imgproc.THRESH_BINARY, (frame.width() + frame.height()) / 200, t);
-				}
-
-				Imgproc.findContours(gray, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-				for (MatOfPoint contour : contours) {
-					MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
-
-					double area = Imgproc.contourArea(contour);
-					approxCurve = new MatOfPoint2f();
-					Imgproc.approxPolyDP(temp, approxCurve, Imgproc.arcLength(temp, true) * 0.02, true);
-
-					if (approxCurve.total() == 4 && area >= maxArea) {
-						double maxCosine = 0;
-
-						List<Point> curves = approxCurve.toList();
-						for (int j = 2; j < 5; j++) {
-
-							double cosine = Math.abs(angle(curves.get(j % 4), curves.get(j - 2), curves.get(j - 1)));
-							maxCosine = Math.max(maxCosine, cosine);
-						}
-
-						if (maxCosine < 0.3) {
-							maxArea = area;
-							maxId = contours.indexOf(contour);
-						}
-					}
-				}
-			}
-		}
-
-		if (maxId >= 0) {
-			
-
-			approxCurve = new MatOfPoint2f();
-			
-		        //Convert contours(i) from MatOfPoint to MatOfPoint2f
-		        MatOfPoint2f contour2f = new MatOfPoint2f( contours.get(maxId).toArray() );
-		        
-		        //Processing on mMOP2f1 which is in type MatOfPoint2f
-		        double approxDistance = Imgproc.arcLength(contour2f, true)*0.02;
-		        Imgproc.approxPolyDP(contour2f, approxCurve, approxDistance, true);
-				
-		        //Convert back to MatOfPoint
-		        MatOfPoint points = new MatOfPoint( approxCurve.toArray() );
-				
-		        // Get bounding rect of contour
-		        Rect rect = Imgproc.boundingRect(points);
-		        
-		        // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
-		        Imgproc.rectangle(frame, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(255, 0, 0, .8), 3);
-
-			
-		}
-			
+		 // STEP 1: Resize input image to img_proc to reduce computation
+	    /*double ratio = 600 / Math.max(frame.width(), frame.height());
+	    Size downscaledSize = new Size(frame.width() * ratio, frame.height() * ratio);
+	    Mat dst = new Mat(downscaledSize, frame.type());
+	    Imgproc.resize(frame, dst, downscaledSize);*/
 		
+		Mat output = new Mat();
+		
+	    Mat grayImage = new Mat();
+	    Mat detectedEdges = new Mat();
+	    // STEP 2: convert to grayscale
+	    Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
+	    // STEP 3: try to filter text inside document
+	    Imgproc.medianBlur(grayImage, detectedEdges, 9);
+	    // STEP 4: Edge detection
+	    Mat edges = new Mat();
+	    // Imgproc.erode(edges, edges, new Mat());
+	    // Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
+	    // canny detector, with ratio of lower:upper threshold of 3:1 
+	    Imgproc.Canny(detectedEdges, edges, 0, 40*3, 3, true);
+	    // STEP 5: makes the object in white bigger to join nearby lines
+	    Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
+	    //Image imageToShow = Utils.mat2Image(edges);
+	    //updateImageView(cannyFrame, imageToShow);
+	    // STEP 6: Compute the contours
+	    List<MatOfPoint> contours = new ArrayList<>();
+	    Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+	    // STEP 7: Sort the contours by length and only keep the largest one
+	    
+	    double maxArea = 0;
+        int maxAreaIdx = 0;
+	    
+        for (int idx = 0; idx != contours.size(); ++idx)
+        {
+              Mat contour = contours.get(idx);
+              double contourarea = Imgproc.contourArea(contour);
+              if (contourarea > maxArea)
+              {
+                  maxArea = contourarea;
+                  maxAreaIdx = idx;
+              }
+
+         }
+	    
+	    MatOfPoint largestContour = contours.get(maxAreaIdx);
+	    
+	    // STEP 8: Generate the convex hull of this contour
+	    Mat convexHullMask = Mat.zeros(frame.rows(), frame.cols(), frame.type());
+	    MatOfInt hullInt = new MatOfInt();
+	    Imgproc.convexHull(largestContour, hullInt);
+	    MatOfPoint hullPoint = OpenCVUtil.getNewContourFromIndices(largestContour, hullInt);
+	    // STEP 9: Use approxPolyDP to simplify the convex hull (this should give a quadrilateral)
+	    MatOfPoint2f polygon = new MatOfPoint2f();
+	    Imgproc.approxPolyDP(OpenCVUtil.convert(hullPoint), polygon, 20, true);
+	    List<MatOfPoint> tmp = new ArrayList<>();
+	    tmp.add(OpenCVUtil.convert(polygon));
+	    //restoreScaleMatOfPoint(tmp, 0.9);
+	    
+	    Imgproc.drawContours(convexHullMask, tmp, 0, new Scalar(25, 25, 255), 2);
+	    // Image extractImageToShow = Utils.mat2Image(convexHullMask);
+	    // updateImageView(extractFrame, extractImageToShow);
+	    MatOfPoint2f finalCorners = new MatOfPoint2f();
+	    Point[] tmpPoints = polygon.toArray();
+	    for (Point point : tmpPoints) {
+	        point.x = point.x / 0.9;
+	        point.y = point.y / 0.9;
+	    }
+	    finalCorners.fromArray(tmpPoints);
+	    boolean clockwise = true;
+	    double currentThreshold = 0;
+	    if (finalCorners.toArray().length == 4) {
+	        Size size = getRectangleSize(finalCorners);
+	        System.out.println("1111111111111111");
+	        Mat result = Mat.zeros(size, frame.type());
+	        // STEP 10: Homography: Use findHomography to find the affine transformation of your paper sheet
+	        Mat homography = new Mat();
+	        MatOfPoint2f dstPoints = new MatOfPoint2f();
+	        Point[] arrDstPoints = { new Point(result.cols(), result.rows()), new Point(0, result.rows()), new Point(0, 0), new Point(result.cols(), 0) };
+	        dstPoints.fromArray(arrDstPoints);
+	        homography = Calib3d.findHomography(finalCorners, dstPoints);	    
+	        
+	        // STEP 11: Warp the input image using the computed homography matrix
+	        //Imgproc.warpPerspective(frame, result, homography, size);
+	        
+	        Imgproc.warpPerspective(frame, result, homography, new Size(850,620));
+	        
+	        // MatOfPoint2f imageOutline = getOutline(result);
+	        // Mat transformation = Imgproc.getPerspectiveTransform(finalCorners, imageOutline);
+	        // Imgproc.warpPerspective(frame, result, transformation, size);
+	        // get the thresholded image
+	        Mat resultGray = new Mat();
+	        Imgproc.cvtColor(result, resultGray, Imgproc.COLOR_BGR2GRAY);
+
+	        
+	        
+	        // Imgproc.medianBlur(resultGray, resultGray, 3);
+	        //Imgproc.adaptiveThreshold(resultGray, resultGray, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, (int) adaptiveThreshold.getValue(), 4);
+	        
+	        output = result;
+	        
+	    }
+	    
+	    return output;
+
 	}
 
-	private double angle(Point p1, Point p2, Point p0) {
-		double dx1 = p1.x - p0.x;
-		double dy1 = p1.y - p0.y;
-		double dx2 = p2.x - p0.x;
-		double dy2 = p2.y - p0.y;
-		return (dx1 * dx2 + dy1 * dy2) / Math.sqrt((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2) + 1e-10);
-		
-		//return frame;
+	
+    private Size getRectangleSize(MatOfPoint2f rectangle) {
+        Point[] corners = rectangle.toArray();
 
-	}
+        double top = getDistance(corners[0], corners[1]);
+        double right = getDistance(corners[1], corners[2]);
+        double bottom = getDistance(corners[2], corners[3]);
+        double left = getDistance(corners[3], corners[0]);
 
+        double averageWidth = (top + bottom) / 2f;
+        double averageHeight = (right + left) / 2f;
+
+        return new Size(new Point(averageWidth, averageHeight));
+    }
+	
+    private double getDistance(Point p1, Point p2) {
+        double dx = p2.x - p1.x;
+        double dy = p2.y - p1.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+	
 	/**
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
