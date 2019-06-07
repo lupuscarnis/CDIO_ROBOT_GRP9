@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -96,21 +97,21 @@ public class FXController {
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
 
-    // Use HSV or Hough for image analysis?
+	// Use HSV or Hough for image analysis?
 	private boolean useHSVImgDetection = false;
 
-    // Sets the frames per second (33 = 33 frames per second)
+	// Sets the frames per second (33 = 33 frames per second)
 	private int captureRate = 250;
 
-    // Sets the id of the systems webcam
+	// Sets the id of the systems webcam
 	private int webcamID = 0;
 
 	// Switch between debug/production mode
 	private boolean isDebug = true;
-	
+
 	// Debug image file
 	private String debugImg = "Debugging/pic01.jpg";
-	
+
 	/**
 	 * The action triggered by pushing the button on the GUI
 	 */
@@ -126,7 +127,6 @@ public class FXController {
 		this.imageViewProperties(this.maskImage, 200);
 		this.imageViewProperties(this.morphImage, 200);
 
-		
 		if (!this.cameraActive) {
 			// start the video capture
 			this.capture.open(webcamID);
@@ -140,21 +140,21 @@ public class FXController {
 
 					@Override
 					public void run() {
-						
-						Mat frame = new Mat();
-						
-						if (useHSVImgDetection) {
-							  frame = grabFrame();						
-							} else {
-							  frame = grabFrameHough();
-							}
-						
-						    // Find robot vector
-							frame = findBackAndFront(frame);
 
-							// Find the rectangle of the playing field
-							frame = findAndDrawRect(frame);
-							
+						Mat frame = new Mat();
+
+						if (useHSVImgDetection) {
+							frame = grabFrame();
+						} else {
+							frame = grabFrameHough();
+						}
+
+						// Find robot vector
+						frame = findBackAndFront(frame);
+
+						// Find the rectangle of the playing field
+						findAndDrawRect(frame);
+
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
 						updateImageView(videoFrame, imageToShow);
@@ -166,7 +166,7 @@ public class FXController {
 
 				// update the button content
 				this.cameraButton.setText("Stop Camera");
-				
+
 			} else {
 				// log the error
 				System.err.println("Failed to open the camera connection...");
@@ -193,19 +193,19 @@ public class FXController {
 		// check if the capture is open
 		if (this.capture.isOpened()) {
 			try {
-			
+
 				if (isDebug == true) {
-					
+
 					// read from from test image
 					frame = Imgcodecs.imread(debugImg);
 
 				} else {
-					
+
 					// read the current frame
 					this.capture.read(frame);
-					
+
 				}
-				
+
 				// if the frame is not empty, process it
 				if (!frame.empty()) {
 					// init
@@ -227,7 +227,7 @@ public class FXController {
 					 * effect on the detection.
 					 */
 					// Imgproc.cvtColor(blurredImage, grayImage, Imgproc.COLOR_BGR2GRAY);
-					
+
 					// convert the frame to HSV
 					Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
 
@@ -279,7 +279,6 @@ public class FXController {
 		return frame;
 	}
 
-	
 	/**
 	 * HOUGH IMAGE ANALYSIS
 	 * 
@@ -287,119 +286,112 @@ public class FXController {
 	 * 
 	 * @return the {@link Image} to show
 	 */
-	private Mat grabFrameHough()
-	{
-		
+	private Mat grabFrameHough() {
+
 		Mat frame = new Mat();
-	      
+
 		// check if the capture is open
 
-			try
-			{
-				
-				if (isDebug == true) {
-					
-					// read from from test image
-					frame = Imgcodecs.imread(debugImg);
+		try {
 
-				} else {
-					
-					// read the current frame
-					this.capture.read(frame);
-					
-				}
-				
-				// if the frame is not empty, process it
-				if (!frame.empty())
-				{
-					// init
+			if (isDebug == true) {
 
-					Mat grayImage = new Mat();
+				// read from from test image
+				frame = Imgcodecs.imread(debugImg);
 
-					
-					Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
-					
-					Imgproc.medianBlur(grayImage, grayImage, 5);
-					
-					Mat circles = new Mat();
-					
-					int min_dist = new Integer((int) this.H_minDist.getValue());
-					double uThresh = new Double(this.H_uThresh.getValue());
-					double cTresh = new Double(this.H_cTresh.getValue());
-					int minRad = new Integer((int) this.H_minRad.getValue());
-					int maxRad = new Integer((int) this.H_maxRad.getValue());
+			} else {
 
-					// show the current selected HSV range
-					String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh
-							+ ", Center Threshold: " + cTresh + ", Min Radius: " + minRad + ", Max Radius: "
-							+ maxRad;
-					
-					Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
-					
-			        /*grayImage: Input image (grayscale).
-			        circles: A vector that stores sets of 3 values: xc,yc,r for each detected circle.
-			        HOUGH_GRADIENT: Define the detection method. Currently this is the only one available in OpenCV.
-			        dp = 1: The inverse ratio of resolution.
-			        min_dist = gray.rows/16: Minimum distance between detected centers.
-			        param_1 = 200: Upper threshold for the internal Canny edge detector.
-			        param_2 = 100*: Threshold for center detection.
-			        min_radius = 0: Minimum radius to be detected. If unknown, put zero as default.
-			        max_radius = 0: Maximum radius to be detected. If unknown, put zero as default.*/
-			        Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0,(double)grayImage.rows()/min_dist,uThresh, cTresh, minRad, maxRad);
+				// read the current frame
+				this.capture.read(frame);
 
-			        
-			        
-			        
-			        for (int x = 0; x < circles.cols(); x++) {
-			        	
-			            List<Point> p = new ArrayList<>();
-			            
-			            double[] c = circles.get(0, x);
-			            Point center = new Point(Math.round(c[0]), Math.round(c[1]));
-			            p.add(center);
-			            // circle center
-			    		BallList s = BallList.getInstance();
-			    		s.clearList();
-			    		for (Point B : p) {
-			    			s.add(new Ball(B.x, B.y));
-			    		}
-
-			            Imgproc.circle(frame, center, 1, new Scalar(0,100,100), 3, 8, 0 );
-			            // circle outline
-			            int radius = (int) Math.round(c[2]);
-			            Imgproc.circle(frame, center, radius, new Scalar(255,0,255), 3, 8, 0 );
-			            Imgproc.circle(frame, center, 1, new Scalar(0,255,255), 3, 8, 0 );
-			            
-			            // Print center coordinates 
-			            
-			            for (int i = 0; i < p.size(); i++) {
-			            	//System.out.println("Point (X,Y): "+p.get(i));
-
-			            }
-			        }
-
-				}
-				
-			}
-			catch (Exception e)
-			{
-				// log the (full) error
-				System.err.print("Exception during the image elaboration...");
-				e.printStackTrace();
 			}
 
-		
+			// if the frame is not empty, process it
+			if (!frame.empty()) {
+				// init
+
+				Mat grayImage = new Mat();
+
+				Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
+
+				Imgproc.medianBlur(grayImage, grayImage, 5);
+
+				Mat circles = new Mat();
+
+				int min_dist = new Integer((int) this.H_minDist.getValue());
+				double uThresh = new Double(this.H_uThresh.getValue());
+				double cTresh = new Double(this.H_cTresh.getValue());
+				int minRad = new Integer((int) this.H_minRad.getValue());
+				int maxRad = new Integer((int) this.H_maxRad.getValue());
+
+				// show the current selected HSV range
+				String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh
+						+ ", Center Threshold: " + cTresh + ", Min Radius: " + minRad + ", Max Radius: " + maxRad;
+
+				Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
+
+				/*
+				 * grayImage: Input image (grayscale). circles: A vector that stores sets of 3
+				 * values: xc,yc,r for each detected circle. HOUGH_GRADIENT: Define the
+				 * detection method. Currently this is the only one available in OpenCV. dp = 1:
+				 * The inverse ratio of resolution. min_dist = gray.rows/16: Minimum distance
+				 * between detected centers. param_1 = 200: Upper threshold for the internal
+				 * Canny edge detector. param_2 = 100*: Threshold for center detection.
+				 * min_radius = 0: Minimum radius to be detected. If unknown, put zero as
+				 * default. max_radius = 0: Maximum radius to be detected. If unknown, put zero
+				 * as default.
+				 */
+				Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0,
+						(double) grayImage.rows() / min_dist, uThresh, cTresh, minRad, maxRad);
+
+				for (int x = 0; x < circles.cols(); x++) {
+
+					List<Point> p = new ArrayList<>();
+
+					double[] c = circles.get(0, x);
+					Point center = new Point(Math.round(c[0]), Math.round(c[1]));
+					p.add(center);
+					// circle center
+					BallList s = BallList.getInstance();
+					s.clearList();
+					for (Point B : p) {
+						s.add(new Ball(B.x, B.y));
+					}
+
+					Imgproc.circle(frame, center, 1, new Scalar(0, 100, 100), 3, 8, 0);
+					// circle outline
+					int radius = (int) Math.round(c[2]);
+					Imgproc.circle(frame, center, radius, new Scalar(255, 0, 255), 3, 8, 0);
+					Imgproc.circle(frame, center, 1, new Scalar(0, 255, 255), 3, 8, 0);
+
+					// Print center coordinates
+
+					for (int i = 0; i < p.size(); i++) {
+						// System.out.println("Point (X,Y): "+p.get(i));
+
+					}
+				}
+
+			}
+
+		} catch (Exception e) {
+			// log the (full) error
+			System.err.print("Exception during the image elaboration...");
+			e.printStackTrace();
+		}
+
 		return frame;
 	}
-	
-	
+
 	/**
 	 * Given a binary image containing one or more closed surfaces, use it as a mask
 	 * to find and highlight the objects contours
 	 * 
-	 * @param maskedImage the binary image to be used as a mask
-	 * @param frame       the original {@link Mat} image to be used for drawing the
-	 *                    objects contours
+	 * @param maskedImage
+	 *            the binary image to be used as a mask
+	 * @param frame
+	 *            the original {@link Mat} image to be used for drawing the objects
+	 *            contours
 	 * @return the {@link Mat} image with the objects contours framed
 	 */
 	private Mat findAndDrawBalls(Mat maskedImage, Mat frame) {
@@ -442,7 +434,6 @@ public class FXController {
 			Imgproc.circle(frame, p.get(i), 4, color, -1);
 		}
 
-		
 		// System.out.println("\t Info: Area and Contour Length \n");
 		for (int i = 0; i < contours.size(); i++) {
 			System.out.println("Point (X,Y): " + p.get(i));
@@ -466,21 +457,122 @@ public class FXController {
 		return frame;
 	}
 
-	
-	private Mat findAndDrawRect(Mat frame) {
+	/**
+	 * Given a binary image (frame), finds the playing field using a search for the
+	 * largest rectangle
+	 * 
+	 * @param frame
+	 *            the original {@link Mat} image to be used for drawing the objects
+	 *            contours
+	 * @return the {@link Mat} image with the playing field framed
+	 */
+	private void findAndDrawRect(Mat frame) {
+
+		Mat blurred = frame.clone();
+		Imgproc.medianBlur(frame, blurred, 9);
+
+		Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();
+		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+
+		List<Mat> blurredChannel = new ArrayList<Mat>();
+		blurredChannel.add(blurred);
+		List<Mat> gray0Channel = new ArrayList<Mat>();
+		gray0Channel.add(gray0);
 		
-		
-		
-		return frame;
+		MatOfPoint2f approxCurve;
+
+		double maxArea = 0;
+		int maxId = -1;
+
+		for (int c = 0; c < 3; c++) {
+			int ch[] = { c, 0 };
+			Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
+
+			int thresholdLevel = 1;
+			for (int t = 0; t < thresholdLevel; t++) {
+				if (t == 0) {
+					Imgproc.Canny(gray0, gray, 10, 20, 3, true); // true ?
+					Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 1); // 1
+					// ?
+				} else {
+					Imgproc.adaptiveThreshold(gray0, gray, thresholdLevel, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+							Imgproc.THRESH_BINARY, (frame.width() + frame.height()) / 200, t);
+				}
+
+				Imgproc.findContours(gray, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+				for (MatOfPoint contour : contours) {
+					MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
+
+					double area = Imgproc.contourArea(contour);
+					approxCurve = new MatOfPoint2f();
+					Imgproc.approxPolyDP(temp, approxCurve, Imgproc.arcLength(temp, true) * 0.02, true);
+
+					if (approxCurve.total() == 4 && area >= maxArea) {
+						double maxCosine = 0;
+
+						List<Point> curves = approxCurve.toList();
+						for (int j = 2; j < 5; j++) {
+
+							double cosine = Math.abs(angle(curves.get(j % 4), curves.get(j - 2), curves.get(j - 1)));
+							maxCosine = Math.max(maxCosine, cosine);
+						}
+
+						if (maxCosine < 0.3) {
+							maxArea = area;
+							maxId = contours.indexOf(contour);
+						}
+					}
+				}
+			}
+		}
+
+		if (maxId >= 0) {
+			
+
+			approxCurve = new MatOfPoint2f();
+			
+		        //Convert contours(i) from MatOfPoint to MatOfPoint2f
+		        MatOfPoint2f contour2f = new MatOfPoint2f( contours.get(maxId).toArray() );
+		        
+		        //Processing on mMOP2f1 which is in type MatOfPoint2f
+		        double approxDistance = Imgproc.arcLength(contour2f, true)*0.02;
+		        Imgproc.approxPolyDP(contour2f, approxCurve, approxDistance, true);
+				
+		        //Convert back to MatOfPoint
+		        MatOfPoint points = new MatOfPoint( approxCurve.toArray() );
+				
+		        // Get bounding rect of contour
+		        Rect rect = Imgproc.boundingRect(points);
+		        
+		        // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
+		        Imgproc.rectangle(frame, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(255, 0, 0, .8), 3);
+
+			
+		}
+			
 		
 	}
-	
+
+	private double angle(Point p1, Point p2, Point p0) {
+		double dx1 = p1.x - p0.x;
+		double dy1 = p1.y - p0.y;
+		double dx2 = p2.x - p0.x;
+		double dy2 = p2.y - p0.y;
+		return (dx1 * dx2 + dy1 * dy2) / Math.sqrt((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2) + 1e-10);
+		
+		//return frame;
+
+	}
+
 	/**
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image     the {@link ImageView} to use
-	 * @param dimension the width of the image to set
+	 * @param image
+	 *            the {@link ImageView} to use
+	 * @param dimension
+	 *            the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -513,8 +605,10 @@ public class FXController {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view  the {@link ImageView} to update
-	 * @param image the {@link Image} to show
+	 * @param view
+	 *            the {@link ImageView} to update
+	 * @param image
+	 *            the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
@@ -548,7 +642,7 @@ public class FXController {
 		minValues.set(new double[] { 20, 185, 245 });
 		maxValues.set(new double[] { 30, 195, 255 });
 		Core.inRange(hsvImage, minValues, maxValues, output2);
-		
+
 		// init
 		List<MatOfPoint> contours1 = new ArrayList<>();
 		List<MatOfPoint> contours2 = new ArrayList<>();
@@ -557,7 +651,7 @@ public class FXController {
 		// find contours
 		Imgproc.findContours(output1, contours1, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 		Imgproc.findContours(output2, contours2, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
-		//System.out.println(""+contours1.size()+":"+ contours2.size());
+		// System.out.println(""+contours1.size()+":"+ contours2.size());
 		// if (contours1.size() > 0 && contours2.size() > 0) {
 		List<org.opencv.core.Point> front = new ArrayList<>();
 		List<org.opencv.core.Point> back = new ArrayList<>();
@@ -593,10 +687,10 @@ public class FXController {
 			y += b.y;
 		}
 		org.opencv.core.Point backCenter = new org.opencv.core.Point(x / iter, y / iter);
-		
-		  System.out.println("Front" + frontCenter.x+","+frontCenter.y +" "+ "Back:" +
-		  frontCenter.x+","+frontCenter.y);
-		 
+
+		System.out.println(
+				"Front" + frontCenter.x + "," + frontCenter.y + " " + "Back:" + frontCenter.x + "," + frontCenter.y);
+
 		Imgproc.line(frame, backCenter, frontCenter, new Scalar(350, 255, 255));
 		Robot s = Robot.getInstance();
 		s.setBackX(backCenter.x);
