@@ -102,6 +102,8 @@ public class FXController {
 // Sets the id of the systems webcam
 	private int webcamID = 0;
 
+	//Homemade Image prosessing
+	ImageProssesing ip = new ImageProssesing();
 	/**
 	 * The action triggered by pushing the button on the GUI
 	 */
@@ -139,8 +141,10 @@ public class FXController {
 							  frame = grabFrameHough();
 							}
 						// Find robot vector
-							frame = findBackAndFront(frame);
-
+						
+						frame = ip.findBackAndFront(frame);
+								
+						//updateImageView(maskImage, Utils.mat2Image(ip.findCorners(frame)));
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
 						updateImageView(videoFrame, imageToShow);
@@ -483,78 +487,5 @@ public class FXController {
 	 * 
 	 * 
 	 */
-	private Mat findBackAndFront(Mat frame) {
-
-		Mat hsvImage = new Mat();
-		Mat output1 = new Mat();
-		Mat output2 = new Mat();
-
-		Mat filtered = new Mat();
-		Imgproc.blur(frame, filtered, new Size(7, 7));
-		Imgproc.cvtColor(filtered, hsvImage, Imgproc.COLOR_BGR2HSV);
-		Scalar minValues = new Scalar(30, 110, 230);
-		Scalar maxValues = new Scalar(40, 120, 255);
-		Core.inRange(hsvImage, minValues, maxValues, output1);
-
-		minValues.set(new double[] { 20, 185, 245 });
-		maxValues.set(new double[] { 30, 195, 255 });
-		Core.inRange(hsvImage, minValues, maxValues, output2);
-		
-		// init
-		List<MatOfPoint> contours1 = new ArrayList<>();
-		List<MatOfPoint> contours2 = new ArrayList<>();
-		Mat hierarchy = new Mat();
-
-		// find contours
-		Imgproc.findContours(output1, contours1, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
-		Imgproc.findContours(output2, contours2, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
-		//System.out.println(""+contours1.size()+":"+ contours2.size());
-		// if (contours1.size() > 0 && contours2.size() > 0) {
-		List<org.opencv.core.Point> front = new ArrayList<>();
-		List<org.opencv.core.Point> back = new ArrayList<>();
-		System.out.println("" + contours1.size() + ":" + contours2.size());
-		for (MatOfPoint s : contours1) {
-			for (int i = 0; i < s.toList().size(); i++)
-				front.add(s.toList().get(i));
-
-		}
-		for (MatOfPoint s : contours2) {
-			for (int i = 0; i < s.toList().size(); i++)
-				back.add(s.toList().get(i));
-
-		}
-
-		double x = 0;
-		double y = 0;
-		int iter = 0;
-		for (org.opencv.core.Point b : front) {
-			iter++;
-			x += b.x;
-			y += b.y;
-
-		}
-		org.opencv.core.Point frontCenter = new org.opencv.core.Point(x / iter, y / iter);
-
-		iter = 0;
-		x = 0;
-		y = 0;
-		for (org.opencv.core.Point b : back) {
-			iter++;
-			x += b.x;
-			y += b.y;
-		}
-		org.opencv.core.Point backCenter = new org.opencv.core.Point(x / iter, y / iter);
-		
-		  System.out.println("Front" + frontCenter.x+","+frontCenter.y +" "+ "Back:" +
-		  frontCenter.x+","+frontCenter.y);
-		 
-		Imgproc.line(frame, backCenter, frontCenter, new Scalar(350, 255, 255));
-		Robot s = Robot.getInstance();
-		s.setBackX(backCenter.x);
-		s.setBackY(backCenter.y);
-		s.setFrontX(frontCenter.x);
-		s.setFrontY(frontCenter.y);
-		return frame;
-	}
 
 }
