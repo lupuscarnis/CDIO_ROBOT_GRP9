@@ -15,12 +15,15 @@ import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.osgi.OpenCVInterface;
+import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
 import application.Utils;
@@ -163,6 +166,8 @@ public class FXController {
 
 						if (!isDebug) {
 
+							System.out.println("test123");
+							
 							// Find robot vector
 							frame = ip.findBackAndFront(frame);
 
@@ -170,7 +175,7 @@ public class FXController {
 
 						}
 
-						// Find the rectangle of the playing field
+						// Find the rectangle of the playing field and crop the image
 						frame = findAndDrawRect(frame);
 
 						// convert and show the frame
@@ -199,7 +204,7 @@ public class FXController {
 		}
 	}
 
-	private Mat findAndDrawRect(Mat frame) {
+private Mat findAndDrawRect(Mat frame) {
 		
 		
 		// STEP 1: Resize input image to img_proc to reduce computation
@@ -263,31 +268,49 @@ public class FXController {
 		// Image extractImageToShow = Utils.mat2Image(convexHullMask);
 		// updateImageView(extractFrame, extractImageToShow);
 		MatOfPoint2f finalCorners = new MatOfPoint2f();
+		MatOfPoint2f maxCurve = new MatOfPoint2f();
 		Point[] tmpPoints = polygon.toArray();
 		for (Point point : tmpPoints) {
 			point.x = point.x / 0.9;
 			point.y = point.y / 0.9;
 		}
 		finalCorners.fromArray(tmpPoints);
-		boolean clockwise = true;
-		double currentThreshold = 0;
+		
 		if (finalCorners.toArray().length == 4) {
 			Size size = getRectangleSize(finalCorners);
-			System.out.println("1111111111111111");
+			
+			maxCurve = polygon;
+			
+			//System.out.println("1111111111111111");
 			Mat result = Mat.zeros(size, frame.type());
-			// STEP 10: Homography: Use findHomography to find the affine transformation of
-			// your paper sheet
+			// STEP 10: Homography: Use findHomography to find the affine transformation tthe rectangle
 			Mat homography = new Mat();
 			MatOfPoint2f dstPoints = new MatOfPoint2f();
 			Point[] arrDstPoints = { new Point(result.cols(), result.rows()), new Point(0, result.rows()),
 					new Point(0, 0), new Point(result.cols(), 0) };
 			dstPoints.fromArray(arrDstPoints);
-			homography = Calib3d.findHomography(finalCorners, dstPoints);
+			homography = Calib3d.findHomography(maxCurve, dstPoints);
 
+		    double temp_double[] = dstPoints.get(0, 0);
+		    Point p1 = new Point(temp_double[0], temp_double[1]);
+		    Imgproc.circle(frame, new Point(p1.x, p1.y), 20, new Scalar(255, 0, 0), 5); //p1 is colored red
+
+		    temp_double = dstPoints.get(1, 0);
+		    Point p2 = new Point(temp_double[0], temp_double[1]);
+		    Imgproc.circle(frame, new Point(p2.x, p2.y), 20, new Scalar(0, 255, 0), 5); //p2 is colored green
+
+		    temp_double = dstPoints.get(2, 0);       
+		    Point p3 = new Point(temp_double[0], temp_double[1]);
+		    Imgproc.circle(frame, new Point(p3.x, p3.y), 20, new Scalar(0, 0, 255), 5); //p3 is colored blue
+
+		    temp_double = dstPoints.get(3, 0);
+		    Point p4 = new Point(temp_double[0], temp_double[1]);
+		    Imgproc.circle(frame, new Point(p4.x, p4.y), 20, new Scalar(0, 255, 255), 5); //p1 is colored violet
+			
 			// STEP 11: Warp the input image using the computed homography matrix
-			// Imgproc.warpPerspective(frame, result, homography, size);
-
-			Imgproc.warpPerspective(frame, result, homography, new Size(850, 620));
+			Imgproc.warpPerspective(frame, result, homography, size);
+		    
+			/*Imgproc.warpPerspective(frame, result, homography, new Size(850, 620));
 
 			// MatOfPoint2f imageOutline = getOutline(result);
 			// Mat transformation = Imgproc.getPerspectiveTransform(finalCorners,
@@ -300,9 +323,9 @@ public class FXController {
 			// Imgproc.medianBlur(resultGray, resultGray, 3);
 			// Imgproc.adaptiveThreshold(resultGray, resultGray, 255,
 			// Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, (int)
-			// adaptiveThreshold.getValue(), 4);
+			// adaptiveThreshold.getValue(), 4);*/
 
-			output = result;
+            output = result;
 
 		}
 
