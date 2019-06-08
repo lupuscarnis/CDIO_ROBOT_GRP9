@@ -104,6 +104,12 @@ public class FXController {
 
 	//Homemade Image prosessing
 	ImageProssesing ip = new ImageProssesing();
+		// Switch between debug/production mode
+	private boolean isDebug = true;
+
+	// Debug image file
+	private String debugImg = "Debugging/pic01.jpg";
+	
 	/**
 	 * The action triggered by pushing the button on the GUI
 	 */
@@ -144,7 +150,12 @@ public class FXController {
 						
 						frame = ip.findBackAndFront(frame);
 								
+							
 						//updateImageView(maskImage, Utils.mat2Image(ip.findCorners(frame)));
+					
+						// Find the rectangle of the playing field
+						frame = findAndDrawRect(frame);
+					
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
 						updateImageView(videoFrame, imageToShow);
