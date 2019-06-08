@@ -10,78 +10,108 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.FXController">
-   <right>
+<BorderPane xmlns="http://javafx.com/javafx/8"
+	xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="application.FXController">
+	<right>
 		<VBox alignment="CENTER" spacing="2.0">
 			<padding>
 				<Insets left="10" right="10" />
 			</padding>
-   <children>
-            <Label layoutX="70.0" layoutY="46.0" text="ONLY FOR HSV" />
-   			<Label text="Hue Start" />
-   			<Slider fx:id="hueStart" blockIncrement="1" max="180" min="0" value="20" />
-   			<Label text="Hue Stop" />
-   			<Slider fx:id="hueStop" blockIncrement="1" max="180" min="0" value="50" />
-   			<Label text="Saturation Start" />
-   			<Slider fx:id="saturationStart" blockIncrement="1" max="255" min="0" value="60" />
-   			<Label text="Saturation Stop" />
-   			<Slider fx:id="saturationStop" blockIncrement="1" max="255" min="0" value="200" />
-   			<Label text="Value Start" />
-   			<Slider fx:id="valueStart" blockIncrement="1" max="255" min="0" value="50" />
-   			<Label text="Value Stop" />
-   			<Slider fx:id="valueStop" blockIncrement="1" max="255" min="0" value="255" />
-   
-   		<Separator prefWidth="150.0">
-                  <VBox.margin>
-                     <Insets bottom="10.0" top="10.0" />
-                  </VBox.margin>
-               </Separator>
-            <Label layoutX="54.0" layoutY="37.0" text="ONLY FOR Hough" />
-               <Label layoutX="61.0" layoutY="357.0" text="H: min_dist (0-64)" />
-               <Slider fx:id="H_minDist" blockIncrement="1" layoutX="20.0" layoutY="384.0" max="64.0" min="0" value="64.0" />
-               <Label layoutX="73.0" layoutY="351.0" text="Upper Threshold (Def. 30.0)" />
-               <Slider fx:id="H_uThresh" blockIncrement="1" layoutX="20.0" layoutY="369.0" min="1.0" value="30.0" />
-               <Label layoutX="73.0" layoutY="385.0" text="Center Threshold (Def. 28.0)" />
-               <Slider fx:id="H_cTresh" blockIncrement="1" layoutX="20.0" layoutY="361.0" min="1.0" value="28.0" />
-               <Label layoutX="73.0" layoutY="402.0" text="Min Radius (Def. 1)" />
-               <Slider fx:id="H_minRad" blockIncrement="1" layoutX="20.0" layoutY="386.0" max="10.0" min="0" value="1.0" />
-               <Label layoutX="91.0" layoutY="404.0" text="Max Radius (Def. 15)" />
-               <Slider fx:id="H_maxRad" blockIncrement="1" layoutX="20.0" layoutY="423.0" max="25.0" min="0" value="15.0" />
-   </children>
-            </VBox>
-		
-   </right>
-   <center>
-      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-         <children>
-            <ImageView fx:id="videoFrame" fitHeight="480.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true" />
-            <VBox prefHeight="200.0" prefWidth="100.0">
-               <children>
-                  <ImageView fx:id="maskImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                  </ImageView>
-                  <ImageView fx:id="morphImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                  </ImageView>
-               </children>
-            </VBox>
-         </children>
-      </HBox>
-   </center>
+			<children>
+				<Label layoutX="70.0" layoutY="46.0" text="ONLY FOR HSV" />
+				<Label text="Hue Start" />
+				<Slider fx:id="hueStart" blockIncrement="1" max="180" min="0"
+					value="20" />
+				<Label text="Hue Stop" />
+				<Slider fx:id="hueStop" blockIncrement="1" max="180" min="0"
+					value="50" />
+				<Label text="Saturation Start" />
+				<Slider fx:id="saturationStart" blockIncrement="1" max="255"
+					min="0" value="60" />
+				<Label text="Saturation Stop" />
+				<Slider fx:id="saturationStop" blockIncrement="1" max="255"
+					min="0" value="200" />
+				<Label text="Value Start" />
+				<Slider fx:id="valueStart" blockIncrement="1" max="255"
+					min="0" value="50" />
+				<Label text="Value Stop" />
+				<Slider fx:id="valueStop" blockIncrement="1" max="255"
+					min="0" value="255" />
+
+				<Separator prefWidth="150.0">
+					<VBox.margin>
+						<Insets bottom="10.0" top="10.0" />
+					</VBox.margin>
+				</Separator>
+				<Label layoutX="54.0" layoutY="37.0" text="ONLY FOR Hough" />
+				<Label layoutX="61.0" layoutY="357.0"
+					text="H: min_dist (0-64)" />
+				<Slider fx:id="H_minDist" blockIncrement="1" layoutX="20.0"
+					layoutY="384.0" max="64.0" min="0" value="64.0" />
+				<Label layoutX="73.0" layoutY="351.0"
+					text="Upper Threshold (Def. 30.0)" />
+				<Slider fx:id="H_uThresh" blockIncrement="1" layoutX="20.0"
+					layoutY="369.0" min="1.0" value="30.0" />
+				<Label layoutX="73.0" layoutY="385.0"
+					text="Center Threshold (Def. 28.0)" />
+				<Slider fx:id="H_cTresh" blockIncrement="1" layoutX="20.0"
+					layoutY="361.0" min="1.0" value="28.0" />
+				<Label layoutX="73.0" layoutY="402.0"
+					text="Min Radius (Def. 1)" />
+				<Slider fx:id="H_minRad" blockIncrement="1" layoutX="20.0"
+					layoutY="386.0" max="10.0" min="0" value="1.0" />
+				<Label layoutX="91.0" layoutY="404.0"
+					text="Max Radius (Def. 15)" />
+				<Slider fx:id="H_maxRad" blockIncrement="1" layoutX="20.0"
+					layoutY="423.0" max="25.0" min="0" value="15.0" />
+				<Separator prefWidth="150.0" />
+				<Label text="Canny lowThreshold (Def. 0)" />
+				<Slider fx:id="C_Low" blockIncrement="0.5" min="0" max="25.0"
+					value="0" />
+				<Label text="Canny MaxThreshold (Def. 0)" />
+				<Slider fx:id="C_Max" blockIncrement="0.5" min="0" max="200"
+					value="120" />
+			</children>
+		</VBox>
+
+	</right>
+	<center>
+		<HBox prefHeight="100.0" prefWidth="200.0"
+			BorderPane.alignment="CENTER">
+			<children>
+				<ImageView fx:id="videoFrame" fitHeight="480.0"
+					fitWidth="640.0" pickOnBounds="true" preserveRatio="true" />
+				<VBox prefHeight="200.0" prefWidth="100.0">
+					<children>
+						<ImageView fx:id="maskImage" fitHeight="150.0"
+							fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+							<VBox.margin>
+								<Insets />
+							</VBox.margin>
+						</ImageView>
+						<ImageView fx:id="morphImage" fitHeight="150.0"
+							fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+							<VBox.margin>
+								<Insets />
+							</VBox.margin>
+						</ImageView>
+					</children>
+				</VBox>
+			</children>
+		</HBox>
+	</center>
 	<bottom>
 		<VBox alignment="CENTER" spacing="15">
 			<padding>
 				<Insets bottom="25" left="25" right="25" top="25" />
 			</padding>
-   <children>
-   			<Button fx:id="cameraButton" alignment="center" onAction="#startCamera" text="Start camera" />
-   			<Separator />
-   			<Label fx:id="hsvCurrentValues" />
-   </children>
+			<children>
+				<Button fx:id="cameraButton" alignment="center"
+					onAction="#startCamera" text="Start camera" />
+				<Separator />
+				<Label fx:id="hsvCurrentValues" />
+			</children>
 		</VBox>
 	</bottom>
 </BorderPane>
