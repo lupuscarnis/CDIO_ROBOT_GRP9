@@ -1,6 +1,7 @@
 
 package application;
 
+import java.awt.image.ImageProducer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,7 +127,7 @@ public class ImageProssesing {
 		Mat output2 = new Mat();
 		Mat morphOutput = new Mat();
 		Mat filtered = new Mat();
-	
+	/*
 		Imgproc.GaussianBlur(frame, filtered, new Size(7, 7), 0);
 		Imgproc.cvtColor(filtered, hsvImage, Imgproc.COLOR_BGR2HSV);
 		Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
@@ -136,7 +137,7 @@ public class ImageProssesing {
 		Scalar maxValues = new Scalar(20, 215, 225);
 	
 		Core.inRange(hsvImage, minValues, maxValues, output1);
-		
+		*/
 		
 		 int threshold = 200;
 	
@@ -148,8 +149,8 @@ public class ImageProssesing {
 	    int blockSize = 2;
 	    int apertureSize = 3;
 	    double k = 0.04;
-		
-       Imgproc.cornerHarris(output1, dst, blockSize, apertureSize, k);
+		Imgproc.cvtColor(frame, srcGray,Imgproc.COLOR_BGR2GRAY);
+       Imgproc.cornerHarris(srcGray, dst, blockSize, apertureSize, k);
        Core.normalize(dst, dstNorm, 0, 255, Core.NORM_MINMAX);
        Core.convertScaleAbs(dstNorm, dstNormScaled);
        float[] dstNormData = new float[(int) (dstNorm.total() * dstNorm.channels())];
