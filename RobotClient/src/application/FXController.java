@@ -95,7 +95,7 @@ public class FXController {
 
 	@FXML
 	private Slider C_Kernel;
-	
+
 	// a timer for acquiring the video stream
 	private ScheduledExecutorService timer;
 	// the OpenCV object that performs the video capture
@@ -108,7 +108,7 @@ public class FXController {
 
 	// Homemade Image prosessing
 	ImageProssesing ip = new ImageProssesing();
-	
+
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
@@ -127,6 +127,9 @@ public class FXController {
 
 	// Debug image file
 	private String debugImg = "Debugging/pic01.jpg";
+
+	// Debug image file
+	private String noImg = "Debugging/Default.jpg";
 
 	/**
 	 * The action triggered by pushing the button on the GUI
@@ -159,7 +162,6 @@ public class FXController {
 
 						Mat frame = new Mat();
 
-						
 						if (UseHSVImgDetection) {
 							frame = grabFrame();
 						} else {
@@ -170,7 +172,7 @@ public class FXController {
 						if (!isDebug) {
 
 							System.out.println("test123");
-							
+
 							// Find robot vector
 							frame = ip.findBackAndFront(frame);
 
@@ -207,30 +209,67 @@ public class FXController {
 		}
 	}
 
-private Mat findAndDrawRect(Mat frame) {
-			
-	int C_MaxValue = (int) this.C_Max.getValue();
-	// show the current selected HSV range
-	String valuesToPrint = "C_Max Value: " + C_MaxValue;
+	private Mat findAndDrawRect(Mat frame) {
 
-	Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
-	
+		// show the current selected HSV range
+		// String valuesToPrint = "C_Max Value: " + C_MaxValue;
+
+		// Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
+
 		// STEP 1: Resize input image to img_proc to reduce computation
+
 		/*
 		 * double ratio = 600 / Math.max(frame.width(), frame.height()); Size
 		 * downscaledSize = new Size(frame.width() * ratio, frame.height() * ratio); Mat
 		 * dst = new Mat(downscaledSize, frame.type()); Imgproc.resize(frame, dst,
 		 * downscaledSize);
 		 */
+
 		Mat output = new Mat();
 		Mat grayImage = new Mat();
 		Mat detectedEdges = new Mat();
 		Mat edges = new Mat();
-		
+		Mat blurredImage = new Mat();
+		Mat hsvImage = new Mat();
+		Mat mask = new Mat();
+
+		// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
+		Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
+
+		/*
+		 * Experimental grayscale -->
+		 * http://answers.opencv.org/question/34970/detection-of-table-tennis-balls-and-
+		 * color-correction/ When using grayscale only the hue min/max slider have an
+		 * effect on the detection.
+		 */
+		// Imgproc.cvtColor(blurredImage, grayImage, Imgproc.COLOR_BGR2GRAY);
+
+		// convert the frame to HSV
+		Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
+
+		// get thresholding values from the UI
+		// remember: H ranges 0-180, S and V range 0-255
+		Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
+				this.valueStart.getValue());
+		Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(),
+				this.valueStop.getValue());
+
+		// show the current selected HSV range
+		String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0] + "\tSaturation range: "
+				+ minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: " + minValues.val[2] + "-"
+				+ maxValues.val[2];
+
+		Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
+
+		// threshold HSV image to select tennis balls
+		Core.inRange(hsvImage, minValues, maxValues, mask);
+		// show the partial output
+		this.updateImageView(this.maskImage, Utils.mat2Image(mask));
+
 		// STEP 2: convert to grayscale
-		Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
+		// Imgproc.cvtColor(mask, grayImage, Imgproc.COLOR_BGR2GRAY);
 		// STEP 3: try to filter text inside document
-		Imgproc.medianBlur(grayImage, detectedEdges, 9);
+		Imgproc.medianBlur(mask, detectedEdges, 9);
 		// STEP 4: Edge detection
 		// Imgproc.erode(edges, edges, new Mat());
 		// Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
@@ -241,12 +280,13 @@ private Mat findAndDrawRect(Mat frame) {
 		// Image imageToShow = Utils.mat2Image(edges);
 		// updateImageView(cannyFrame, imageToShow);
 		// STEP 6: Compute the contours
+
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		// STEP 7: Sort the contours by length and only keep the largest one
 
 		double maxArea = 0;
-		int maxAreaIdx = 0;
+		int maxAreaIdx = -1;
 
 		for (int idx = 0; idx != contours.size(); ++idx) {
 			Mat contour = contours.get(idx);
@@ -258,84 +298,99 @@ private Mat findAndDrawRect(Mat frame) {
 
 		}
 
-		MatOfPoint largestContour = contours.get(maxAreaIdx);
+		if (maxAreaIdx >= 0) {
 
-		// STEP 8: Generate the convex hull of this contour
-		Mat convexHullMask = Mat.zeros(frame.rows(), frame.cols(), frame.type());
-		MatOfInt hullInt = new MatOfInt();
-		Imgproc.convexHull(largestContour, hullInt);
-		MatOfPoint hullPoint = OpenCVUtil.getNewContourFromIndices(largestContour, hullInt);
-		// STEP 9: Use approxPolyDP to simplify the convex hull (this should give a
-		// quadrilateral)
-		MatOfPoint2f polygon = new MatOfPoint2f();
-		Imgproc.approxPolyDP(OpenCVUtil.convert(hullPoint), polygon, 20, true);
-		List<MatOfPoint> tmp = new ArrayList<>();
-		tmp.add(OpenCVUtil.convert(polygon));
-		// restoreScaleMatOfPoint(tmp, 0.9);
+			MatOfPoint largestContour = contours.get(maxAreaIdx);
 
-		Imgproc.drawContours(convexHullMask, tmp, 0, new Scalar(25, 25, 255), 2);
-		// Image extractImageToShow = Utils.mat2Image(convexHullMask);
-		// updateImageView(extractFrame, extractImageToShow);
-		MatOfPoint2f finalCorners = new MatOfPoint2f();
-		MatOfPoint2f maxCurve = new MatOfPoint2f();
-		Point[] tmpPoints = polygon.toArray();
-		for (Point point : tmpPoints) {
-			point.x = point.x / 0.9;
-			point.y = point.y / 0.9;
-		}
-		finalCorners.fromArray(tmpPoints);
-		
-		if (finalCorners.toArray().length == 4) {
-			Size size = getRectangleSize(finalCorners);
-			
-			maxCurve = polygon;
-			
-			//System.out.println("1111111111111111");
-			Mat result = Mat.zeros(size, frame.type());
-			// STEP 10: Homography: Use findHomography to find the affine transformation tthe rectangle
-			Mat homography = new Mat();
-			MatOfPoint2f dstPoints = new MatOfPoint2f();
-			Point[] arrDstPoints = { new Point(result.cols(), result.rows()), new Point(0, result.rows()),
-					new Point(0, 0), new Point(result.cols(), 0) };
-			dstPoints.fromArray(arrDstPoints);
-			homography = Calib3d.findHomography(maxCurve, dstPoints);
+			// STEP 8: Generate the convex hull of this contour
+			Mat convexHullMask = Mat.zeros(frame.rows(), frame.cols(), frame.type());
+			MatOfInt hullInt = new MatOfInt();
+			Imgproc.convexHull(largestContour, hullInt);
+			MatOfPoint hullPoint = OpenCVUtil.getNewContourFromIndices(largestContour, hullInt);
+			// STEP 9: Use approxPolyDP to simplify the convex hull (this should give a
+			// quadrilateral)
+			MatOfPoint2f polygon = new MatOfPoint2f();
+			Imgproc.approxPolyDP(OpenCVUtil.convert(hullPoint), polygon, 20, true);
+			List<MatOfPoint> tmp = new ArrayList<>();
+			tmp.add(OpenCVUtil.convert(polygon));
+			// restoreScaleMatOfPoint(tmp, 0.9);
 
-		    double temp_double[] = dstPoints.get(0, 0);
-		    Point p1 = new Point(temp_double[0], temp_double[1]);
-		    Imgproc.circle(frame, new Point(p1.x, p1.y), 20, new Scalar(255, 0, 0), 5); //p1 is colored red
+			Imgproc.drawContours(convexHullMask, tmp, 0, new Scalar(25, 25, 255), 2);
+			// Image extractImageToShow = Utils.mat2Image(convexHullMask);
+			// updateImageView(extractFrame, extractImageToShow);
+			MatOfPoint2f finalCorners = new MatOfPoint2f();
+			MatOfPoint2f maxCurve = new MatOfPoint2f();
+			Point[] tmpPoints = polygon.toArray();
+			for (Point point : tmpPoints) {
+				point.x = point.x / 0.9;
+				point.y = point.y / 0.9;
+			}
+			finalCorners.fromArray(tmpPoints);
 
-		    temp_double = dstPoints.get(1, 0);
-		    Point p2 = new Point(temp_double[0], temp_double[1]);
-		    Imgproc.circle(frame, new Point(p2.x, p2.y), 20, new Scalar(0, 255, 0), 5); //p2 is colored green
+			if (finalCorners.toArray().length == 4) {
+				Size size = getRectangleSize(finalCorners);
 
-		    temp_double = dstPoints.get(2, 0);       
-		    Point p3 = new Point(temp_double[0], temp_double[1]);
-		    Imgproc.circle(frame, new Point(p3.x, p3.y), 20, new Scalar(0, 0, 255), 5); //p3 is colored blue
+				maxCurve = polygon;
 
-		    temp_double = dstPoints.get(3, 0);
-		    Point p4 = new Point(temp_double[0], temp_double[1]);
-		    Imgproc.circle(frame, new Point(p4.x, p4.y), 20, new Scalar(0, 255, 255), 5); //p1 is colored violet
-			
-			// STEP 11: Warp the input image using the computed homography matrix
-			Imgproc.warpPerspective(frame, result, homography, size);
-		    
-			/*Imgproc.warpPerspective(frame, result, homography, new Size(850, 620));
+				// System.out.println("1111111111111111");
+				Mat result = Mat.zeros(size, frame.type());
+				// STEP 10: Homography: Use findHomography to find the affine transformation
+				// tthe rectangle
+				Mat homography = new Mat();
+				MatOfPoint2f dstPoints = new MatOfPoint2f();
+				Point[] arrDstPoints = { new Point(result.cols(), result.rows()), new Point(0, result.rows()),
+						new Point(0, 0), new Point(result.cols(), 0) };
+				dstPoints.fromArray(arrDstPoints);
+				homography = Calib3d.findHomography(maxCurve, dstPoints);
 
-			// MatOfPoint2f imageOutline = getOutline(result);
-			// Mat transformation = Imgproc.getPerspectiveTransform(finalCorners,
-			// imageOutline);
-			// Imgproc.warpPerspective(frame, result, transformation, size);
-			// get the thresholded image
-			Mat resultGray = new Mat();
-			Imgproc.cvtColor(result, resultGray, Imgproc.COLOR_BGR2GRAY);
+				/*
+				 * double temp_double[] = dstPoints.get(0, 0); Point p1 = new
+				 * Point(temp_double[0], temp_double[1]); Imgproc.circle(frame, new Point(p1.x,
+				 * p1.y), 20, new Scalar(255, 0, 0), 5); //p1 is colored red
+				 * 
+				 * temp_double = dstPoints.get(1, 0); Point p2 = new Point(temp_double[0],
+				 * temp_double[1]); Imgproc.circle(frame, new Point(p2.x, p2.y), 20, new
+				 * Scalar(0, 255, 0), 5); //p2 is colored green
+				 * 
+				 * temp_double = dstPoints.get(2, 0); Point p3 = new Point(temp_double[0],
+				 * temp_double[1]); Imgproc.circle(frame, new Point(p3.x, p3.y), 20, new
+				 * Scalar(0, 0, 255), 5); //p3 is colored blue
+				 * 
+				 * temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
+				 * temp_double[1]); Imgproc.circle(frame, new Point(p4.x, p4.y), 20, new
+				 * Scalar(0, 255, 255), 5); //p1 is colored violet
+				 */
 
-			// Imgproc.medianBlur(resultGray, resultGray, 3);
-			// Imgproc.adaptiveThreshold(resultGray, resultGray, 255,
-			// Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, (int)
-			// adaptiveThreshold.getValue(), 4);*/
+				// STEP 11: Warp the input image using the computed homography matrix
+				Imgproc.warpPerspective(frame, result, homography, size);
 
-            output = result;
+				/*
+				 * Imgproc.warpPerspective(frame, result, homography, new Size(850, 620));
+				 * 
+				 * // MatOfPoint2f imageOutline = getOutline(result); // Mat transformation =
+				 * Imgproc.getPerspectiveTransform(finalCorners, // imageOutline); //
+				 * Imgproc.warpPerspective(frame, result, transformation, size); // get the
+				 * thresholded image Mat resultGray = new Mat(); Imgproc.cvtColor(result,
+				 * resultGray, Imgproc.COLOR_BGR2GRAY);
+				 * 
+				 * // Imgproc.medianBlur(resultGray, resultGray, 3); //
+				 * Imgproc.adaptiveThreshold(resultGray, resultGray, 255, //
+				 * Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, (int) //
+				 * adaptiveThreshold.getValue(), 4);
+				 */
 
+				/*
+				 * Mat dst = new Mat(); //Scaling the Image Imgproc.resize(result, dst, new
+				 * Size(frame.rows()/3, frame.rows()/3), 0, 0, Imgproc.INTER_AREA);
+				 */
+
+				output = result;
+			}
+		} else {
+
+			frame = Imgcodecs.imread(noImg);
+
+			output = frame;
 		}
 
 		return output;
@@ -418,7 +473,6 @@ private Mat findAndDrawRect(Mat frame) {
 					Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(),
 							this.valueStop.getValue());
 
-					
 					// show the current selected HSV range
 					String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0]
 							+ "\tSaturation range: " + minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: "
@@ -474,7 +528,7 @@ private Mat findAndDrawRect(Mat frame) {
 		// check if the capture is open
 
 		try {
-			
+
 			if (isDebug == true) {
 
 				// read from from test image
