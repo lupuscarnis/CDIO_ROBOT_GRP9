@@ -1,4 +1,4 @@
-package Interfaces_application;
+package application;
 
 import java.util.HashMap;
 import java.util.List;

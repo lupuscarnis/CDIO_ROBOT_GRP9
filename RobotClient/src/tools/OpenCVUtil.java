@@ -13,8 +13,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import Interfaces_application.I_OpenCVUtil;
-
 public class OpenCVUtil implements I_OpenCVUtil {
 
 	

@@ -2,15 +2,21 @@ package behavior;
 import java.util.ArrayList;
 
 import dao.DAO;
+import dao.I_DAO;
 import dto.DTO;
+import dto.I_DTO;
 import objects.Ball;
 import objects.Robot;
 
-public class RouteFinder{
+public class RouteFinder implements I_RouteFinder{
 	static int test = 0;
 	 private static ArrayList nodes = new ArrayList<Node>();
 	 
-	 public void getABall(Ball ball, Robot robot) {
+	 /* (non-Javadoc)
+	 * @see behavior.I_RouteFinder#getABall(objects.Ball, objects.Robot)
+	 */
+	@Override
+	public void getABall(Ball ball, Robot robot) {
 		 //this method should be called on the next ball to collect
 	double ballX = ball.getX();
 	double ballY = ball.getY();
@@ -27,12 +33,12 @@ public class RouteFinder{
 	
 	dist = dist/1000;
 	
-	dto.DTO dtoo = new DTO();
+	I_DTO dtoo = new DTO();
 	dtoo.setRotation((float) dir);
 	dtoo.setDistance((float) dist-100);
 	dtoo.setClawMove(180);
 	
-	dao.DAO data = new DAO();  
+	I_DAO data = new DAO();  
 	data.sendData(dtoo);
 	/*
 	dtoo.setRotation((float) 0);
@@ -76,7 +82,11 @@ public class RouteFinder{
 	    }
 	    */
 	    
-	    public Node[] findRoute(Node[] nodes, double angle/*maybe its own poisition, if not first in array*/) {
+	    /* (non-Javadoc)
+		 * @see behavior.I_RouteFinder#findRoute(behavior.Node[], double)
+		 */
+	    @Override
+		public Node[] findRoute(Node[] nodes, double angle/*maybe its own poisition, if not first in array*/) {
 	    	Node robot = nodes[0];
 	double currentMin =361;
 	    	 double[] angles = new double[nodes.length-1];

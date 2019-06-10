@@ -10,10 +10,11 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import connection.Connection;
-import dto.DTO;
+import connection.I_Connection;
+import dto.I_DTO;
 
-public class DAO {
-	private Connection c = null;
+public class DAO implements I_DAO {
+	private I_Connection c = null;
 	private Socket s;
 	private BufferedReader	in;
 	private PrintWriter out;
@@ -22,7 +23,11 @@ public class DAO {
 	s =	c.Connect();
 	}
 	
-	public void sendData(DTO data) {
+	/* (non-Javadoc)
+	 * @see dao.I_DAO#sendData(dto.DTO)
+	 */
+	@Override
+	public void sendData(I_DTO data) {
 			
 		try {
 			

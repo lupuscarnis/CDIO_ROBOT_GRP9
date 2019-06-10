@@ -15,9 +15,8 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import Interfaces_application.I_ImageProssesing;
-import Interfaces_application.I_Size_Scale;
 import objects.Robot;
+import tools.I_Size_Scale;
 import tools.Size_scale;
 
 public class ImageProssesing implements I_ImageProssesing {

@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 import dao.DAO;
+import dao.I_DAO;
 import dto.DTO;
+import dto.I_DTO;
 
 public class ConsoleOutput implements Runnable{
 	String input = "hello";
@@ -15,8 +17,8 @@ public class ConsoleOutput implements Runnable{
 
 	@Override
 	public void run() {
-		DAO dao = new DAO();
-		DTO sheet = new DTO();
+		I_DAO dao = new DAO();
+		I_DTO sheet = new DTO();
 	
 		while(!input.equals("exit")) {
 				

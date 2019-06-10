@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import org.opencv.core.Core;
 
+import behavior.I_RouteFinder;
 import behavior.RouteFinder;
 import connection.ConsoleOutput;
 import dao.DAO;
@@ -70,7 +71,7 @@ public class Main extends Application {
 		
 		console.start();
 		launch(args);
-		RouteFinder s = new RouteFinder();
+		I_RouteFinder s = new RouteFinder();
 		s.getABall(BallList.getInstance().getIndex(0), Robot.getInstance());
 		
 		/*try {

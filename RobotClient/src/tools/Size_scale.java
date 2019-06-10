@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.opencv.core.MatOfPoint;
 
-import Interfaces_application.I_Size_Scale;
 import objects.Robot;
 
 public class Size_scale implements I_Size_Scale {

@@ -26,7 +26,6 @@ import org.opencv.osgi.OpenCVInterface;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
-import Interfaces_application.I_ImageProssesing;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;

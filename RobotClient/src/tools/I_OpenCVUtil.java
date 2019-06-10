@@ -1,4 +1,4 @@
-package Interfaces_application;
+package tools;
 
 public interface I_OpenCVUtil {
 
