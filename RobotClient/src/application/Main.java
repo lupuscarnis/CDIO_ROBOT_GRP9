@@ -71,6 +71,7 @@ public class Main extends Application {
 //		Danny.setBallpickup(false);
 //		dao.sendData(Danny);
 //		
+	
 		nu.pattern.OpenCV.loadShared();
 		Thread console = new Thread( new ConsoleOutput());
 		console.start();

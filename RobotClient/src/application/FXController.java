@@ -175,7 +175,7 @@ public class FXController
 					Mat hsvImage = new Mat();
 					Mat mask = new Mat();
 					Mat morphOutput = new Mat();
-					
+			
 					// remove some noise
 					//Imgproc.blur(frame, blurredImage, new Size(7, 7));
 					
@@ -331,10 +331,13 @@ public class FXController
 			        min_radius = 0: Minimum radius to be detected. If unknown, put zero as default.
 			        max_radius = 0: Maximum radius to be detected. If unknown, put zero as default.*/
 			        Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0,(double)grayImage.rows()/min_dist,uThresh, cTresh, minRad, maxRad);
-
+			    	//send this coordinate system somewhere
+			        CSystem coordinates = new CSystem(800,600);
 			        for (int x = 0; x < circles.cols(); x++) {
 			            double[] c = circles.get(0, x);
 			            Point center = new Point(Math.round(c[0]), Math.round(c[1]));
+			            Coordinate ball = new Coordinate( (int)Math.round(c[1]), (int)Math.round(c[1]));
+			            coordinates.addPoint(ball);
 			            // circle center
 			            Imgproc.circle(frame, center, 1, new Scalar(0,100,100), 3, 8, 0 );
 			            // circle outline
