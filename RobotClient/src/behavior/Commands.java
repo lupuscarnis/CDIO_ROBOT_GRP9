@@ -1,6 +1,6 @@
 package behavior;
 /*
-public class commands implements  behaviour{
+public class commands implements  Í_Commands{
 	
 	int nrBalls =0;
 	int goals=0;

@@ -1,6 +1,6 @@
 package behavior;
 
-public interface behaviour {
+public interface I_Commands {
 	
 	void start();
 	boolean findBall();
