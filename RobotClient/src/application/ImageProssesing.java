@@ -1,13 +1,10 @@
 
 package application;
 
-import java.awt.image.ImageProducer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.swing.text.html.HTMLDocument.Iterator;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -18,11 +15,12 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import javafx.fxml.FXML;
-import javafx.scene.image.ImageView;
+import Interfaces_application.I_ImageProssesing;
+import Interfaces_application.I_Size_Scale;
 import objects.Robot;
+import tools.Size_scale;
 
-public class ImageProssesing {
+public class ImageProssesing implements I_ImageProssesing {
 	// the FXML area for showing the mask
 	Mat output;
 	Scalar minValuesf = new Scalar(30, 55, 140);
@@ -35,6 +33,10 @@ public class ImageProssesing {
 		// TODO Auto-generated constructor stub
 	}
 
+	/* (non-Javadoc)
+	 * @see application.I_ImageProssesing#findBackAndFront(org.opencv.core.Mat)
+	 */
+	@Override
 	public Mat findBackAndFront(Mat frame) {
 
 		Point back = findColor(frame, minValuesb, maxValuesb);
@@ -58,14 +60,26 @@ public class ImageProssesing {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see application.I_ImageProssesing#getOutput()
+	 */
+	@Override
 	public Mat getOutput() {
 		return output;
 	}
 
+	/* (non-Javadoc)
+	 * @see application.I_ImageProssesing#setOutput(org.opencv.core.Mat)
+	 */
+	@Override
 	public void setOutput(Mat output) {
 		this.output = output;
 	}
 
+	/* (non-Javadoc)
+	 * @see application.I_ImageProssesing#findCorners(org.opencv.core.Mat, org.opencv.core.Point, int)
+	 */
+	@Override
 	public void findCorners(Mat frame, org.opencv.core.Point center, int threshold) {
 
 		Mat srcGray = new Mat();
@@ -120,7 +134,7 @@ public class ImageProssesing {
 		cornors.add(lengths.get(values.get(1)));
 		cornors.add(lengths.get(values.get(2)));
 		cornors.add(lengths.get(values.get(3)));
-		Size_scale ss = new Size_scale();
+		I_Size_Scale ss = new Size_scale();
 		ss.pixelToCm(cornors);	
 		for(Point p: cornors)
 			Imgproc.line(dstNormScaled, p, center, new Scalar(350, 255, 255));
@@ -129,6 +143,10 @@ public class ImageProssesing {
 		}
 
 
+	/* (non-Javadoc)
+	 * @see application.I_ImageProssesing#findColor(org.opencv.core.Mat, org.opencv.core.Scalar, org.opencv.core.Scalar)
+	 */
+	@Override
 	public Point findColor(Mat frame, Scalar minValues, Scalar maxValues) {
 		Mat hsvImage = new Mat();
 		Mat output = new Mat();
@@ -168,6 +186,10 @@ public class ImageProssesing {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see application.I_ImageProssesing#convertPointsToVectorsDistancesFromCenter(java.util.List, org.opencv.core.Point)
+	 */
+	@Override
 	public HashMap<Double, Point> convertPointsToVectorsDistancesFromCenter(List<Point> pointList, Point center) {
 
 		HashMap<Double, Point> lengths = new HashMap<Double, Point>();

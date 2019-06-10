@@ -1,19 +1,24 @@
-package application;
+package tools;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.core.MatOfPoint;
 
+import Interfaces_application.I_Size_Scale;
 import objects.Robot;
 
-public class Size_scale {
+public class Size_scale implements I_Size_Scale {
 	private double Ratio;
 
 	public Size_scale() {
 		// TODO Auto-generated constructor stub
 	}
 
+	/* (non-Javadoc)
+	 * @see application.I_Size_Scale#pixelToCm(java.util.List)
+	 */
+	@Override
 	public void pixelToCm(List<org.opencv.core.Point> list) {
 		org.opencv.core.Point start = list.get(0);
 		List<Double> lengths = new ArrayList<>();

@@ -1,4 +1,4 @@
-package application;
+package tools;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,9 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-public class OpenCVUtil {
+import Interfaces_application.I_OpenCVUtil;
+
+public class OpenCVUtil implements I_OpenCVUtil {
 
 	
 	/**

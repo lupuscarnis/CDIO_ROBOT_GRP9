@@ -26,7 +26,7 @@ import org.opencv.osgi.OpenCVInterface;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
-import application.Utils;
+import Interfaces_application.I_ImageProssesing;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -39,6 +39,8 @@ import nu.pattern.OpenCV;
 import objects.Ball;
 import objects.BallList;
 import objects.Robot;
+import tools.OpenCVUtil;
+import tools.Utils;
 
 /**
  * https://github.com/opencv-java
@@ -107,7 +109,7 @@ public class FXController {
 	private ObjectProperty<String> hsvValuesProp;
 
 	// Homemade Image prosessing
-	ImageProssesing ip = new ImageProssesing();
+	I_ImageProssesing ip = new ImageProssesing();
 
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
