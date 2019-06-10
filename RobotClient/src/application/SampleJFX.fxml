@@ -69,9 +69,12 @@
 				<Label text="Canny lowThreshold (Def. 0)" />
 				<Slider fx:id="C_Low" blockIncrement="0.5" min="0" max="25.0"
 					value="0" />
-				<Label text="Canny MaxThreshold (Def. 0)" />
+				<Label text="Canny MaxThreshold (Def. 90)" />
 				<Slider fx:id="C_Max" blockIncrement="0.5" min="0" max="200"
-					value="120" />
+					value="75" />
+				<Label text="Canny Kernel Size (Def. 0)" />
+				<Slider fx:id="C_Kernel" blockIncrement="0.5" min="1" max="10"
+					value="3" />
 			</children>
 		</VBox>
 

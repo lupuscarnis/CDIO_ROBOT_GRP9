@@ -93,6 +93,9 @@ public class FXController {
 	@FXML
 	private Slider C_Max;
 
+	@FXML
+	private Slider C_Kernel;
+	
 	// a timer for acquiring the video stream
 	private ScheduledExecutorService timer;
 	// the OpenCV object that performs the video capture
@@ -133,7 +136,7 @@ public class FXController {
 		// bind a text property with the string containing the current range of
 		// HSV values for object detection
 		hsvValuesProp = new SimpleObjectProperty<>();
-		// this.hsvCurrentValues.textProperty().bind(hsvValuesProp);
+		this.hsvCurrentValues.textProperty().bind(hsvValuesProp);
 
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
@@ -205,8 +208,13 @@ public class FXController {
 	}
 
 private Mat findAndDrawRect(Mat frame) {
-		
-		
+			
+	int C_MaxValue = (int) this.C_Max.getValue();
+	// show the current selected HSV range
+	String valuesToPrint = "C_Max Value: " + C_MaxValue;
+
+	Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
+	
 		// STEP 1: Resize input image to img_proc to reduce computation
 		/*
 		 * double ratio = 600 / Math.max(frame.width(), frame.height()); Size
@@ -217,12 +225,13 @@ private Mat findAndDrawRect(Mat frame) {
 		Mat output = new Mat();
 		Mat grayImage = new Mat();
 		Mat detectedEdges = new Mat();
+		Mat edges = new Mat();
+		
 		// STEP 2: convert to grayscale
 		Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
 		// STEP 3: try to filter text inside document
 		Imgproc.medianBlur(grayImage, detectedEdges, 9);
 		// STEP 4: Edge detection
-		Mat edges = new Mat();
 		// Imgproc.erode(edges, edges, new Mat());
 		// Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
 		// canny detector, with ratio of lower:upper threshold of 3:1
@@ -409,6 +418,7 @@ private Mat findAndDrawRect(Mat frame) {
 					Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(),
 							this.valueStop.getValue());
 
+					
 					// show the current selected HSV range
 					String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0]
 							+ "\tSaturation range: " + minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: "
