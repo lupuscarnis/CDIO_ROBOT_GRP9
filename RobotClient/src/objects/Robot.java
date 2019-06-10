@@ -2,7 +2,13 @@ package objects;
 
 public class Robot {
 	private static Robot robot;
-
+	private double pixelToCM;
+	public double getPixelToCM() {
+		return pixelToCM;
+	}
+	public void setPixelToCM(double pixelToCM) {
+		this.pixelToCM = pixelToCM;
+	}
 	private double frontX;
 	private double frontY;
 	private double backX;

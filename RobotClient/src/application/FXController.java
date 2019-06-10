@@ -108,7 +108,7 @@ public class FXController {
 	//Homemade Image prosessing
 	ImageProssesing ip = new ImageProssesing();
 		// Switch between debug/production mode
-	private boolean isDebug = true;
+	private boolean isDebug = false;
 
 	// Debug image file
 	private String debugImg = "Debugging/pic01.jpg";
@@ -149,12 +149,14 @@ public class FXController {
 							} else {
 							  frame = grabFrameHough();
 							}
+						
 						// Find robot vector
 						
 						frame = ip.findBackAndFront(frame);
-								
-							
-						updateImageView(maskImage, Utils.mat2Image(ip.findCorners(frame)));
+						updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));		
+
+
+						
 					
 						// Find the rectangle of the playing field
 						//frame = findAndDrawRect(frame);

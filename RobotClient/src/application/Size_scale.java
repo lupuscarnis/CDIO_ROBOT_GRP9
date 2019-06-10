@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.opencv.core.MatOfPoint;
 
+import objects.Robot;
+
 public class Size_scale {
 	private double Ratio;
 
@@ -39,6 +41,7 @@ public class Size_scale {
 
 		}
 		this.Ratio = (double)pixellengths/7;
+		Robot.getInstance().setPixelToCM(Ratio);
 		System.out.println("Pixels for 1cm: "+Ratio);
 	}
 }
