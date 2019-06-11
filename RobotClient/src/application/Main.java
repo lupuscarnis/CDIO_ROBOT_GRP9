@@ -33,13 +33,13 @@ public class Main extends Application {
 		try
 		{
 			// load the FXML resource
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("SampleJFX.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("RobotJFX.fxml"));
 			// store the root element so that the controllers can use it
 			BorderPane root = (BorderPane) loader.load();
 			// set a whitesmoke background
 			root.setStyle("-fx-background-color: whitesmoke;");
 			// create and style a scene
-			Scene scene = new Scene(root, 800, 600);
+			Scene scene = new Scene(root, 900, 750);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			// create the stage with the given title and the previously created
 			// scene

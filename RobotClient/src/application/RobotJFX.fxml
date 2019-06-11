@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.FXController">
+	<right>
+		<VBox alignment="TOP_CENTER" spacing="2.0">
+			<padding>
+				<Insets left="10" right="10" />
+			</padding>
+			<children>
+            <Accordion minHeight="600.0">
+              <panes>
+                <TitledPane animated="false" text="Playing Field">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <VBox prefHeight="200.0" prefWidth="200.0">
+                                 <children>
+                        				<Label text="Hue Start" />
+                        				<Slider fx:id="hueStart" blockIncrement="1" max="180" min="0" value="0" />
+                        				<Label text="Hue Stop" />
+                        				<Slider fx:id="hueStop" blockIncrement="1" max="180" min="0" value="50" />
+                        				<Label text="Saturation Start" />
+                        				<Slider fx:id="saturationStart" blockIncrement="1" max="255" min="0" value="64" />
+                        				<Label text="Saturation Stop" />
+                        				<Slider fx:id="saturationStop" blockIncrement="1" max="255" min="0" value="255" />
+                        				<Label text="Value Start" />
+                        				<Slider fx:id="valueStart" blockIncrement="1" max="255" min="0" value="0" />
+                        				<Label text="Value Stop" />
+                        				<Slider fx:id="valueStop" blockIncrement="1" max="255" min="0" value="255" />
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                                       <children>
+                                          <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" text="Freeze Analysis">
+                                             <HBox.margin>
+                                                <Insets top="15.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                       </children>
+                                       <opaqueInsets>
+                                          <Insets />
+                                       </opaqueInsets>
+                                    </HBox>
+                                 </children>
+                                 <padding>
+                                    <Insets left="10.0" right="10.0" top="15.0" />
+                                 </padding>
+                              </VBox>
+                           </children>
+                        </AnchorPane>
+                  </content>
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                </TitledPane>
+                <TitledPane animated="false" text="Balls">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <VBox prefHeight="200.0" prefWidth="200.0">
+                                 <children>
+                        				<Label text="H: min_dist (0-64)" />
+                        				<Slider fx:id="H_minDist" blockIncrement="1" max="64.0" min="0" value="64.0" />
+                        				<Label text="Upper Threshold (Def. 30.0)" />
+                        				<Slider fx:id="H_uThresh" blockIncrement="1" min="1.0" value="30.0" />
+                        				<Label text="Center Threshold (Def. 28.0)" />
+                        				<Slider fx:id="H_cTresh" blockIncrement="1" min="1.0" value="28.0" />
+                        				<Label text="Min Radius (Def. 1)" />
+                        				<Slider fx:id="H_minRad" blockIncrement="1" max="10.0" min="0" value="1.0" />
+                        				<Label text="Max Radius (Def. 15)" />
+                        				<Slider fx:id="H_maxRad" blockIncrement="1" max="25.0" min="0" value="15.0" />
+                        				<Separator prefWidth="150.0" />
+                        				<Label text="Canny lowThreshold (Def. 0)" />
+                        				<Slider fx:id="C_Low" blockIncrement="0.5" max="25.0" min="0" value="0" />
+                        				<Label text="Canny MaxThreshold (Def. 90)" />
+                        				<Slider fx:id="C_Max" blockIncrement="0.5" max="200" min="0" value="75" />
+                        				<Label text="Canny Kernel Size (Def. 0)" />
+                        				<Slider fx:id="C_Kernel" blockIncrement="0.5" max="10" min="1" value="3" />
+                                 </children>
+                                 <padding>
+                                    <Insets left="10.0" right="10.0" top="15.0" />
+                                 </padding>
+                              </VBox>
+                           </children>
+                        </AnchorPane>
+                  </content>
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                </TitledPane>
+                <TitledPane animated="false" text="Robot">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  </content>
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                </TitledPane>
+              </panes>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Accordion>
+			</children>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+		</VBox>
+
+	</right>
+	<center>
+		<HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+			<children>
+				<ImageView fx:id="videoFrame" fitHeight="480.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true" />
+				<VBox prefHeight="200.0" prefWidth="100.0">
+					<children>
+						<ImageView fx:id="maskImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+							<VBox.margin>
+								<Insets />
+							</VBox.margin>
+						</ImageView>
+						<ImageView fx:id="morphImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+							<VBox.margin>
+								<Insets />
+							</VBox.margin>
+						</ImageView>
+					</children>
+				</VBox>
+			</children>
+		</HBox>
+	</center>
+	<bottom>
+		<VBox alignment="CENTER" spacing="15">
+			<padding>
+				<Insets bottom="25" left="25" right="25" top="25" />
+			</padding>
+			<children>
+				<Button fx:id="cameraButton" alignment="center" contentDisplay="CENTER" onAction="#startCamera" text="Start camera" />
+				<Separator />
+				<Label fx:id="hsvCurrentValues" />
+			</children>
+		</VBox>
+	</bottom>
+</BorderPane>
