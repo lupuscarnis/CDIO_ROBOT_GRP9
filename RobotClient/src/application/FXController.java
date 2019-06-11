@@ -26,6 +26,7 @@ import org.opencv.osgi.OpenCVInterface;
 import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
+import behavior.RobotController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -97,6 +98,8 @@ public class FXController {
 	@FXML
 	private Slider C_Kernel;
 
+	boolean robotest = false;
+
 	// a timer for acquiring the video stream
 	private ScheduledExecutorService timer;
 	// the OpenCV object that performs the video capture
@@ -121,7 +124,7 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Switch between debug/production mode
 	private boolean isDebug = false;
@@ -154,7 +157,7 @@ public class FXController {
 			// is the video stream available?
 			if (this.capture.isOpened()) {
 				this.cameraActive = true;
-				
+
 				// grab a frame every 33 ms (30 frames/sec)
 				Runnable frameGrabber = new Runnable() {
 
@@ -162,13 +165,12 @@ public class FXController {
 					public void run() {
 
 						Mat frame = new Mat();
-						 
 
 						frame = grabFrame();
-					
+
 						ip.findBackAndFront(frame);
 						// Find the rectangle of the playing field and crop the image
-						//frame = findAndDrawRect(frame);
+						frame = findAndDrawRect(frame);
 
 						if (UseHSVImgDetection) {
 							frame = grabFrameHSV(frame);
@@ -181,16 +183,22 @@ public class FXController {
 						if (!isDebug) {
 
 							// Find robot vector
-							 
-							updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
 
-							
+							// updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
 
 						}
 
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
 						updateImageView(videoFrame, imageToShow);
+
+						if ((!robotest) && (BallList.getInstance().getBallList().size() > 1)) {
+
+							RobotController rc = new RobotController();
+							rc.start();
+							robotest = true;
+
+						}
 					}
 				};
 
@@ -575,20 +583,13 @@ public class FXController {
 			 */
 			Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double) grayImage.rows() / min_dist,
 					uThresh, cTresh, minRad, maxRad);
-
+			List<Point> p = new ArrayList<>();
 			for (int x = 0; x < circles.cols(); x++) {
-
-				List<Point> p = new ArrayList<>();
 
 				double[] c = circles.get(0, x);
 				Point center = new Point(Math.round(c[0]), Math.round(c[1]));
 				p.add(center);
 				// circle center
-				BallList s = BallList.getInstance();
-				s.clearList();
-				for (Point B : p) {
-					s.add(new Ball(B.x, B.y));
-				}
 
 				Imgproc.circle(frame, center, 1, new Scalar(0, 100, 100), 3, 8, 0);
 				// circle outline
@@ -598,10 +599,16 @@ public class FXController {
 
 				// Print center coordinates
 
-				for (int i = 0; i < p.size(); i++) {
-					// System.out.println("Point (X,Y): "+p.get(i));
+			}
+			BallList s = BallList.getInstance();
+			s.clearList();
+			for (Point B : p) {
+				s.add(new Ball(B.x, B.y));
+			}
+			
+			for (int i = 0; i < p.size(); i++) {
+				// System.out.println("Point (X,Y): "+p.get(i));
 
-				}
 			}
 
 		}
@@ -613,9 +620,11 @@ public class FXController {
 	 * Given a binary image containing one or more closed surfaces, use it as a mask
 	 * to find and highlight the objects contours
 	 * 
-	 * @param maskedImage the binary image to be used as a mask
-	 * @param frame       the original {@link Mat} image to be used for drawing the
-	 *                    objects contours
+	 * @param maskedImage
+	 *            the binary image to be used as a mask
+	 * @param frame
+	 *            the original {@link Mat} image to be used for drawing the objects
+	 *            contours
 	 * @return the {@link Mat} image with the objects contours framed
 	 */
 	private Mat findAndDrawBalls(Mat maskedImage, Mat frame) {
@@ -685,8 +694,10 @@ public class FXController {
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image     the {@link ImageView} to use
-	 * @param dimension the width of the image to set
+	 * @param image
+	 *            the {@link ImageView} to use
+	 * @param dimension
+	 *            the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -719,8 +730,10 @@ public class FXController {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view  the {@link ImageView} to update
-	 * @param image the {@link Image} to show
+	 * @param view
+	 *            the {@link ImageView} to update
+	 * @param image
+	 *            the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);

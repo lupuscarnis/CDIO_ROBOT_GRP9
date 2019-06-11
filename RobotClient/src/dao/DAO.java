@@ -27,8 +27,10 @@ public class DAO implements I_DAO {
 	 * @see dao.I_DAO#sendData(dto.DTO)
 	 */
 	@Override
-	public void sendData(I_DTO data) {
-			
+	public boolean sendData(I_DTO data) {
+	if(!(c==null)) {
+		
+	
 		try {
 			
 			out = new PrintWriter(s.getOutputStream(), true);
@@ -46,10 +48,12 @@ public class DAO implements I_DAO {
 		
 		
 		out.println(data.toString());
+		return true;
 		
 	}
 	
-	
+	return false;
+	}
 	
 	
 	

@@ -25,8 +25,8 @@ public class ImageProssesing implements I_ImageProssesing {
 	Scalar minValuesf = new Scalar(15, 130, 240);
 	Scalar maxValuesf = new Scalar(35, 170, 255);
 
-	Scalar minValuesb = new Scalar(90, 220, 200);
-	Scalar maxValuesb = new Scalar(110, 255, 255);
+	Scalar minValuesb = new Scalar(95, 200, 194);
+	Scalar maxValuesb = new Scalar(115, 220, 214);
 
 	public ImageProssesing() {
 		// TODO Auto-generated constructor stub

@@ -88,6 +88,7 @@ public class RouteFinder implements I_RouteFinder{
 	    @Override
 		public Node[] findRoute(Node[] nodes, double angle/*maybe its own poisition, if not first in array*/) {
 	    	Node robot = nodes[0];
+	    	Node next;
 	double currentMin =361;
 	    	 double[] angles = new double[nodes.length-1];
 	    	 ArrayList<Double> degs = new ArrayList<Double>();
@@ -108,6 +109,7 @@ public class RouteFinder implements I_RouteFinder{
 	    		if(degs.indexOf(0)-degs.indexOf(i)>-20 && degs.indexOf(0)-degs.indexOf(i)<20) {
 	    		if(robot.measureDist(nodes[i])<smallest) {
 	    			smallest = robot.measureDist(nodes[i]);
+	    			next =nodes[i];
 	    		}
 	    		
 	    			

@@ -5,17 +5,21 @@ import java.util.List;
 
 public class BallList {
 	private static BallList ballList;
-	private List<Ball> list ;
+	private List<Ball> list  ;
 	
 	
 	private BallList() {
-		list = new ArrayList();
+		list = new ArrayList<Ball>();
 	}
 	
 	public static BallList getInstance() {
 		
 		if(ballList == null) {
-			return new BallList();
+		
+		 ballList = new BallList();
+		
+		return ballList;
+		
 		}
 		
 		return ballList;
@@ -23,7 +27,9 @@ public class BallList {
 	}
 	
 public List getBallList() {
+	
 	return list;
+	
 }
 public void add(Ball ball) {
 	

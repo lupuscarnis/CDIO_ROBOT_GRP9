@@ -6,6 +6,7 @@ import java.util.Scanner;
 import org.opencv.core.Core;
 
 import behavior.I_RouteFinder;
+import behavior.RobotController;
 import behavior.RouteFinder;
 import connection.ConsoleOutput;
 import dao.DAO;
@@ -65,14 +66,19 @@ public class Main extends Application {
 	public static void main(String[] args)
 	{
 	
-//		
+		BallList.getInstance();
+		Robot.getInstance();
 		nu.pattern.OpenCV.loadShared();
+		
+		
+		/*
 		Thread console = new Thread( new ConsoleOutput());
 		
 		console.start();
+		*/
 		launch(args);
-		I_RouteFinder s = new RouteFinder();
-		s.getABall(BallList.getInstance().getIndex(0), Robot.getInstance());
+	
+		
 		
 		/*try {
 			console.join();
