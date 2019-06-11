@@ -22,17 +22,19 @@ import tools.Size_scale;
 public class ImageProssesing implements I_ImageProssesing {
 	// the FXML area for showing the mask
 	Mat output;
-	Scalar minValuesf = new Scalar(30, 55, 140);
-	Scalar maxValuesf = new Scalar(50, 77, 180);
+	Scalar minValuesf = new Scalar(15, 130, 240);
+	Scalar maxValuesf = new Scalar(35, 170, 255);
 
-	Scalar minValuesb = new Scalar(10,180 ,210 );
-	Scalar maxValuesb = new Scalar(30, 210, 250);
+	Scalar minValuesb = new Scalar(90, 220, 200);
+	Scalar maxValuesb = new Scalar(110, 255, 255);
 
 	public ImageProssesing() {
 		// TODO Auto-generated constructor stub
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see application.I_ImageProssesing#findBackAndFront(org.opencv.core.Mat)
 	 */
 	@Override
@@ -41,25 +43,28 @@ public class ImageProssesing implements I_ImageProssesing {
 		Point back = findColor(frame, minValuesb, maxValuesb);
 		Point front = findColor(frame, minValuesf, maxValuesf);
 
-		
 		Robot s = Robot.getInstance();
 		s.setBackX(back.x);
 		s.setBackY(back.y);
 		s.setFrontX(front.x);
 		s.setFrontY(front.y);
-		
-		findCorners(frame, front, 160);
+
+	//	findCorners(frame, front, 160);
 		Imgproc.line(frame, back, front, new Scalar(350, 255, 255));
 		/*
-		System.out.println("Distance: "+ Math.sqrt(Math.pow(s.getBackX() - s.getFrontX(), 2) + Math.pow(s.getBackY() - s.getFrontY(), 2)));
-		System.out.println("Distance in cm: "+ (Math.sqrt(Math.pow(s.getBackX() - s.getFrontX(), 2) + Math.pow(s.getBackY() - s.getFrontY(), 2)))/s.getPixelToCM());
-		*/
-		
+		 * System.out.println("Distance: " + Math.sqrt(Math.pow(s.getBackX() -
+		 * s.getFrontX(), 2) + Math.pow(s.getBackY() - s.getFrontY(), 2)));
+		 * System.out.println("Distance in cm: " + (Math.sqrt(Math.pow(s.getBackX() -
+		 * s.getFrontX(), 2) + Math.pow(s.getBackY() - s.getFrontY(), 2))) /
+		 * s.getPixelToCM());
+		 */
 		return frame;
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see application.I_ImageProssesing#getOutput()
 	 */
 	@Override
@@ -67,7 +72,9 @@ public class ImageProssesing implements I_ImageProssesing {
 		return output;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see application.I_ImageProssesing#setOutput(org.opencv.core.Mat)
 	 */
 	@Override
@@ -75,12 +82,16 @@ public class ImageProssesing implements I_ImageProssesing {
 		this.output = output;
 	}
 
-	/* (non-Javadoc)
-	 * @see application.I_ImageProssesing#findCorners(org.opencv.core.Mat, org.opencv.core.Point, int)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see application.I_ImageProssesing#findCorners(org.opencv.core.Mat,
+	 * org.opencv.core.Point, int)
 	 */
 	@Override
 	public void findCorners(Mat frame, org.opencv.core.Point center, int threshold) {
 
+		double tresh = 4;
 		Mat srcGray = new Mat();
 		Mat dst = new Mat();
 		Mat dstNorm = new Mat();
@@ -92,69 +103,67 @@ public class ImageProssesing implements I_ImageProssesing {
 
 		dst = Mat.zeros(srcGray.size(), CvType.CV_32F);
 		int blockSize = 2;
-		int iter =0;
+		int iter = 0;
 		int apertureSize = 3;
 		double k = 0.04;
 		Imgproc.cvtColor(frame, srcGray, Imgproc.COLOR_BGR2GRAY);
 		Imgproc.cornerHarris(srcGray, dst, blockSize, apertureSize, k);
 		Core.normalize(dst, dstNorm, 0, 255, Core.NORM_MINMAX);
 		Core.convertScaleAbs(dstNorm, dstNormScaled);
-
+		lengths.clear();
 		float[] dstNormData = new float[(int) (dstNorm.total() * dstNorm.channels())];
 		dstNorm.get(0, 0, dstNormData);
 		for (int i = 0; i < dstNorm.rows(); i++) {
 			for (int j = 0; j < dstNorm.cols(); j++) {
 				if ((int) dstNormData[i * dstNorm.cols() + j] > threshold) {
 					cornors.add(new Point(j, i));
-					Imgproc.circle(dstNormScaled, new Point(j, i), 3, new Scalar(255, 255, 255));
+					Imgproc.circle(dstNormScaled, new Point(j, i), 2, new Scalar(255, 255, 255));
 					iter++;
 				}
 			}
 		}
-		System.out.println("Iteration: " + iter+ "cornors: "+cornors.size());
-		
-		
-		lengths = convertPointsToVectorsDistancesFromCenter(cornors, center);
-		
-		for(Double b : lengths.keySet()) {
-			values.add(b);
-		
-	}
-		 Collections.sort(values);
-		cornors.clear();
-	
-		
-		System.out.println("Short1: "+ values.get(0));
-		System.out.println("Short2: "+ values.get(1));
-		System.out.println("Short3: "+ values.get(2));
-		System.out.println("Short4: "+ values.get(3));
-		
-		cornors.add(lengths.get(values.get(0)));
-		cornors.add(lengths.get(values.get(1)));
-		cornors.add(lengths.get(values.get(2)));
-		cornors.add(lengths.get(values.get(3)));
-		I_Size_Scale ss = new Size_scale();
-		ss.pixelToCm(cornors);	
-		for(Point p: cornors)
-			Imgproc.line(dstNormScaled, p, center, new Scalar(350, 255, 255));
-		
-		output = dstNormScaled;
+		System.out.println("Itrations" + iter);
+		if (cornors.size() > 4) {
+
+			lengths = convertPointsToVectorsDistancesFromCenter(cornors, center);
+
+			for (Double b : lengths.keySet()) {
+				values.add(b);
+
+			}
+			Collections.sort(values);
+			cornors.clear();
+
+			cornors.add(lengths.get(values.get(0)));
+			cornors.add(lengths.get(values.get(1)));
+			cornors.add(lengths.get(values.get(2)));
+			cornors.add(lengths.get(values.get(3)));
+			I_Size_Scale ss = new Size_scale();
+
+			ss.pixelToCm(cornors);
+			for (Point p : cornors)
+				Imgproc.line(dstNormScaled, p, center, new Scalar(350, 255, 255));
 		}
+		output = dstNormScaled;
+	}
 
-
-	/* (non-Javadoc)
-	 * @see application.I_ImageProssesing#findColor(org.opencv.core.Mat, org.opencv.core.Scalar, org.opencv.core.Scalar)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see application.I_ImageProssesing#findColor(org.opencv.core.Mat,
+	 * org.opencv.core.Scalar, org.opencv.core.Scalar)
 	 */
 	@Override
 	public Point findColor(Mat frame, Scalar minValues, Scalar maxValues) {
+
 		Mat hsvImage = new Mat();
 		Mat output = new Mat();
 		Mat filtered = new Mat();
 
-		Imgproc.GaussianBlur(frame, filtered, new Size(45, 45), 0);
-		Imgproc.cvtColor(filtered, hsvImage, Imgproc.COLOR_BGR2HSV);
+		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 
 		Core.inRange(hsvImage, minValues, maxValues, output);
+
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
@@ -185,8 +194,12 @@ public class ImageProssesing implements I_ImageProssesing {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see application.I_ImageProssesing#convertPointsToVectorsDistancesFromCenter(java.util.List, org.opencv.core.Point)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * application.I_ImageProssesing#convertPointsToVectorsDistancesFromCenter(java.
+	 * util.List, org.opencv.core.Point)
 	 */
 	@Override
 	public HashMap<Double, Point> convertPointsToVectorsDistancesFromCenter(List<Point> pointList, Point center) {
@@ -201,6 +214,5 @@ public class ImageProssesing implements I_ImageProssesing {
 
 		return lengths;
 	}
-	
 
 }

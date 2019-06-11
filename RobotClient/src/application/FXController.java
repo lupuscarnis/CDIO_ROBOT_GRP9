@@ -121,7 +121,7 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 2;
+	private int webcamID = 1;
 
 	// Switch between debug/production mode
 	private boolean isDebug = false;
@@ -162,11 +162,13 @@ public class FXController {
 					public void run() {
 
 						Mat frame = new Mat();
+						 
 
 						frame = grabFrame();
-
+					
+						ip.findBackAndFront(frame);
 						// Find the rectangle of the playing field and crop the image
-						frame = findAndDrawRect(frame);
+						//frame = findAndDrawRect(frame);
 
 						if (UseHSVImgDetection) {
 							frame = grabFrameHSV(frame);
@@ -179,11 +181,10 @@ public class FXController {
 						if (!isDebug) {
 
 							// Find robot vector
+							 
+							updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
 
-							// frame = ip.findBackAndFront(frame);
-
-							// updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
-
+							
 
 						}
 
@@ -268,7 +269,7 @@ public class FXController {
 		// threshold HSV image to select tennis balls
 		Core.inRange(hsvImage, minValues, maxValues, mask);
 		// show the partial output
-		this.updateImageView(this.maskImage, Utils.mat2Image(mask));
+		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
 
 		// STEP 2: convert to grayscale
 		// Imgproc.cvtColor(mask, grayImage, Imgproc.COLOR_BGR2GRAY);
