@@ -179,9 +179,11 @@ public class FXController {
 						if (!isDebug) {
 
 							// Find robot vector
+
 							// frame = ip.findBackAndFront(frame);
 
 							// updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
+
 
 						}
 
