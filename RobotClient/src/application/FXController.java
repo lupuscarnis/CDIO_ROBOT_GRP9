@@ -176,9 +176,9 @@ public class FXController {
 							System.out.println("test123");
 
 							// Find robot vector
-							frame = ip.findBackAndFront(frame);
+							//frame = ip.findBackAndFront(frame);
 
-							updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
+							//updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
 
 						}
 
