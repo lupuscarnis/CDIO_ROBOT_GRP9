@@ -32,7 +32,7 @@ public class Main extends Application {
 		try
 		{
 			// load the FXML resource
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("SampleJFX.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("RobotJFX.fxml"));
 			// store the root element so that the controllers can use it
 			BorderPane root = (BorderPane) loader.load();
 			// set a whitesmoke background
