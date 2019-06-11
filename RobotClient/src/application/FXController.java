@@ -129,7 +129,7 @@ public class FXController {
 	// Debug image file
 	private String debugImg = "Debugging/pic01.jpg";
 
-	// Debug image file
+	// Empty image file
 	private String noImg = "Debugging/Default.jpg";
 
 	/**
@@ -263,19 +263,9 @@ public class FXController {
 			Mat mask = new Mat();
 			Mat morphOutput = new Mat();
 
-			// remove some noise
-			// Imgproc.blur(frame, blurredImage, new Size(7, 7));
-
 			// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
 			Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
 
-			/*
-			 * Experimental grayscale -->
-			 * http://answers.opencv.org/question/34970/detection-of-table-tennis-balls-and-
-			 * color-correction/ When using grayscale only the hue min/max slider have an
-			 * effect on the detection.
-			 */
-			// Imgproc.cvtColor(blurredImage, grayImage, Imgproc.COLOR_BGR2GRAY);
 
 			// convert the frame to HSV
 			Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
@@ -312,7 +302,7 @@ public class FXController {
 
 			// show the partial output
 			this.updateImageView(this.morphImage, Utils.mat2Image(morphOutput));
-			// frame = findBackAndFront(frame);
+			
 			// find the tennis ball(s) contours and show them
 			frame = this.findAndDrawBalls(morphOutput, frame);
 
@@ -354,17 +344,6 @@ public class FXController {
 
 			Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
 
-			/*
-			 * grayImage: Input image (grayscale). circles: A vector that stores sets of 3
-			 * values: xc,yc,r for each detected circle. HOUGH_GRADIENT: Define the
-			 * detection method. Currently this is the only one available in OpenCV. dp = 1:
-			 * The inverse ratio of resolution. min_dist = gray.rows/16: Minimum distance
-			 * between detected centers. param_1 = 200: Upper threshold for the internal
-			 * Canny edge detector. param_2 = 100*: Threshold for center detection.
-			 * min_radius = 0: Minimum radius to be detected. If unknown, put zero as
-			 * default. max_radius = 0: Maximum radius to be detected. If unknown, put zero
-			 * as default.
-			 */
 			Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double) grayImage.rows() / min_dist,
 					uThresh, cTresh, minRad, maxRad);
 
@@ -403,13 +382,6 @@ public class FXController {
 
 	private Mat findAndDrawRect(Mat frame) {
 
-		// show the current selected HSV range
-		// String valuesToPrint = "C_Max Value: " + C_MaxValue;
-
-		// Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
-
-		// STEP 1: Resize input image to img_proc to reduce computation
-
 		/*
 		 * double ratio = 600 / Math.max(frame.width(), frame.height()); Size
 		 * downscaledSize = new Size(frame.width() * ratio, frame.height() * ratio); Mat
@@ -417,9 +389,6 @@ public class FXController {
 		 * downscaledSize);
 		 */
 		Mat debugImg = Imgcodecs.imread(noImg);
-
-		Mat output = new Mat();
-		Mat grayImage = new Mat();
 		Mat detectedEdges = new Mat();
 		Mat edges = new Mat();
 		Mat blurredImage = new Mat();
@@ -428,14 +397,6 @@ public class FXController {
 
 		// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
 		Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
-
-		/*
-		 * Experimental grayscale -->
-		 * http://answers.opencv.org/question/34970/detection-of-table-tennis-balls-and-
-		 * color-correction/ When using grayscale only the hue min/max slider have an
-		 * effect on the detection.
-		 */
-		// Imgproc.cvtColor(blurredImage, grayImage, Imgproc.COLOR_BGR2GRAY);
 
 		// convert the frame to HSV
 		Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
@@ -459,20 +420,15 @@ public class FXController {
 		// show the partial output
 		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
 
-		// STEP 2: convert to grayscale
-		// Imgproc.cvtColor(mask, grayImage, Imgproc.COLOR_BGR2GRAY);
-		// STEP 3: try to filter text inside document
+		// try to filter everything inside the rectangle
 		Imgproc.medianBlur(mask, detectedEdges, 9);
-		// STEP 4: Edge detection
-		// Imgproc.erode(edges, edges, new Mat());
-		// Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
+		
+		// Imgproc.erode(detectedEdges, detectedEdges, new Mat());
+
 		// canny detector, with ratio of lower:upper threshold of 3:1
 		Imgproc.Canny(detectedEdges, edges, this.C_Low.getValue(), this.C_Max.getValue(), 3, true);
 		// STEP 5: makes the object in white bigger to join nearby lines
 		Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
-		// Image imageToShow = Utils.mat2Image(edges);
-		// updateImageView(cannyFrame, imageToShow);
-		// STEP 6: Compute the contours
 
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -502,7 +458,7 @@ public class FXController {
 				MatOfInt hullInt = new MatOfInt();
 				Imgproc.convexHull(largestContour, hullInt);
 				MatOfPoint hullPoint = OpenCVUtil.getNewContourFromIndices(largestContour, hullInt);
-				// STEP 9: Use approxPolyDP to simplify the convex hull (this should give a
+				// Use approxPolyDP to simplify the convex hull (this should give a
 				// quadrilateral)
 				MatOfPoint2f polygon = new MatOfPoint2f();
 				Imgproc.approxPolyDP(OpenCVUtil.convert(hullPoint), polygon, 20, true);
@@ -511,8 +467,7 @@ public class FXController {
 				// restoreScaleMatOfPoint(tmp, 0.9);
 
 				Imgproc.drawContours(convexHullMask, tmp, 0, new Scalar(25, 25, 255), 2);
-				// Image extractImageToShow = Utils.mat2Image(convexHullMask);
-				// updateImageView(extractFrame, extractImageToShow);
+
 				MatOfPoint2f finalCorners = new MatOfPoint2f();
 				MatOfPoint2f maxCurve = new MatOfPoint2f();
 				Point[] tmpPoints = polygon.toArray();
@@ -527,10 +482,9 @@ public class FXController {
 
 					maxCurve = polygon;
 
-					// System.out.println("1111111111111111");
 					Mat result = Mat.zeros(size, frame.type());
-					// STEP 10: Homography: Use findHomography to find the affine transformation
-					// tthe rectangle
+					// Homography: Use findHomography to find the affine transformation
+					// of the rectangle
 					Mat homography = new Mat();
 					MatOfPoint2f dstPoints = new MatOfPoint2f();
 					Point[] arrDstPoints = { new Point(result.cols(), result.rows()), new Point(0, result.rows()),
@@ -538,6 +492,8 @@ public class FXController {
 					dstPoints.fromArray(arrDstPoints);
 					homography = Calib3d.findHomography(maxCurve, dstPoints);
 
+					// Draws circles around the corners of the found rectangle
+					
 					/*
 					 * double temp_double[] = dstPoints.get(0, 0); Point p1 = new
 					 * Point(temp_double[0], temp_double[1]); Imgproc.circle(frame, new Point(p1.x,
@@ -556,30 +512,11 @@ public class FXController {
 					 * Scalar(0, 255, 255), 5); //p1 is colored violet
 					 */
 
-					// STEP 11: Warp the input image using the computed homography matrix
+					// Warp the input image using the computed homography matrix
 					Imgproc.warpPerspective(frame, result, homography, size);
 
-					/*
-					 * Imgproc.warpPerspective(frame, result, homography, new Size(850, 620));
-					 * 
-					 * // MatOfPoint2f imageOutline = getOutline(result); // Mat transformation =
-					 * Imgproc.getPerspectiveTransform(finalCorners, // imageOutline); //
-					 * Imgproc.warpPerspective(frame, result, transformation, size); // get the
-					 * thresholded image Mat resultGray = new Mat(); Imgproc.cvtColor(result,
-					 * resultGray, Imgproc.COLOR_BGR2GRAY);
-					 * 
-					 * // Imgproc.medianBlur(resultGray, resultGray, 3); //
-					 * Imgproc.adaptiveThreshold(resultGray, resultGray, 255, //
-					 * Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, (int) //
-					 * adaptiveThreshold.getValue(), 4);
-					 */
-
-					/*
-					 * Mat dst = new Mat(); //Scaling the Image Imgproc.resize(result, dst, new
-					 * Size(frame.rows()/3, frame.rows()/3), 0, 0, Imgproc.INTER_AREA);
-					 */
-
 					frame = result;
+					
 				} else {
 
 					frame = debugImg;
