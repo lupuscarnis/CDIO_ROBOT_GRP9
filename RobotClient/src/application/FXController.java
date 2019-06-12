@@ -126,7 +126,7 @@ public class FXController {
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
-	//I_DAO  dao = new DAO();
+	// I_DAO dao = new DAO();
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
 
@@ -200,8 +200,11 @@ public class FXController {
 
 						}
 
-						// convert and show the frame
-						Image imageToShow = Utils.mat2Image(frame);
+						// convert, resize and show the frame
+						Mat resizeimage = new Mat();
+						Size scaleSize = new Size(600, 320);
+						Imgproc.resize(frame, resizeimage, scaleSize, 0, 0, Imgproc.INTER_AREA);
+						Image imageToShow = Utils.mat2Image(resizeimage);
 						updateImageView(videoFrame, imageToShow);
 					}
 				};
@@ -236,7 +239,7 @@ public class FXController {
 
 			this.robotActive = true;
 			rc.start();
-			//update the button content
+			// update the button content
 			this.robotButton.setText("Stop Camera");
 			System.out.println("Robot starting...");
 
@@ -601,9 +604,11 @@ public class FXController {
 	 * Given a binary image containing one or more closed surfaces, use it as a mask
 	 * to find and highlight the objects contours
 	 * 
-	 * @param maskedImage the binary image to be used as a mask
-	 * @param frame       the original {@link Mat} image to be used for drawing the
-	 *                    objects contours
+	 * @param maskedImage
+	 *            the binary image to be used as a mask
+	 * @param frame
+	 *            the original {@link Mat} image to be used for drawing the objects
+	 *            contours
 	 * @return the {@link Mat} image with the objects contours framed
 	 */
 	private Mat findAndDrawBalls(Mat maskedImage, Mat frame) {
@@ -673,8 +678,10 @@ public class FXController {
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image     the {@link ImageView} to use
-	 * @param dimension the width of the image to set
+	 * @param image
+	 *            the {@link ImageView} to use
+	 * @param dimension
+	 *            the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -707,8 +714,10 @@ public class FXController {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view  the {@link ImageView} to update
-	 * @param image the {@link Image} to show
+	 * @param view
+	 *            the {@link ImageView} to update
+	 * @param image
+	 *            the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
