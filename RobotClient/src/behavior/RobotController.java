@@ -62,7 +62,8 @@ public class RobotController {
 	}
 	
 	public void start() {
-		System.out.println("i have started");
+		
+		
 		getView();
 		
 		while(goals<10) {
@@ -86,6 +87,8 @@ public class RobotController {
 		//check if can find balls
 		
 		//make sound signalling win and stop measuring time
+		
+		
 	}
 	
 	public void getBall(ArrayList<Coordinate> currentPath) {
@@ -105,14 +108,19 @@ public class RobotController {
 		//dir = Math.toDegrees()
 		//System.out.println("got measurement");
 		double distance = measureDist(cs.robot.get(0), nextBall);
+		//pixels get converted to cm
+		distance = distance*3.1;
 		
 		System.out.println("vi sender "+dir+"distance"+distance);
 		
 		I_DTO dtoo = new DTO();
+		
+		
 		dtoo.setRotation((float) dir);
 		dtoo.setDistance((float) distance);
 		dtoo.setClawMove(180);
 		System.out.println(dtoo.toString());
+		
 		I_DAO data = new DAO();  
 		while(data.sendData(dtoo)) {
 			
@@ -177,6 +185,7 @@ public class RobotController {
 		double X = a.getX()-b.getX();
 		double Y = a.getY()-b.getY();
 		return Math.sqrt(X*X+Y*Y);
+		
 		
 	}
 	//gang pixel med 3,1 for at faa cm

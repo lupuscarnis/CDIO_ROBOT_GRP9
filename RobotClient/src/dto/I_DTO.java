@@ -1,6 +1,10 @@
 package dto;
 
 public interface I_DTO {
+	
+	void setBackClawMove(float clawMove);
+
+	float getBackClawMove();
 
 	boolean isBallpickup();
 

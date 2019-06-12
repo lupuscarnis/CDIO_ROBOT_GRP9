@@ -25,11 +25,11 @@
    <top>
       <HBox BorderPane.alignment="CENTER">
          <children>
-            <VBox prefHeight="200.0" prefWidth="100.0">
+            <VBox>
                <children>
-                  <HBox prefHeight="100.0" prefWidth="200.0">
+                  <HBox>
                      <children>
-                        <VBox prefHeight="200.0" prefWidth="100.0">
+                        <VBox>
                            <children>
                   				<ImageView fx:id="videoFrame" fitHeight="320.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -38,9 +38,9 @@
                               </ImageView>
                            </children>
                         </VBox>
-                        <VBox prefHeight="200.0" prefWidth="100.0">
+                        <VBox>
                            <children>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
+                              <HBox>
                                  <children>
                         						<ImageView fx:id="morphImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
@@ -60,7 +60,7 @@
                                     <Insets bottom="15.0" />
                                  </VBox.margin>
                               </HBox>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
+                              <HBox>
                                  <children>
                                     <ImageView fx:id="cornerImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
@@ -87,7 +87,7 @@
                         <Insets left="15.0" right="15.0" top="15.0" />
                      </VBox.margin>
                   </HBox>
-                  <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0">
+                  <HBox alignment="CENTER" prefHeight="50.0">
                      <children>
             				<Button fx:id="cameraButton" alignment="center" contentDisplay="CENTER" onAction="#startCamera" text="Start camera" />
                         <Button fx:id="robotButton" mnemonicParsing="false" onAction="#startRobot" text="Start robot">

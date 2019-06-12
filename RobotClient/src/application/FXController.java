@@ -150,10 +150,10 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Switch between debug/production mode
-	private boolean isDebug = false;
+	private boolean isDebug = true;
 
 	// Debug image file
 	private String debugImg1 = "Debugging/pic01.jpg";
@@ -207,6 +207,7 @@ public class FXController {
 						} else {
 							frame = grabFrameHough(frame);
 						}
+
 						if (!isDebug) {
 
 							// Find robot vector
@@ -227,7 +228,10 @@ public class FXController {
 						updateImageView(robotImage, Utils.mat2Image(frame));
 */
 						// convert and show the frame
-						Image imageToShow = Utils.mat2Image(frame);
+						Mat resizeimage = new Mat();
+						Size scaleSize = new Size(600, 320);
+						Imgproc.resize(frame, resizeimage, scaleSize, 0, 0, Imgproc.INTER_AREA);
+						Image imageToShow = Utils.mat2Image(resizeimage);
 						updateImageView(videoFrame, imageToShow);
 					}
 				};
@@ -263,14 +267,14 @@ public class FXController {
 			this.robotActive = true;
 			//rc.start();
 			// update the button content
-			this.robotButton.setText("Stop Robot");
+			this.robotButton.setText("Stop Camera");
 			System.out.println("Robot starting...");
 
 		} else {
 
 			this.robotActive = false;
 			// update the button content
-			this.robotButton.setText("Start Robot");
+			this.robotButton.setText("Start Camera");
 
 		}
 

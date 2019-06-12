@@ -8,6 +8,7 @@ public class DTO implements I_DTO {
 	private float distance;
 	private float rotation;
 	private float clawMove;
+	private float backClawMove;
 	private boolean ballpickup;
 	
 	
@@ -35,10 +36,17 @@ public class DTO implements I_DTO {
 		distance = 0;
 		rotation = 0;
 		clawMove = 0;
+		backClawMove =0; 
 		ballpickup = false;
 	}
-
-
+	
+	public float getBackClawMove() {
+		return backClawMove;
+	}
+	
+	public void setBackClawMove(float clawMove) {
+		this.backClawMove =clawMove;
+	}
 
 	/* (non-Javadoc)
 	 * @see dto.I_DTO#getDistance()
@@ -104,9 +112,9 @@ public class DTO implements I_DTO {
 		String s;
 		
 		if(ballpickup == true) {
-			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},"+"clawMove:{"+clawMove+"},BallPickUp:{true}"; 
+			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},"+"backClawMove:{"+backClawMove+"},"+"clawMove:{"+clawMove+"},BallPickUp:{true}"; 
 		}else {
-			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},"+"clawMove:{"+clawMove+"},BallPickUp:{false}";
+			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},"+"backClawMove:{"+backClawMove+"},"+"clawMove:{"+clawMove+"},BallPickUp:{false}";
 		}
 		
 		
