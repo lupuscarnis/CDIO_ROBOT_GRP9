@@ -66,6 +66,13 @@ public class FXController {
 	// the FXML area for showing the output of the morphological operations
 	@FXML
 	private ImageView morphImage;
+
+	@FXML
+	private ImageView cornerImage;
+
+	@FXML
+	private ImageView robotImage;
+
 	// FXML slider for setting HSV ranges
 	@FXML
 	private Slider hueStart;
@@ -79,6 +86,15 @@ public class FXController {
 	private Slider valueStart;
 	@FXML
 	private Slider valueStop;
+	@FXML
+	private Slider H_CORNER;
+	@FXML
+	private Slider S_CORNER;
+	@FXML
+	private Slider V_CORNER;
+	@FXML
+	private Slider TRESHOLD;
+
 	// FXML label to show the current values set with the sliders
 	@FXML
 	private Label hsvCurrentValues;
@@ -126,7 +142,7 @@ public class FXController {
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
-	//I_DAO  dao = new DAO();
+	// I_DAO dao = new DAO();
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
 
@@ -160,7 +176,9 @@ public class FXController {
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
 		this.imageViewProperties(this.maskImage, 200);
+		this.imageViewProperties(this.cornerImage, 200);
 		this.imageViewProperties(this.morphImage, 200);
+		this.imageViewProperties(this.robotImage, 200);
 
 		if (!this.cameraActive) {
 			// start the video capture
@@ -176,19 +194,14 @@ public class FXController {
 
 					@Override
 					public void run() {
-						Mat cleanFrame = new Mat();	
+						Mat cleanFrame = new Mat();
 						Mat frame = new Mat();
 
 						frame = grabFrame();
-					
-						cleanFrame	= frame.clone();
-						
-						
-	
-						
+
 						// Find the rectangle of the playing field and crop the image
-						//frame = findAndDrawRect(frame);
-					
+						// frame = findAndDrawRect(frame);
+
 						if (UseHSVImgDetection) {
 							frame = grabFrameHSV(frame);
 						} else {
@@ -196,21 +209,23 @@ public class FXController {
 						}
 						if (!isDebug) {
 
-						// Find robot vector
-							updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
+							// Find robot vector
 
 						}
 						// finds the pixels to cm Ratio
-						Scalar minValuesb = new Scalar(20, 80, 240);
-						Scalar maxValuesb = new Scalar(30, 120, 255);
-
-						Point p = ip.findColor(frame, minValuesb, maxValuesb);
-						ip.findCorners(frame, p, 140);
-						
-						
+						Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10),
+								((S_CORNER.getValue() / 100) * 255 - 10), ((V_CORNER.getValue() / 100) * 255 - 10));
+						Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10),
+								((S_CORNER.getValue() / 100) * 255 + 10), ((V_CORNER.getValue() / 100) * 255 + 10));
+/*					
+						  Point p = ip.findColor(frame, minValuesc, maxValuesc);
+						  ip.findCorners(frame, p, (int)TRESHOLD.getValue());
+						  updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+						 
 						// finds the front and back of the robot
-						ip.findBackAndFront(frame);
-					
+						//ip.findBackAndFront(frame)
+						updateImageView(robotImage, Utils.mat2Image(frame));
+*/
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
 						updateImageView(videoFrame, imageToShow);
@@ -246,7 +261,7 @@ public class FXController {
 		if (!this.robotActive) {
 
 			this.robotActive = true;
-			rc.start();
+			//rc.start();
 			// update the button content
 			this.robotButton.setText("Stop Robot");
 			System.out.println("Robot starting...");
@@ -612,9 +627,11 @@ public class FXController {
 	 * Given a binary image containing one or more closed surfaces, use it as a mask
 	 * to find and highlight the objects contours
 	 * 
-	 * @param maskedImage the binary image to be used as a mask
-	 * @param frame       the original {@link Mat} image to be used for drawing the
-	 *                    objects contours
+	 * @param maskedImage
+	 *            the binary image to be used as a mask
+	 * @param frame
+	 *            the original {@link Mat} image to be used for drawing the objects
+	 *            contours
 	 * @return the {@link Mat} image with the objects contours framed
 	 */
 	private Mat findAndDrawBalls(Mat maskedImage, Mat frame) {
@@ -684,8 +701,10 @@ public class FXController {
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image     the {@link ImageView} to use
-	 * @param dimension the width of the image to set
+	 * @param image
+	 *            the {@link ImageView} to use
+	 * @param dimension
+	 *            the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -718,8 +737,10 @@ public class FXController {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view  the {@link ImageView} to update
-	 * @param image the {@link Image} to show
+	 * @param view
+	 *            the {@link ImageView} to update
+	 * @param image
+	 *            the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);

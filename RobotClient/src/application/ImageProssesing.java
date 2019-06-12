@@ -15,18 +15,32 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import javafx.fxml.FXML;
+import javafx.scene.control.Slider;
 import objects.Robot;
 import tools.I_Size_Scale;
 import tools.Size_scale;
 
+
+
 public class ImageProssesing implements I_ImageProssesing {
+
+	@FXML
+	private Slider H_FRONT;	
+	@FXML
+	private Slider S_FRONT;
+	@FXML
+	private Slider V_FRONT;
+	@FXML
+	private Slider H_BACK;
+	@FXML
+	private Slider S_BACK;
+	@FXML
+	private Slider V_BACK;
+
+
 	// the FXML area for showing the mask
 	Mat output;
-	Scalar minValuesf = new Scalar(80, 230, 190);
-	Scalar maxValuesf = new Scalar(120, 255, 210);
-
-	Scalar minValuesb = new Scalar(20, 80, 230);
-	Scalar maxValuesb = new Scalar(30, 120, 240);
 
 	public ImageProssesing() {
 		// TODO Auto-generated constructor stub
@@ -39,8 +53,15 @@ public class ImageProssesing implements I_ImageProssesing {
 	 */
 	@Override
 	public Mat findBackAndFront(Mat frame) {
+		Scalar minValuesf = new Scalar(((H_FRONT.getValue()/2)-15),((S_FRONT.getValue()/100)*255-10),((V_FRONT.getValue()/100)*255-10));
+		Scalar maxValuesf = new Scalar(((H_FRONT.getValue()/2)+15),((S_FRONT.getValue()/100)*255+10),((V_FRONT.getValue()/100)*255+10));
+		
+		Scalar minValuesb = new Scalar(((H_BACK.getValue()/2)-15),((S_BACK.getValue()/100)*255-10),((V_BACK.getValue()/100)*255-10));
+		Scalar maxValuesb = new Scalar(((H_BACK.getValue()/2)+15),((S_BACK.getValue()/100)*255+10),((V_BACK.getValue()/100)*255+10));
 
-		Point back = findColor(frame, minValuesb, maxValuesb);
+		
+		
+		Point back = findColor(frame,minValuesb ,maxValuesb);
 		Point front = findColor(frame, minValuesf, maxValuesf);
 
 		Robot s = Robot.getInstance();
