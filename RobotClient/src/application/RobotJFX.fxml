@@ -31,11 +31,15 @@
                      <children>
                         <VBox>
                            <children>
-                  				<ImageView fx:id="videoFrame" fitHeight="320.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../Debugging/Default.jpg" />
-                                 </image>
-                              </ImageView>
+                              <Pane prefHeight="320.0" prefWidth="600.0">
+                                 <children>
+                        				<ImageView fx:id="videoFrame" fitHeight="320.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../Debugging/Default.jpg" />
+                                       </image>
+                                    </ImageView>
+                                 </children>
+                              </Pane>
                            </children>
                         </VBox>
                         <VBox>

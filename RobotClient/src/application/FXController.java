@@ -140,12 +140,10 @@ public class FXController {
 	private boolean isDebug = true;
 
 	// Debug image file
-	private String debugImg1 = "Debugging/pic01.jpg";
-	private String debugImg2 = "Debugging/pic01.jpg";
-	private String debugImg3 = "Debugging/pic01.jpg";
+	private String debugImg = "Debugging/pic01.jpg";
 
 	// Empty image file
-	private String noImg = "Debugging/Default.jpg";
+	private String defaultImg = "Debugging/Default.jpg";
 
 	/**
 	 * The action triggered by pushing the button on the GUI
@@ -181,7 +179,7 @@ public class FXController {
 
 						frame = grabFrame();
 
-						ip.findBackAndFront(frame);
+						// ip.findBackAndFront(frame);
 
 						// Find the rectangle of the playing field and crop the image
 						frame = findAndDrawRect(frame);
@@ -199,13 +197,10 @@ public class FXController {
 							updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
 
 						}
-
-						// convert, resize and show the frame
-						Mat resizeimage = new Mat();
-						Size scaleSize = new Size(600, 320);
-						Imgproc.resize(frame, resizeimage, scaleSize, 0, 0, Imgproc.INTER_AREA);
-						Image imageToShow = Utils.mat2Image(resizeimage);
-						updateImageView(videoFrame, imageToShow);
+						
+						 Image imageToShow = Utils.mat2Image(frame); 
+						 updateImageView(videoFrame, imageToShow);
+						 
 					}
 				};
 
@@ -268,7 +263,7 @@ public class FXController {
 				if (isDebug == true) {
 
 					// read from from test image
-					frame = Imgcodecs.imread(debugImg1);
+					frame = Imgcodecs.imread(debugImg);
 
 				} else {
 
@@ -365,11 +360,6 @@ public class FXController {
 			// init
 
 			Mat grayImage = new Mat();
-
-			Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
-
-			Imgproc.medianBlur(grayImage, grayImage, 5);
-
 			Mat circles = new Mat();
 
 			int min_dist = new Integer((int) this.H_minDist.getValue());
@@ -377,6 +367,9 @@ public class FXController {
 			double cTresh = new Double(this.H_cTresh.getValue());
 			int minRad = new Integer((int) this.H_minRad.getValue());
 			int maxRad = new Integer((int) this.H_maxRad.getValue());
+
+			Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
+			Imgproc.medianBlur(grayImage, grayImage, 5);
 
 			// show the current selected HSV range
 			String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh + ", Center Threshold: "
@@ -427,9 +420,10 @@ public class FXController {
 		 * dst = new Mat(downscaledSize, frame.type()); Imgproc.resize(frame, dst,
 		 * downscaledSize);
 		 */
-		Mat debugImg1 = Imgcodecs.imread(noImg);
+		Mat noImg = Imgcodecs.imread(defaultImg);
 		Mat detectedEdges = new Mat();
 		Mat edges = new Mat();
+		Mat dilatedEdges = new Mat();
 		Mat blurredImage = new Mat();
 		Mat hsvImage = new Mat();
 		Mat mask = new Mat();
@@ -454,8 +448,10 @@ public class FXController {
 
 		Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
 
-		// threshold HSV image to select tennis balls
+		// In HSV space, the red color wraps around 180. So we need the H values to be
+		// both in [0,10] and [170, 180].
 		Core.inRange(hsvImage, minValues, maxValues, mask);
+
 		// show the partial output
 		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
 
@@ -467,10 +463,10 @@ public class FXController {
 		// canny detector, with ratio of lower:upper threshold of 3:1
 		Imgproc.Canny(detectedEdges, edges, this.C_Low.getValue(), this.C_Max.getValue(), 3, true);
 		// STEP 5: makes the object in white bigger to join nearby lines
-		Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
+		Imgproc.dilate(edges, dilatedEdges, new Mat(), new Point(-1, -1), 1); // 1
 
 		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(dilatedEdges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		// STEP 7: Sort the contours by length and only keep the largest one
 
 		if (contours.size() > 0) {
@@ -558,14 +554,14 @@ public class FXController {
 
 				} else {
 
-					frame = debugImg1;
+					frame = noImg;
 
 				}
 			}
 
 		} else {
 
-			frame = debugImg1;
+			frame = noImg;
 		}
 
 		return frame;
