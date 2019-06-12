@@ -27,6 +27,8 @@ import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
 import behavior.RobotController;
+import dao.DAO;
+import dao.I_DAO;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -43,6 +45,8 @@ import tools.OpenCVUtil;
 import tools.Utils;
 
 /**
+ * 
+ * 
  * https://github.com/opencv-java
  */
 
@@ -122,7 +126,7 @@ public class FXController {
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
-
+	//I_DAO  dao = new DAO();
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
 
@@ -199,7 +203,6 @@ public class FXController {
 						// convert and show the frame
 						Image imageToShow = Utils.mat2Image(frame);
 						updateImageView(videoFrame, imageToShow);
-
 					}
 				};
 

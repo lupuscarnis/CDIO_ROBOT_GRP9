@@ -118,7 +118,7 @@ public class RobotController {
 			
 			
 		}
-		
+		data.reciveData();
 		/*
 		I_DTO dtooo = new DTO();
 		dtooo.setDistance((float) 100);

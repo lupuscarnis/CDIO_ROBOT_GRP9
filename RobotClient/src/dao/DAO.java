@@ -34,7 +34,7 @@ public class DAO implements I_DAO {
 		try {
 			
 			out = new PrintWriter(s.getOutputStream(), true);
-			
+		
 		} catch (IOException e) {
 			System.out.println("Failed getting output stream");
 			e.printStackTrace();
@@ -56,7 +56,28 @@ public class DAO implements I_DAO {
 	}
 	
 	
+	public void reciveData() {
+	String str = "";
+			
 	
-
+	
+		try {
+			System.out.println(	in.readLine());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	}
+	
+	
 }
 

@@ -20,7 +20,7 @@ public class ConsoleOutput implements Runnable{
 		I_DAO dao = new DAO();
 		I_DTO sheet = new DTO();
 	
-		while(!input.equals("exit")) {
+		while(!input.equals("peace")) {
 				
 			System.out.println("Input format: Distance:Rotation:Arm_Rotation");
 			Scanner std = new Scanner(System.in);
@@ -32,7 +32,7 @@ public class ConsoleOutput implements Runnable{
 			sheet.setClawMove(Float.parseFloat(splitString.get(2)));
 			sheet.setBallpickup(false);
 			dao.sendData(sheet);
-			
+			dao.reciveData();
 			}
 	
 	}
