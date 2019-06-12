@@ -22,7 +22,7 @@ public class ConsoleOutput implements Runnable{
 	
 		while(!input.equals("peace")) {
 				
-			System.out.println("Input format: Distance:Rotation:Arm_Rotation");
+			System.out.println("Input format: Distance:Rotation:Arm_Rotation:BackClawMove");
 			Scanner std = new Scanner(System.in);
 			input = std.nextLine();
 			
@@ -30,6 +30,7 @@ public class ConsoleOutput implements Runnable{
 			sheet.setDistance(Float.parseFloat(splitString.get(0)));
 			sheet.setRotation(Float.parseFloat(splitString.get(1)));
 			sheet.setClawMove(Float.parseFloat(splitString.get(2)));
+			sheet.setBackClawMove(Float.parseFloat(splitString.get(3)));
 			sheet.setBallpickup(false);
 			dao.sendData(sheet);
 			dao.reciveData();

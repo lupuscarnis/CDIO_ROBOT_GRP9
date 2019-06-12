@@ -112,9 +112,9 @@ public class DTO implements I_DTO {
 		String s;
 		
 		if(ballpickup == true) {
-			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},"+"clawMove:{"+clawMove+"},BallPickUp:{true}"; 
+			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},"+"backClawMove:{"+backClawMove+"},"+"clawMove:{"+clawMove+"},BallPickUp:{true}"; 
 		}else {
-			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},"+"clawMove:{"+clawMove+"},BallPickUp:{false}";
+			s = ""+"Distance:"+"{"+distance+"},"+"Rotation:{"+rotation+"},"+"backClawMove:{"+backClawMove+"},"+"clawMove:{"+clawMove+"},BallPickUp:{false}";
 		}
 		
 		

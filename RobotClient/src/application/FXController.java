@@ -236,7 +236,7 @@ public class FXController {
 
 			this.robotActive = true;
 			rc.start();
-			// update the button content
+			//update the button content
 			this.robotButton.setText("Stop Camera");
 			System.out.println("Robot starting...");
 
