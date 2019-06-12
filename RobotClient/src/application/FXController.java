@@ -237,14 +237,14 @@ public class FXController {
 			this.robotActive = true;
 			rc.start();
 			// update the button content
-			this.robotButton.setText("Stop Camera");
+			this.robotButton.setText("Stop Robot");
 			System.out.println("Robot starting...");
 
 		} else {
 
 			this.robotActive = false;
 			// update the button content
-			this.robotButton.setText("Start Camera");
+			this.robotButton.setText("Start Robot");
 
 		}
 
