@@ -71,7 +71,7 @@ public class Main extends Application {
 		nu.pattern.OpenCV.loadShared();
 		
 		
-		
+		Reminder timer  = new Reminder(480);
 		Thread console = new Thread( new ConsoleOutput());
 		
 		console.start();

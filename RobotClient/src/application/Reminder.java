@@ -20,9 +20,5 @@ import java.util.TimerTask;
 	    }
 	  }
 
-	  public static void main(String args[]) {
-	    
-	    new Reminder(60);
-	   
-	  }
+	
 	}
