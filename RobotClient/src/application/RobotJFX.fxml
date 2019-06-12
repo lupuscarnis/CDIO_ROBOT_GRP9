@@ -21,7 +21,7 @@
 				<Insets left="10" right="10" />
 			</padding>
 			<children>
-            <Accordion minHeight="600.0">
+            <Accordion minHeight="50.0">
               <panes>
                 <TitledPane animated="false" text="Playing Field">
                   <content>
@@ -147,12 +147,11 @@
 	<bottom>
 		<VBox alignment="CENTER" spacing="15">
 			<padding>
-				<Insets bottom="25" left="25" right="25" top="25" />
+				<Insets bottom="25.0" left="25.0" right="25.0" />
 			</padding>
 			<children>
-				<Separator />
-				<Label fx:id="hsvCurrentValues" />
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+				<Separator valignment="TOP" />
+            <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0">
                <children>
       				<Button fx:id="cameraButton" alignment="center" contentDisplay="CENTER" onAction="#startCamera" text="Start camera" />
                   <Button fx:id="robotButton" mnemonicParsing="false" onAction="#startRobot" text="Start robot">
@@ -160,6 +159,7 @@
                         <Insets left="20.0" />
                      </HBox.margin>
                   </Button>
+      				<Label fx:id="hsvCurrentValues" />
                </children>
             </HBox>
 			</children>
