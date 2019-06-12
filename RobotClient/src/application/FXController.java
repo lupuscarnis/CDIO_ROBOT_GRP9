@@ -66,6 +66,13 @@ public class FXController {
 	// the FXML area for showing the output of the morphological operations
 	@FXML
 	private ImageView morphImage;
+
+	@FXML
+	private ImageView cornerImage;
+
+	@FXML
+	private ImageView robotImage;
+
 	// FXML slider for setting HSV ranges
 	@FXML
 	private Slider hueStart;
@@ -79,6 +86,15 @@ public class FXController {
 	private Slider valueStart;
 	@FXML
 	private Slider valueStop;
+	@FXML
+	private Slider H_CORNER;
+	@FXML
+	private Slider S_CORNER;
+	@FXML
+	private Slider V_CORNER;
+	@FXML
+	private Slider TRESHOLD;
+
 	// FXML label to show the current values set with the sliders
 	@FXML
 	private Label hsvCurrentValues;
@@ -158,7 +174,9 @@ public class FXController {
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
 		this.imageViewProperties(this.maskImage, 200);
+		this.imageViewProperties(this.cornerImage, 200);
 		this.imageViewProperties(this.morphImage, 200);
+		this.imageViewProperties(this.robotImage, 200);
 
 		if (!this.cameraActive) {
 			// start the video capture
@@ -174,12 +192,10 @@ public class FXController {
 
 					@Override
 					public void run() {
-
+						Mat cleanFrame = new Mat();
 						Mat frame = new Mat();
 
 						frame = grabFrame();
-
-						// ip.findBackAndFront(frame);
 
 						// Find the rectangle of the playing field and crop the image
 						frame = findAndDrawRect(frame);
@@ -193,14 +209,27 @@ public class FXController {
 						if (!isDebug) {
 
 							// Find robot vector
-							// updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
-							updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
 
 						}
-						
-						 Image imageToShow = Utils.mat2Image(frame); 
-						 updateImageView(videoFrame, imageToShow);
+
+						// finds the pixels to cm Ratio
+						Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10),
+								((S_CORNER.getValue() / 100) * 255 - 10), ((V_CORNER.getValue() / 100) * 255 - 10));
+						Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10),
+								((S_CORNER.getValue() / 100) * 255 + 10), ((V_CORNER.getValue() / 100) * 255 + 10));
+/*					
+						  Point p = ip.findColor(frame, minValuesc, maxValuesc);
+						  ip.findCorners(frame, p, (int)TRESHOLD.getValue());
+						  updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
 						 
+						// finds the front and back of the robot
+						//ip.findBackAndFront(frame)
+						updateImageView(robotImage, Utils.mat2Image(frame));
+*/
+
+						Image imageToShow = Utils.mat2Image(frame);
+						updateImageView(videoFrame, imageToShow);
+
 					}
 				};
 
@@ -233,7 +262,7 @@ public class FXController {
 		if (!this.robotActive) {
 
 			this.robotActive = true;
-			rc.start();
+			//rc.start();
 			// update the button content
 			this.robotButton.setText("Stop Camera");
 			System.out.println("Robot starting...");

@@ -74,7 +74,7 @@ public class Main extends Application {
 		Reminder timer  = new Reminder(480);
 		Thread console = new Thread( new ConsoleOutput());
 		
-		console.start();
+		//console.start();
 		
 		launch(args);
 	
