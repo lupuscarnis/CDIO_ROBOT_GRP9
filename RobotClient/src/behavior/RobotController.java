@@ -102,8 +102,8 @@ public class RobotController {
 		double a2 = measureDist(nextBall, cs.robot.get(0))*measureDist(nextBall, cs.robot.get(0));
 		double c2 = measureDist(nextBall, cs.robot.get(1))*measureDist(nextBall, cs.robot.get(1));
 		double b2 = measureDist(cs.robot.get(0) ,cs.robot.get(0))*measureDist(cs.robot.get(0), cs.robot.get(0));
-		double under = 2*measureDist(nextBall, cs.robot.get(0))*measureDist(cs.robot.get(0) ,cs.robot.get(0));
-		dir = (a2+c2-b2)/under;
+		double denominator = 2*measureDist(nextBall, cs.robot.get(0))*measureDist(cs.robot.get(0) ,cs.robot.get(0));
+		dir = (a2+c2-b2)/denominator;
 		dir = Math.acos(dir);
 		//dir = Math.toDegrees()
 		//System.out.println("got measurement");

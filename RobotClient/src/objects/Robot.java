@@ -19,7 +19,9 @@ public class Robot {
 	public static Robot getInstance() {
 	
 	if(robot == null) {
-		return new Robot();
+		robot = new Robot();
+		
+		return robot;
 	}else {
 		return robot;
 	}
