@@ -22,11 +22,11 @@ import tools.Size_scale;
 public class ImageProssesing implements I_ImageProssesing {
 	// the FXML area for showing the mask
 	Mat output;
-	Scalar minValuesf = new Scalar(15, 130, 240);
-	Scalar maxValuesf = new Scalar(35, 170, 255);
+	Scalar minValuesf = new Scalar(80, 230, 190);
+	Scalar maxValuesf = new Scalar(120, 255, 210);
 
-	Scalar minValuesb = new Scalar(95, 200, 194);
-	Scalar maxValuesb = new Scalar(115, 220, 214);
+	Scalar minValuesb = new Scalar(20, 80, 230);
+	Scalar maxValuesb = new Scalar(30, 120, 240);
 
 	public ImageProssesing() {
 		// TODO Auto-generated constructor stub
@@ -49,7 +49,7 @@ public class ImageProssesing implements I_ImageProssesing {
 		s.setFrontX(front.x);
 		s.setFrontY(front.y);
 
-	//	findCorners(frame, front, 160);
+		
 		Imgproc.line(frame, back, front, new Scalar(350, 255, 255));
 		/*
 		 * System.out.println("Distance: " + Math.sqrt(Math.pow(s.getBackX() -
@@ -141,8 +141,10 @@ public class ImageProssesing implements I_ImageProssesing {
 			I_Size_Scale ss = new Size_scale();
 
 			ss.pixelToCm(cornors);
-			for (Point p : cornors)
-				Imgproc.line(dstNormScaled, p, center, new Scalar(350, 255, 255));
+			for (Point p : cornors) {
+				Imgproc.line(dstNormScaled, p, center, new Scalar(350, 255, 255));	
+			}
+			
 		}
 		output = dstNormScaled;
 	}
