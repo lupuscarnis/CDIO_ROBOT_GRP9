@@ -96,6 +96,13 @@ public class RobotController {
 		//System.out.println("i got next ball");
 		//direction needed for robot to move towards ball
 		double dir = Math.toDegrees(Math.atan((ballY-cs.robot.get(0).getY())/(ballX-cs.robot.get(0).getX())));
+		double a2 = measureDist(nextBall, cs.robot.get(0))*measureDist(nextBall, cs.robot.get(0));
+		double c2 = measureDist(nextBall, cs.robot.get(1))*measureDist(nextBall, cs.robot.get(1));
+		double b2 = measureDist(cs.robot.get(0) ,cs.robot.get(0))*measureDist(cs.robot.get(0), cs.robot.get(0));
+		double under = 2*measureDist(nextBall, cs.robot.get(0))*measureDist(cs.robot.get(0) ,cs.robot.get(0));
+		dir = (a2+c2-b2)/under;
+		dir = Math.acos(dir);
+		//dir = Math.toDegrees()
 		//System.out.println("got measurement");
 		double distance = measureDist(cs.robot.get(0), nextBall);
 		

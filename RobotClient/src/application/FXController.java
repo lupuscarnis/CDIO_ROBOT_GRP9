@@ -136,7 +136,9 @@ public class FXController {
 	private boolean isDebug = true;
 
 	// Debug image file
-	private String debugImg = "Debugging/pic01.jpg";
+	private String debugImg1 = "Debugging/pic01.jpg";
+	private String debugImg2 = "Debugging/pic01.jpg";
+	private String debugImg3 = "Debugging/pic01.jpg";
 
 	// Empty image file
 	private String noImg = "Debugging/Default.jpg";
@@ -260,7 +262,7 @@ public class FXController {
 				if (isDebug == true) {
 
 					// read from from test image
-					frame = Imgcodecs.imread(debugImg);
+					frame = Imgcodecs.imread(debugImg1);
 
 				} else {
 
@@ -419,7 +421,7 @@ public class FXController {
 		 * dst = new Mat(downscaledSize, frame.type()); Imgproc.resize(frame, dst,
 		 * downscaledSize);
 		 */
-		Mat debugImg = Imgcodecs.imread(noImg);
+		Mat debugImg1 = Imgcodecs.imread(noImg);
 		Mat detectedEdges = new Mat();
 		Mat edges = new Mat();
 		Mat blurredImage = new Mat();
@@ -550,14 +552,14 @@ public class FXController {
 
 				} else {
 
-					frame = debugImg;
+					frame = debugImg1;
 
 				}
 			}
 
 		} else {
 
-			frame = debugImg;
+			frame = debugImg1;
 		}
 
 		return frame;
