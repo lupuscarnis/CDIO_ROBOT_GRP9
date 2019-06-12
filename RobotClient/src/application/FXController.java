@@ -50,6 +50,9 @@ public class FXController {
 	// FXML camera button
 	@FXML
 	private Button cameraButton;
+	// FXML robot button
+	@FXML
+	private Button robotButton;
 	// the FXML area for showing the current frame
 	@FXML
 	private ImageView videoFrame;
@@ -106,12 +109,15 @@ public class FXController {
 	private VideoCapture capture = new VideoCapture();
 	// a flag to change the button behavior
 	private boolean cameraActive;
-
+	// a flag to change the button behavior
+	private boolean robotActive;
 	// property for object binding
 	private ObjectProperty<String> hsvValuesProp;
 
 	// Homemade Image prosessing
 	I_ImageProssesing ip = new ImageProssesing();
+
+	RobotController rc = new RobotController();
 
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
@@ -159,11 +165,6 @@ public class FXController {
 
 				this.cameraActive = true;
 
-
-
-				System.out.println("111111111111111111111");
-
-
 				// grab a frame every 33 ms (30 frames/sec)
 				Runnable frameGrabber = new Runnable() {
 
@@ -188,12 +189,8 @@ public class FXController {
 						if (!isDebug) {
 
 							// Find robot vector
-
-
 							// updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
-
 							updateImageView(maskImage, Utils.mat2Image(ip.getOutput()));
-
 
 						}
 
@@ -201,13 +198,6 @@ public class FXController {
 						Image imageToShow = Utils.mat2Image(frame);
 						updateImageView(videoFrame, imageToShow);
 
-						if ((!robotest) && (BallList.getInstance().getBallList().size() > 1)) {
-
-							RobotController rc = new RobotController();
-							rc.start();
-							robotest = true;
-
-						}
 					}
 				};
 
@@ -229,6 +219,30 @@ public class FXController {
 			// stop the timer
 			this.stopAcquisition();
 		}
+	}
+
+	/**
+	 * The action triggered by pushing the button on the GUI
+	 */
+	@FXML
+	private void startRobot() {
+
+		if (!this.robotActive) {
+
+			this.robotActive = true;
+			rc.start();
+			// update the button content
+			this.robotButton.setText("Stop Camera");
+			System.out.println("Robot starting...");
+
+		} else {
+
+			this.robotActive = false;
+			// update the button content
+			this.robotButton.setText("Start Camera");
+
+		}
+
 	}
 
 	/**
@@ -285,7 +299,6 @@ public class FXController {
 			// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
 			Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
 
-
 			// convert the frame to HSV
 			Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
 
@@ -321,7 +334,7 @@ public class FXController {
 
 			// show the partial output
 			this.updateImageView(this.morphImage, Utils.mat2Image(morphOutput));
-			
+
 			// find the tennis ball(s) contours and show them
 			frame = this.findAndDrawBalls(morphOutput, frame);
 
@@ -387,7 +400,7 @@ public class FXController {
 			for (Point B : p) {
 				s.add(new Ball(B.x, B.y));
 			}
-			
+
 			for (int i = 0; i < p.size(); i++) {
 				// System.out.println("Point (X,Y): "+p.get(i));
 
@@ -440,7 +453,7 @@ public class FXController {
 
 		// try to filter everything inside the rectangle
 		Imgproc.medianBlur(mask, detectedEdges, 9);
-		
+
 		// Imgproc.erode(detectedEdges, detectedEdges, new Mat());
 
 		// canny detector, with ratio of lower:upper threshold of 3:1
@@ -511,7 +524,7 @@ public class FXController {
 					homography = Calib3d.findHomography(maxCurve, dstPoints);
 
 					// Draws circles around the corners of the found rectangle
-					
+
 					/*
 					 * double temp_double[] = dstPoints.get(0, 0); Point p1 = new
 					 * Point(temp_double[0], temp_double[1]); Imgproc.circle(frame, new Point(p1.x,
@@ -534,7 +547,7 @@ public class FXController {
 					Imgproc.warpPerspective(frame, result, homography, size);
 
 					frame = result;
-					
+
 				} else {
 
 					frame = debugImg;
@@ -583,11 +596,9 @@ public class FXController {
 	 * Given a binary image containing one or more closed surfaces, use it as a mask
 	 * to find and highlight the objects contours
 	 * 
-	 * @param maskedImage
-	 *            the binary image to be used as a mask
-	 * @param frame
-	 *            the original {@link Mat} image to be used for drawing the objects
-	 *            contours
+	 * @param maskedImage the binary image to be used as a mask
+	 * @param frame       the original {@link Mat} image to be used for drawing the
+	 *                    objects contours
 	 * @return the {@link Mat} image with the objects contours framed
 	 */
 	private Mat findAndDrawBalls(Mat maskedImage, Mat frame) {
@@ -657,10 +668,8 @@ public class FXController {
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image
-	 *            the {@link ImageView} to use
-	 * @param dimension
-	 *            the width of the image to set
+	 * @param image     the {@link ImageView} to use
+	 * @param dimension the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -693,10 +702,8 @@ public class FXController {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view
-	 *            the {@link ImageView} to update
-	 * @param image
-	 *            the {@link Image} to show
+	 * @param view  the {@link ImageView} to update
+	 * @param image the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
