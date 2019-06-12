@@ -97,8 +97,11 @@ public class FXController {
 
 	// FXML label to show the current values set with the sliders
 	@FXML
-	private Label hsvCurrentValues;
-
+	private Label pf_CurrentValues;
+	@FXML
+	private Label b_CurrentValues;
+	@FXML
+	private Label r_CurrentValues;
 	// For Hough
 	@FXML
 	private Slider H_minDist;
@@ -132,7 +135,11 @@ public class FXController {
 	// a flag to change the button behavior
 	private boolean robotActive;
 	// property for object binding
-	private ObjectProperty<String> hsvValuesProp;
+	private ObjectProperty<String> pf_ValuesProp;
+	// property for object binding
+	private ObjectProperty<String> b_ValuesProp;
+	// property for object binding
+	private ObjectProperty<String> r_ValuesProp;
 
 	// Homemade Image prosessing
 	I_ImageProssesing ip = new ImageProssesing();
@@ -156,6 +163,7 @@ public class FXController {
 	private boolean isDebug = true;
 
 	// Debug image file
+	//private String debugImg = "Debugging/newvinkelret.jpg";
 	private String debugImg = "Debugging/pic01.jpg";
 
 	// Empty image file
@@ -168,8 +176,12 @@ public class FXController {
 	private void startCamera() {
 		// bind a text property with the string containing the current range of
 		// HSV values for object detection
-		hsvValuesProp = new SimpleObjectProperty<>();
-		this.hsvCurrentValues.textProperty().bind(hsvValuesProp);
+		pf_ValuesProp = new SimpleObjectProperty<>();
+		this.pf_CurrentValues.textProperty().bind(pf_ValuesProp);
+		b_ValuesProp = new SimpleObjectProperty<>();
+		this.b_CurrentValues.textProperty().bind(b_ValuesProp);
+		r_ValuesProp = new SimpleObjectProperty<>();
+		this.r_CurrentValues.textProperty().bind(r_ValuesProp);
 
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
@@ -346,7 +358,7 @@ public class FXController {
 					+ minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: " + minValues.val[2] + "-"
 					+ maxValues.val[2];
 
-			Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
+			Utils.onFXThread(this.b_ValuesProp, valuesToPrint);
 
 			// threshold HSV image to select tennis balls
 			Core.inRange(hsvImage, minValues, maxValues, mask);
@@ -404,7 +416,7 @@ public class FXController {
 			String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh + ", Center Threshold: "
 					+ cTresh + ", Min Radius: " + minRad + ", Max Radius: " + maxRad;
 
-			Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
+			Utils.onFXThread(this.b_ValuesProp, valuesToPrint);
 
 			Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double) grayImage.rows() / min_dist,
 					uThresh, cTresh, minRad, maxRad);
@@ -475,7 +487,7 @@ public class FXController {
 				+ minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: " + minValues.val[2] + "-"
 				+ maxValues.val[2];
 
-		Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
+		Utils.onFXThread(this.pf_ValuesProp, valuesToPrint);
 
 		// In HSV space, the red color wraps around 180. So we need the H values to be
 		// both in [0,10] and [170, 180].
@@ -556,29 +568,38 @@ public class FXController {
 					dstPoints.fromArray(arrDstPoints);
 					homography = Calib3d.findHomography(maxCurve, dstPoints);
 
-					// Draws circles around the corners of the found rectangle
-
-					/*
-					 * double temp_double[] = dstPoints.get(0, 0); Point p1 = new
-					 * Point(temp_double[0], temp_double[1]); Imgproc.circle(frame, new Point(p1.x,
-					 * p1.y), 20, new Scalar(255, 0, 0), 5); //p1 is colored red
-					 * 
-					 * temp_double = dstPoints.get(1, 0); Point p2 = new Point(temp_double[0],
-					 * temp_double[1]); Imgproc.circle(frame, new Point(p2.x, p2.y), 20, new
-					 * Scalar(0, 255, 0), 5); //p2 is colored green
-					 * 
-					 * temp_double = dstPoints.get(2, 0); Point p3 = new Point(temp_double[0],
-					 * temp_double[1]); Imgproc.circle(frame, new Point(p3.x, p3.y), 20, new
-					 * Scalar(0, 0, 255), 5); //p3 is colored blue
-					 * 
-					 * temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
-					 * temp_double[1]); Imgproc.circle(frame, new Point(p4.x, p4.y), 20, new
-					 * Scalar(0, 255, 255), 5); //p1 is colored violet
-					 */
-
 					// Warp the input image using the computed homography matrix
 					Imgproc.warpPerspective(frame, result, homography, size);
+					
+					// Draws circles around the corners of the found rectangle
+					 double temp_double[] = dstPoints.get(0, 0); Point p1 = new
+							  Point(temp_double[0], temp_double[1]); Imgproc.circle(result, new Point(p1.x,
+							  p1.y), 20, new Scalar(255, 0, 0), -1); //p1 is colored red
+							  
+							  temp_double = dstPoints.get(1, 0); Point p2 = new Point(temp_double[0],
+							  temp_double[1]); Imgproc.circle(result, new Point(p2.x, p2.y), 20, new
+							  Scalar(0, 255, 0), -1); //p2 is colored green
+							  
+							  temp_double = dstPoints.get(2, 0); Point p3 = new Point(temp_double[0],
+							  temp_double[1]); Imgproc.circle(result, new Point(p3.x, p3.y), 20, new
+							  Scalar(0, 0, 255), -1); //p3 is colored blue
+							  
+							 temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
+							  temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
+							  Scalar(0, 255, 255), -1); //p1 is colored violet
 
+							  
+							  if(frame.width() < frame.height()) {
+								  
+								  System.out.println("FLIP IT!");
+								  
+								  Mat flippedImage = new Mat();
+								  Core.flip(result, flippedImage, -1);
+								  
+								  result = flippedImage;
+								  
+							  }
+							  
 					frame = result;
 
 				} else {
