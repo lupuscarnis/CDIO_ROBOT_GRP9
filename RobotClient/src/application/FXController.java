@@ -157,10 +157,10 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 0;
+	private int webcamID = 2;
 
 	// Switch between debug/production mode
-	private boolean isDebug = true;
+	private boolean isDebug = false;
 
 	// Debug image file
 	//private String debugImg = "Debugging/newvinkelret.jpg";
@@ -238,8 +238,22 @@ public class FXController {
 						//ip.findBackAndFront(frame)
 						updateImageView(robotImage, Utils.mat2Image(frame));
 */
+						Mat out = new Mat();
 
-						Image imageToShow = Utils.mat2Image(frame);
+						// Check if image needs to flipped before displaying
+						if (frame.width() < frame.height()) {
+
+							Mat dst = new Mat();
+							Core.flip(frame, dst, -1);
+							Core.rotate(dst, out, Core.ROTATE_90_CLOCKWISE); // ROTATE_180 or ROTATE_90_COUNTERCLOCKWISE
+
+						} else {
+
+							out = frame;
+						}
+						
+
+						Image imageToShow = Utils.mat2Image(out);
 						updateImageView(videoFrame, imageToShow);
 
 					}
