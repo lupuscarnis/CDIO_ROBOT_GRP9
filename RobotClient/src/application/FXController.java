@@ -157,10 +157,10 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 0;
+	private int webcamID = 2;
 
 	// Switch between debug/production mode
-	private boolean isDebug = true;
+	private boolean isDebug = false;
 
 	// Debug image file
 	//private String debugImg = "Debugging/newvinkelret.jpg";
@@ -238,8 +238,22 @@ public class FXController {
 						//ip.findBackAndFront(frame)
 						updateImageView(robotImage, Utils.mat2Image(frame));
 */
+						Mat out = new Mat();
+						
+						// Check if image needs to flipped before displaying
+						if(frame.width()<frame.height()) {
+							
+							Mat dst = new Mat();
+							Core.flip(frame, dst, -1);
+							Core.rotate(dst, out, Core.ROTATE_90_CLOCKWISE); //ROTATE_180 or ROTATE_90_COUNTERCLOCKWISE
+							
+						} else {
+							
+							out = frame;
+						}
+						
 
-						Image imageToShow = Utils.mat2Image(frame);
+						Image imageToShow = Utils.mat2Image(out);
 						updateImageView(videoFrame, imageToShow);
 
 					}
@@ -350,6 +364,7 @@ public class FXController {
 			// remember: H ranges 0-180, S and V range 0-255
 			Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
 					this.valueStart.getValue());
+			
 			Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(),
 					this.valueStop.getValue());
 
@@ -572,7 +587,7 @@ public class FXController {
 					Imgproc.warpPerspective(frame, result, homography, size);
 					
 					// Draws circles around the corners of the found rectangle
-					 double temp_double[] = dstPoints.get(0, 0); Point p1 = new
+					 /*double temp_double[] = dstPoints.get(0, 0); Point p1 = new
 							  Point(temp_double[0], temp_double[1]); Imgproc.circle(result, new Point(p1.x,
 							  p1.y), 20, new Scalar(255, 0, 0), -1); //p1 is colored red
 							  
@@ -586,7 +601,7 @@ public class FXController {
 							  
 							 temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
 							  temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
-							  Scalar(0, 255, 255), -1); //p1 is colored violet
+							  Scalar(0, 255, 255), -1); //p1 is colored violet*/
 
 							  
 							  if(frame.width() < frame.height()) {
