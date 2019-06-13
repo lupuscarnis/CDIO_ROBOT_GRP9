@@ -158,11 +158,11 @@ public class FXController {
 	private int webcamID = 0;
 
 	// Switch between debug/production mode
-	private boolean isDebug = false;
+	private boolean isDebug = true;
 
 	// Debug image file
-	//private String debugImg = "Debugging/newvinkelret.jpg";
-	private String debugImg = "Debugging/pic01.jpg";
+	// private String debugImg = "Debugging/newvinkelret.jpg";
+	private String debugImg = "Debugging/Robo_w_Balls.png";
 
 	// Empty image file
 	private String defaultImg = "Debugging/Default.jpg";
@@ -207,14 +207,55 @@ public class FXController {
 
 						frame = grabFrame();
 
-						// Find the rectangle of the playing field and crop the image
-						frame = findAndDrawRect(frame);
+						// if the frame is not empty, process it
+						if (!frame.empty()) {
 
-						if (UseHSVImgDetection) {
-							frame = grabFrameHSV(frame);
-						} else {
-							frame = grabFrameHough(frame);
+							// Find the rectangle of the playing field and crop the image
+							frame = findAndDrawRect(frame);
+
+							if (UseHSVImgDetection) {
+								frame = grabFrameHSV(frame);
+							} else {
+								frame = grabFrameHough(frame);
+							}
+
+							// finds the pixels to cm Ratio
+							/*
+							 * Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10),
+							 * ((S_CORNER.getValue() / 100) * 255 - 10), ((V_CORNER.getValue() / 100) * 255
+							 * - 10)); Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10),
+							 * ((S_CORNER.getValue() / 100) * 255 + 10), ((V_CORNER.getValue() / 100) * 255
+							 * + 10));
+							 */
+
+							Scalar minValuesc = new Scalar(2, 240, 230);
+							Scalar maxValuesc = new Scalar(17, 255, 255);
+
+							Point p = ip.findColor(frame, minValuesc, maxValuesc);
+							ip.findCorners(frame, p, (int) TRESHOLD.getValue());
+							updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+
+							// finds the front and back of the robot
+							updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame)));
+
+							Mat out = new Mat();
+
+							// Check if image needs to flipped before displaying
+							if (frame.width() < frame.height()) {
+
+								Mat dst = new Mat();
+								Core.flip(frame, dst, -1); // Flip frame
+								Core.rotate(dst, out, Core.ROTATE_90_CLOCKWISE); // ROTATE_90_COUNTERCLOCKWISE
+
+							} else {
+
+								out = frame;
+							}
+
+							Image imageToShow = Utils.mat2Image(out);
+							updateImageView(videoFrame, imageToShow);
 						}
+
 
 
 						// finds the pixels to cm Ratio
@@ -286,7 +327,11 @@ public class FXController {
 		if (!this.robotActive) {
 
 			this.robotActive = true;
+
 			rc.start();
+
+			// rc.start();
+
 			// update the button content
 			this.robotButton.setText("Stop Camera");
 			System.out.println("Robot starting...");
@@ -313,7 +358,7 @@ public class FXController {
 		if (this.capture.isOpened() || isDebug) {
 			try {
 
-				if (isDebug == true) {
+				if (isDebug) {
 
 					// read from from test image
 					frame = Imgcodecs.imread(debugImg);
@@ -344,57 +389,53 @@ public class FXController {
 	 */
 	private Mat grabFrameHSV(Mat frame) {
 
-		// if the frame is not empty, process it
-		if (!frame.empty()) {
-			// init
-			Mat blurredImage = new Mat();
-			Mat hsvImage = new Mat();
-			Mat mask = new Mat();
-			Mat morphOutput = new Mat();
+		// init
+		Mat blurredImage = new Mat();
+		Mat hsvImage = new Mat();
+		Mat mask = new Mat();
+		Mat morphOutput = new Mat();
 
-			// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
-			Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
+		// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
+		Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
 
-			// convert the frame to HSV
-			Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
+		// convert the frame to HSV
+		Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
 
-			// get thresholding values from the UI
-			// remember: H ranges 0-180, S and V range 0-255
-			Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
-					this.valueStart.getValue());
-			Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(),
-					this.valueStop.getValue());
+		// get thresholding values from the UI
+		// remember: H ranges 0-180, S and V range 0-255
+		Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
+				this.valueStart.getValue());
+		Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(),
+				this.valueStop.getValue());
 
-			// show the current selected HSV range
-			String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0] + "\tSaturation range: "
-					+ minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: " + minValues.val[2] + "-"
-					+ maxValues.val[2];
+		// show the current selected HSV range
+		String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0] + "\tSaturation range: "
+				+ minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: " + minValues.val[2] + "-"
+				+ maxValues.val[2];
 
-			Utils.onFXThread(this.b_ValuesProp, valuesToPrint);
+		Utils.onFXThread(this.b_ValuesProp, valuesToPrint);
 
-			// threshold HSV image to select tennis balls
-			Core.inRange(hsvImage, minValues, maxValues, mask);
-			// show the partial output
-			this.updateImageView(this.maskImage, Utils.mat2Image(mask));
+		// threshold HSV image to select tennis balls
+		Core.inRange(hsvImage, minValues, maxValues, mask);
+		// show the partial output
+		this.updateImageView(this.maskImage, Utils.mat2Image(mask));
 
-			// morphological operators
-			// dilate with large element, erode with small ones
-			Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
-			Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
+		// morphological operators
+		// dilate with large element, erode with small ones
+		Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
+		Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
 
-			Imgproc.erode(mask, morphOutput, erodeElement);
-			Imgproc.erode(morphOutput, morphOutput, erodeElement);
+		Imgproc.erode(mask, morphOutput, erodeElement);
+		Imgproc.erode(morphOutput, morphOutput, erodeElement);
 
-			Imgproc.dilate(morphOutput, morphOutput, dilateElement);
-			Imgproc.dilate(morphOutput, morphOutput, dilateElement);
+		Imgproc.dilate(morphOutput, morphOutput, dilateElement);
+		Imgproc.dilate(morphOutput, morphOutput, dilateElement);
 
-			// show the partial output
-			this.updateImageView(this.morphImage, Utils.mat2Image(morphOutput));
+		// show the partial output
+		this.updateImageView(this.morphImage, Utils.mat2Image(morphOutput));
 
-			// find the tennis ball(s) contours and show them
-			frame = this.findAndDrawBalls(morphOutput, frame);
-
-		}
+		// find the tennis ball(s) contours and show them
+		frame = this.findAndDrawBalls(morphOutput, frame);
 
 		return frame;
 	}
@@ -408,45 +449,44 @@ public class FXController {
 	 */
 	private Mat grabFrameHough(Mat frame) {
 
-		// if the frame is not empty, process it
-		if (!frame.empty()) {
-			// init
+		// init
 
-			Mat grayImage = new Mat();
-			Mat circles = new Mat();
+		Mat grayImage = new Mat();
+		Mat circles = new Mat();
 
-			int min_dist = new Integer((int) this.H_minDist.getValue());
-			double uThresh = new Double(this.H_uThresh.getValue());
-			double cTresh = new Double(this.H_cTresh.getValue());
-			int minRad = new Integer((int) this.H_minRad.getValue());
-			int maxRad = new Integer((int) this.H_maxRad.getValue());
+		int min_dist = new Integer((int) this.H_minDist.getValue());
+		double uThresh = new Double(this.H_uThresh.getValue());
+		double cTresh = new Double(this.H_cTresh.getValue());
+		int minRad = new Integer((int) this.H_minRad.getValue());
+		int maxRad = new Integer((int) this.H_maxRad.getValue());
 
-			Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
-			Imgproc.medianBlur(grayImage, grayImage, 5);
+		Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
+		Imgproc.medianBlur(grayImage, grayImage, 5);
 
-			// show the current selected HSV range
-			String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh + ", Center Threshold: "
-					+ cTresh + ", Min Radius: " + minRad + ", Max Radius: " + maxRad;
+		// show the current selected HSV range
+		String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh + ", Center Threshold: "
+				+ cTresh + ", Min Radius: " + minRad + ", Max Radius: " + maxRad;
 
-			Utils.onFXThread(this.b_ValuesProp, valuesToPrint);
+		Utils.onFXThread(this.b_ValuesProp, valuesToPrint);
 
-			Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double) grayImage.rows() / min_dist,
-					uThresh, cTresh, minRad, maxRad);
-			List<Point> p = new ArrayList<>();
-			for (int x = 0; x < circles.cols(); x++) {
+		Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double) grayImage.rows() / min_dist,
+				uThresh, cTresh, minRad, maxRad);
+		List<Point> p = new ArrayList<>();
+		for (int x = 0; x < circles.cols(); x++) {
 
-				double[] c = circles.get(0, x);
-				Point center = new Point(Math.round(c[0]), Math.round(c[1]));
-				p.add(center);
-				// circle center
+			double[] c = circles.get(0, x);
+			Point center = new Point(Math.round(c[0]), Math.round(c[1]));
+			p.add(center);
+			// circle center
 
-				Imgproc.circle(frame, center, 1, new Scalar(0, 100, 100), 3, 8, 0);
-				// circle outline
-				int radius = (int) Math.round(c[2]);
-				Imgproc.circle(frame, center, radius, new Scalar(255, 0, 255), 3, 8, 0);
-				Imgproc.circle(frame, center, 1, new Scalar(0, 255, 255), 3, 8, 0);
+			Imgproc.circle(frame, center, 1, new Scalar(0, 100, 100), 3, 8, 0);
+			// circle outline
+			int radius = (int) Math.round(c[2]);
+			Imgproc.circle(frame, center, radius, new Scalar(255, 0, 255), 3, 8, 0);
+			Imgproc.circle(frame, center, 1, new Scalar(0, 255, 255), 3, 8, 0);
 
-				// Print center coordinates
+			// Print center coordinates
+
 
 			}
 			BallList s = BallList.getInstance();
@@ -457,10 +497,16 @@ public class FXController {
 				s.add(new Ball(B.x, B.y));
 			}
 
-			for (int i = 0; i < p.size(); i++) {
-				// System.out.println("Point (X,Y): "+p.get(i));
+		}
+		BallList s = BallList.getInstance();
+		s.clearList();
+		for (Point B : p) {
+			s.add(new Ball(B.x, B.y));
+		}
 
-			}
+
+		for (int i = 0; i < p.size(); i++) {
+			// System.out.println("Point (X,Y): "+p.get(i));
 
 		}
 
@@ -484,11 +530,10 @@ public class FXController {
 		Mat mask = new Mat();
 
 		// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
-		Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
+		//Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
 
 		// convert the frame to HSV
-		Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
-
+		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 		// get thresholding values from the UI
 		// remember: H ranges 0-180, S and V range 0-255
 		Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
@@ -507,12 +552,12 @@ public class FXController {
 		// both in [0,10] and [170, 180].
 		Core.inRange(hsvImage, minValues, maxValues, mask);
 
-		// show the partial output
-		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
-
 		// try to filter everything inside the rectangle
 		Imgproc.medianBlur(mask, detectedEdges, 9);
 
+		// show the partial output
+		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
+		
 		// Imgproc.erode(detectedEdges, detectedEdges, new Mat());
 
 		// canny detector, with ratio of lower:upper threshold of 3:1
@@ -584,44 +629,44 @@ public class FXController {
 
 					// Warp the input image using the computed homography matrix
 					Imgproc.warpPerspective(frame, result, homography, size);
-					
+
 					// Draws circles around the corners of the found rectangle
-					 /*double temp_double[] = dstPoints.get(0, 0); Point p1 = new
-							  Point(temp_double[0], temp_double[1]); Imgproc.circle(result, new Point(p1.x,
-							  p1.y), 20, new Scalar(255, 0, 0), -1); //p1 is colored red
-							  
-							  temp_double = dstPoints.get(1, 0); Point p2 = new Point(temp_double[0],
-							  temp_double[1]); Imgproc.circle(result, new Point(p2.x, p2.y), 20, new
-							  Scalar(0, 255, 0), -1); //p2 is colored green
-							  
-							  temp_double = dstPoints.get(2, 0); Point p3 = new Point(temp_double[0],
-							  temp_double[1]); Imgproc.circle(result, new Point(p3.x, p3.y), 20, new
-							  Scalar(0, 0, 255), -1); //p3 is colored blue
-							  
-							 temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
-							  temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
+					/*
+					 * double temp_double[] = dstPoints.get(0, 0); Point p1 = new
+					 * Point(temp_double[0], temp_double[1]); Imgproc.circle(result, new Point(p1.x,
+					 * p1.y), 20, new Scalar(255, 0, 0), -1); //p1 is colored red
+					 * 
+					 * temp_double = dstPoints.get(1, 0); Point p2 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(result, new Point(p2.x, p2.y), 20, new
+					 * Scalar(0, 255, 0), -1); //p2 is colored green
+					 * 
+					 * temp_double = dstPoints.get(2, 0); Point p3 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(result, new Point(p3.x, p3.y), 20, new
+					 * Scalar(0, 0, 255), -1); //p3 is colored blue
+					 * 
+					 * temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
+					 * 
+					 * Scalar(0, 255, 255), -1); //p1 is colored violet
+					 * 
+					 * Scalar(0, 255, 255), -1); //p1 is colored violet
+					 */
 
-							  Scalar(0, 255, 255), -1); //p1 is colored violet
+					// save frane size for use in robotController
+					FrameSize fSize = FrameSize.getInstance();
+					fSize.setX(frame.width());
+					fSize.setY(frame.height());
+					if (frame.width() < frame.height()) {
 
-							  Scalar(0, 255, 255), -1); //p1 is colored violet*/
+						System.out.println("FLIP IT!");
 
+						Mat flippedImage = new Mat();
+						Core.flip(result, flippedImage, -1);
 
-							  
-								// save frane size for use in robotController
-								FrameSize fSize =  FrameSize.getInstance();
-								fSize.setX(frame.width());
-								fSize.setY(frame.height());
-							  if(frame.width() < frame.height()) {
-								  
-								  System.out.println("FLIP IT!");
-								  
-								  Mat flippedImage = new Mat();
-								  Core.flip(result, flippedImage, -1);
-								  
-								  result = flippedImage;
-								  
-							  }
-							  
+						result = flippedImage;
+
+					}
+
 					frame = result;
 
 				} else {
