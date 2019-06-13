@@ -586,7 +586,7 @@ public class FXController {
 					Imgproc.warpPerspective(frame, result, homography, size);
 					
 					// Draws circles around the corners of the found rectangle
-					 double temp_double[] = dstPoints.get(0, 0); Point p1 = new
+					 /*double temp_double[] = dstPoints.get(0, 0); Point p1 = new
 							  Point(temp_double[0], temp_double[1]); Imgproc.circle(result, new Point(p1.x,
 							  p1.y), 20, new Scalar(255, 0, 0), -1); //p1 is colored red
 							  
@@ -600,7 +600,7 @@ public class FXController {
 							  
 							 temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
 							  temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
-							  Scalar(0, 255, 255), -1); //p1 is colored violet
+							  Scalar(0, 255, 255), -1); //p1 is colored violet*/
 
 							  
 							  if(frame.width() < frame.height()) {
