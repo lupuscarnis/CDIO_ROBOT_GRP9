@@ -150,10 +150,10 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 0;
+	private int webcamID = 1;
 
 	// Switch between debug/production mode
-	private boolean isDebug = true;
+	private boolean isDebug = false;
 
 	// Debug image file
 	private String debugImg1 = "Debugging/pic01.jpg";
@@ -200,7 +200,7 @@ public class FXController {
 						frame = grabFrame();
 
 						// Find the rectangle of the playing field and crop the image
-						// frame = findAndDrawRect(frame);
+						//frame = findAndDrawRect(frame);
 
 						if (UseHSVImgDetection) {
 							frame = grabFrameHSV(frame);
@@ -222,11 +222,11 @@ public class FXController {
 						  Point p = ip.findColor(frame, minValuesc, maxValuesc);
 						  ip.findCorners(frame, p, (int)TRESHOLD.getValue());
 						  updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
-						 
+*/						 
 						// finds the front and back of the robot
-						//ip.findBackAndFront(frame)
-						updateImageView(robotImage, Utils.mat2Image(frame));
-*/
+					
+						updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame)));
+
 						// convert and show the frame
 						Mat resizeimage = new Mat();
 						Size scaleSize = new Size(600, 320);
