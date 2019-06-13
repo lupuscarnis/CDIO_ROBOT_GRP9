@@ -63,11 +63,11 @@ public class ImageProssesing implements I_ImageProssesing {
 		Scalar minValuesb = new Scalar(((H_BACK.getValue()/2)-15),((S_BACK.getValue()/100)*255-10),((V_BACK.getValue()/100)*255-10));
 		Scalar maxValuesb = new Scalar(((H_BACK.getValue()/2)+15),((S_BACK.getValue()/100)*255+10),((V_BACK.getValue()/100)*255+10));
 */
-		Scalar minValuesf = new Scalar(93,140,180);
-		Scalar maxValuesf = new Scalar(113,165,210);
+		Scalar minValuesf = new Scalar(93,240,190);
+		Scalar maxValuesf = new Scalar(113,255,215);
 		
-		Scalar minValuesb = new Scalar(17,120,255);
-		Scalar maxValuesb = new Scalar(37,150,255);
+		Scalar minValuesb = new Scalar(17,60,230);
+		Scalar maxValuesb = new Scalar(37,100,255);
 
 	
 		
