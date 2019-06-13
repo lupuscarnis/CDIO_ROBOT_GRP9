@@ -155,7 +155,7 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 2;
+	private int webcamID = 1;
 
 	// Switch between debug/production mode
 	private boolean isDebug = false;
@@ -216,26 +216,26 @@ public class FXController {
 							frame = grabFrameHough(frame);
 						}
 
-						if (!isDebug) {
-
-							// Find robot vector
-
-						}
 
 						// finds the pixels to cm Ratio
+		/*
 						Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10),
 								((S_CORNER.getValue() / 100) * 255 - 10), ((V_CORNER.getValue() / 100) * 255 - 10));
 						Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10),
 								((S_CORNER.getValue() / 100) * 255 + 10), ((V_CORNER.getValue() / 100) * 255 + 10));
-/*					
+	*/
+
+						Scalar minValuesc = new Scalar(2,240,230);
+						Scalar maxValuesc = new Scalar(17,255,255);
+
 						  Point p = ip.findColor(frame, minValuesc, maxValuesc);
 						  ip.findCorners(frame, p, (int)TRESHOLD.getValue());
 						  updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
 						 
 						// finds the front and back of the robot
-						//ip.findBackAndFront(frame)
-						updateImageView(robotImage, Utils.mat2Image(frame));
-*/
+						
+						updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame)));
+
 						Mat out = new Mat();
 
 						// Check if image needs to flipped before displaying
@@ -584,7 +584,7 @@ public class FXController {
 					Imgproc.warpPerspective(frame, result, homography, size);
 					
 					// Draws circles around the corners of the found rectangle
-					 double temp_double[] = dstPoints.get(0, 0); Point p1 = new
+					 /*double temp_double[] = dstPoints.get(0, 0); Point p1 = new
 							  Point(temp_double[0], temp_double[1]); Imgproc.circle(result, new Point(p1.x,
 							  p1.y), 20, new Scalar(255, 0, 0), -1); //p1 is colored red
 							  
@@ -598,7 +598,12 @@ public class FXController {
 							  
 							 temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
 							  temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
+
 							  Scalar(0, 255, 255), -1); //p1 is colored violet
+
+							  Scalar(0, 255, 255), -1); //p1 is colored violet*/
+
+
 							  
 								// save frane size for use in robotController
 								FrameSize fSize =  FrameSize.getInstance();
