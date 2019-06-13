@@ -162,7 +162,7 @@ public class FXController {
 
 	// Debug image file
 	// private String debugImg = "Debugging/newvinkelret.jpg";
-	private String debugImg = "Debugging/pic01.jpg";
+	private String debugImg = "Debugging/Robo_w_Balls.png";
 
 	// Empty image file
 	private String defaultImg = "Debugging/Default.jpg";
@@ -236,7 +236,6 @@ public class FXController {
 							updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
 
 							// finds the front and back of the robot
-
 							updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame)));
 
 							Mat out = new Mat();
@@ -245,9 +244,8 @@ public class FXController {
 							if (frame.width() < frame.height()) {
 
 								Mat dst = new Mat();
-								Core.flip(frame, dst, -1);
-								Core.rotate(dst, out, Core.ROTATE_90_CLOCKWISE); // ROTATE_180 or
-																					// ROTATE_90_COUNTERCLOCKWISE
+								Core.flip(frame, dst, -1); // Flip frame
+								Core.rotate(dst, out, Core.ROTATE_90_CLOCKWISE); // ROTATE_90_COUNTERCLOCKWISE
 
 							} else {
 
@@ -317,7 +315,7 @@ public class FXController {
 		if (this.capture.isOpened() || isDebug) {
 			try {
 
-				if (isDebug == true) {
+				if (isDebug) {
 
 					// read from from test image
 					frame = Imgcodecs.imread(debugImg);
@@ -478,11 +476,10 @@ public class FXController {
 		Mat mask = new Mat();
 
 		// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
-		Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
+		//Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
 
 		// convert the frame to HSV
-		Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
-
+		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 		// get thresholding values from the UI
 		// remember: H ranges 0-180, S and V range 0-255
 		Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
@@ -501,12 +498,12 @@ public class FXController {
 		// both in [0,10] and [170, 180].
 		Core.inRange(hsvImage, minValues, maxValues, mask);
 
-		// show the partial output
-		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
-
 		// try to filter everything inside the rectangle
 		Imgproc.medianBlur(mask, detectedEdges, 9);
 
+		// show the partial output
+		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
+		
 		// Imgproc.erode(detectedEdges, detectedEdges, new Mat());
 
 		// canny detector, with ratio of lower:upper threshold of 3:1
