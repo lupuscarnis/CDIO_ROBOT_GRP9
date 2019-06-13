@@ -53,11 +53,21 @@ public class ImageProssesing implements I_ImageProssesing {
 	 */
 	@Override
 	public Mat findBackAndFront(Mat frame) {
+		
+		/*
 		Scalar minValuesf = new Scalar(((H_FRONT.getValue()/2)-15),((S_FRONT.getValue()/100)*255-10),((V_FRONT.getValue()/100)*255-10));
 		Scalar maxValuesf = new Scalar(((H_FRONT.getValue()/2)+15),((S_FRONT.getValue()/100)*255+10),((V_FRONT.getValue()/100)*255+10));
 		
 		Scalar minValuesb = new Scalar(((H_BACK.getValue()/2)-15),((S_BACK.getValue()/100)*255-10),((V_BACK.getValue()/100)*255-10));
 		Scalar maxValuesb = new Scalar(((H_BACK.getValue()/2)+15),((S_BACK.getValue()/100)*255+10),((V_BACK.getValue()/100)*255+10));
+*/
+		
+Scalar minValuesf = new Scalar(93,140,180);
+Scalar maxValuesf = new Scalar(113,165,210);
+
+Scalar minValuesb = new Scalar(17,60,190);
+Scalar maxValuesb = new Scalar(37,86,215);
+
 
 		
 		
