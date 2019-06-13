@@ -155,7 +155,7 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Switch between debug/production mode
 	private boolean isDebug = false;
@@ -225,8 +225,8 @@ public class FXController {
 								((S_CORNER.getValue() / 100) * 255 + 10), ((V_CORNER.getValue() / 100) * 255 + 10));
 	*/
 
-						Scalar minValuesc = new Scalar(2,240,230);
-						Scalar maxValuesc = new Scalar(17,255,255);
+						Scalar minValuesc = new Scalar(17,60,190);
+						Scalar maxValuesc = new Scalar(37,86,215);
 
 						  Point p = ip.findColor(frame, minValuesc, maxValuesc);
 						  ip.findCorners(frame, p, (int)TRESHOLD.getValue());
@@ -286,7 +286,7 @@ public class FXController {
 		if (!this.robotActive) {
 
 			this.robotActive = true;
-			//rc.start();
+			rc.start();
 			// update the button content
 			this.robotButton.setText("Stop Camera");
 			System.out.println("Robot starting...");
@@ -450,7 +450,9 @@ public class FXController {
 
 			}
 			BallList s = BallList.getInstance();
+			if(s.getBallList().size()<800000000) {
 			s.clearList();
+			}
 			for (Point B : p) {
 				s.add(new Ball(B.x, B.y));
 			}

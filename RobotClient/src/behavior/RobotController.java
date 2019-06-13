@@ -18,7 +18,7 @@ import objects.Robot;
 public class RobotController {
 	int nrBalls =0;
 	int goals=0;
-	double ratio = 3.1;
+	double ratio = 310;
 	double robotDirection = 0;
 	
 	CSystem cs;
@@ -49,8 +49,8 @@ public class RobotController {
 	 }
 	//front
 	 //System.out.println(cs.balls.size());
-	 System.out.println("Ballist"+ballist.get(0).getX()+"dens y er"+ballist.get(0).getY());
-	 System.out.println("Ballist nummer 2 er "+ballist.get(1).getX()+"dens y er"+ballist.get(1).getY());
+	 System.out.println("Ballist "+ballist.get(0).getX()+"dens y er" +ballist.get(0).getY());
+	 //System.out.println("Ballist nummer 2 er "+ballist.get(1).getX()+"dens y er"+ballist.get(1).getY());
 	 System.out.println("her er en ball"+cs.balls.get(0).getX());
 	cs.robot.add(new Coordinate((int)rob.getFrontX(),(int) rob.getFrontY()));
 	//back
@@ -83,6 +83,7 @@ public class RobotController {
 		
 System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal");
 		//send message to drive in front of goal
+		/*
 		I_DTO dtoo = new DTO();
 		
 		dtoo.setRotation((float) dir);
@@ -95,14 +96,17 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 			
 		}
 		data.reciveData();
-		
+		*/
 		//find direction to point towards goal
+		
 		Coordinate goal = new Coordinate(0,cs.getYLength()/2);
-	
+	System.out.println(goal.getX()+" goal tal "+goal.getY());
 		dir = getDirection(goal);
 		
 		System.out.println("vi sender "+dir+"distance for at komme parallelt med maalet");
+		
 		//send message to drive close to goal and release balls
+		/*
 		I_DTO scoreDTO = new DTO();
 		
 		scoreDTO.setRotation((float) dir);
@@ -120,6 +124,7 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 			
 		}
 		data2.reciveData();
+		*/
 		
 		
 		
@@ -128,14 +133,18 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 	
 	public void start() {
 		
-		
+		int counter =0;
 		getView();
 		
 		while(cs.robot.size()>0) {
 			//needs to be in here to get new location of balls
+			counter++;
+			if(counter>10) {
+				break;
+			}
 			getView();
 			if(nrBalls>5) {
-				scoreGoal();
+				//scoreGoal();
 				goals +=nrBalls;
 				nrBalls=0;
 			}else {
@@ -164,21 +173,32 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 		double ballY = nextBall.getY();
 		//System.out.println("i got next ball");
 		//direction needed for robot to move towards ball
+		System.out.println("nextBallx = "+nextBall.getX()+"    y "+nextBall.getY());
 		double dir = Math.toDegrees(Math.atan((ballY-cs.robot.get(0).getY())/(ballX-cs.robot.get(0).getX())));
 		double a2 = getDistance(nextBall, cs.robot.get(0))*getDistance(nextBall, cs.robot.get(0));
 		double c2 = getDistance(nextBall, cs.robot.get(1))*getDistance(nextBall, cs.robot.get(1));
-		double b2 = getDistance(cs.robot.get(0) ,cs.robot.get(0))*getDistance(cs.robot.get(0), cs.robot.get(0));
-		double denominator = 2*getDistance(nextBall, cs.robot.get(0))*getDistance(cs.robot.get(0) ,cs.robot.get(0));
-		dir = (a2+c2-b2)/denominator;
-		dir = Math.acos(dir);
+		double b2 = getDistance(cs.robot.get(1) ,cs.robot.get(0))*getDistance(cs.robot.get(0), cs.robot.get(1));
+		//supposedly correct
+		//double denominator = 2*getDistance(nextBall, cs.robot.get(0))*getDistance(nextBall, cs.robot.get(1));
+		double denominator = 2*getDistance(nextBall, cs.robot.get(0))*getDistance(cs.robot.get(1) ,cs.robot.get(0));
+	//supposedly correct
+	//	dir = (a2+c2-b2)/denominator;
+		
+		dir = calcDirection(cs.robot.get(0),cs.robot.get(1),nextBall);
+		//supposedly correct
+	//	dir = Math.toDegrees(Math.acos(dir));
+		System.out.println("a2 = "+a2+" b2 = "+b2+" c2 = "+c2+" denom = "+denominator);
 		//dir = Math.toDegrees()
 		//System.out.println("got measurement");
 		double distance = getDistance(cs.robot.get(0), nextBall);
 		//pixels get converted to cm
-		distance = distance*ratio;
+		System.out.println("distance i pixel "+distance);
+		distance = distance/ratio;
+		
+		
 		
 		System.out.println("vi sender "+dir+"distance"+distance);
-		
+		/*
 		I_DTO dtoo = new DTO();
 		
 		dtoo.setRotation((float) dir);
@@ -192,6 +212,8 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 			
 		}
 		data.reciveData();
+		*/
+		
 		/*
 		I_DTO dtooo = new DTO();
 		dtooo.setDistance((float) 100);
@@ -267,7 +289,36 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 		
 		return 0;
 	}
+	
+	public double calcDirection(Coordinate robotFront, Coordinate robotBack, Coordinate ball){
+		/*
+		Coordinate mix = new Coordinate(robot.getX(),ball.getY());
+		
+		double hypo = getDistance(robot,ball);
+		System.out.println( "mix bold x="+mix.getX()+" mix bold y = "+mix.getY());
+		double opposite = getDistance(ball,mix);
+		
+		System.out.println("in degrees "+Math.toDegrees(Math.asin(opposite/hypo))+" radians "+Math.asin(opposite/hypo) );
+		return Math.toDegrees(Math.asin(opposite/hypo)) ;
+		*/
+		Coordinate vector1 = new Coordinate( Math.abs(robotFront.getX()-robotBack.getX()), Math.abs(robotFront.getY()-robotBack.getY()));
+		Coordinate vector2 = new Coordinate( Math.abs(ball.getX()-robotBack.getX()), Math.abs(ball.getY()-robotBack.getY()));
+		
+		double upper = vector1.getX()*vector2.getX()+vector1.getY()*vector2.getY();
+		double lower = getDistance(robotBack,robotFront)*getDistance(robotBack,ball);
+		
+	// double signed_angle = (Math.atan2(vector2.getY(),vector2.getX()) - Math.atan2(vector1.getY(),vector1.getX()));
+	
+		double dot = vector1.getX()*vector2.getX() + vector1.getY()*vector2.getY();      // dot product between [x1, y1] and [x2, y2]
+				double det = vector1.getX()*vector2.getY() - vector1.getY()*vector2.getX();      // determinant
+				double angle = Math.atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
 
+		
+	System.out.println("not in degrees from vector "+Math.toDegrees(angle));
+		return (Math.acos(upper/lower));
+		
+	}
+//hvis x i robot er stoerre end x i bold
 
 public class Node {
 int x=0,y=0,id=0,deg=361;

@@ -65,10 +65,9 @@ public class ImageProssesing implements I_ImageProssesing {
 Scalar minValuesf = new Scalar(93,140,180);
 Scalar maxValuesf = new Scalar(113,165,210);
 
-Scalar minValuesb = new Scalar(17,60,190);
-Scalar maxValuesb = new Scalar(37,86,215);
 
-
+Scalar minValuesb = new Scalar(149,90,168);
+Scalar maxValuesb = new Scalar(169,110,188);
 		
 		
 		Point back = findColor(frame,minValuesb ,maxValuesb);
@@ -153,7 +152,7 @@ Scalar maxValuesb = new Scalar(37,86,215);
 				}
 			}
 		}
-		System.out.println("Itrations" + iter);
+		//System.out.println("Itrations" + iter);
 		if (cornors.size() > 4) {
 
 			lengths = convertPointsToVectorsDistancesFromCenter(cornors, center);
