@@ -150,7 +150,7 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Switch between debug/production mode
 	private boolean isDebug = false;
@@ -200,7 +200,7 @@ public class FXController {
 						frame = grabFrame();
 
 						// Find the rectangle of the playing field and crop the image
-						//frame = findAndDrawRect(frame);
+						frame = findAndDrawRect(frame);
 
 						if (UseHSVImgDetection) {
 							frame = grabFrameHSV(frame);
@@ -267,7 +267,7 @@ public class FXController {
 		if (!this.robotActive) {
 
 			this.robotActive = true;
-			//rc.start();
+			rc.start();
 			// update the button content
 			this.robotButton.setText("Stop Camera");
 			System.out.println("Robot starting...");
