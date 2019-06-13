@@ -97,11 +97,8 @@ public class FXController {
 
 	// FXML label to show the current values set with the sliders
 	@FXML
-	private Label pf_CurrentValues;
-	@FXML
-	private Label b_CurrentValues;
-	@FXML
-	private Label r_CurrentValues;
+	private Label hsvCurrentValues;
+
 	// For Hough
 	@FXML
 	private Slider H_minDist;
@@ -135,11 +132,7 @@ public class FXController {
 	// a flag to change the button behavior
 	private boolean robotActive;
 	// property for object binding
-	private ObjectProperty<String> pf_ValuesProp;
-	// property for object binding
-	private ObjectProperty<String> b_ValuesProp;
-	// property for object binding
-	private ObjectProperty<String> r_ValuesProp;
+	private ObjectProperty<String> hsvValuesProp;
 
 	// Homemade Image prosessing
 	I_ImageProssesing ip = new ImageProssesing();
@@ -163,11 +156,12 @@ public class FXController {
 	private boolean isDebug = false;
 
 	// Debug image file
-	//private String debugImg = "Debugging/newvinkelret.jpg";
-	private String debugImg = "Debugging/pic01.jpg";
+	private String debugImg1 = "Debugging/pic01.jpg";
+	private String debugImg2 = "Debugging/pic01.jpg";
+	private String debugImg3 = "Debugging/pic01.jpg";
 
 	// Empty image file
-	private String defaultImg = "Debugging/Default.jpg";
+	private String noImg = "Debugging/Default.jpg";
 
 	/**
 	 * The action triggered by pushing the button on the GUI
@@ -176,12 +170,8 @@ public class FXController {
 	private void startCamera() {
 		// bind a text property with the string containing the current range of
 		// HSV values for object detection
-		pf_ValuesProp = new SimpleObjectProperty<>();
-		this.pf_CurrentValues.textProperty().bind(pf_ValuesProp);
-		b_ValuesProp = new SimpleObjectProperty<>();
-		this.b_CurrentValues.textProperty().bind(b_ValuesProp);
-		r_ValuesProp = new SimpleObjectProperty<>();
-		this.r_CurrentValues.textProperty().bind(r_ValuesProp);
+		hsvValuesProp = new SimpleObjectProperty<>();
+		this.hsvCurrentValues.textProperty().bind(hsvValuesProp);
 
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
@@ -218,44 +208,42 @@ public class FXController {
 							frame = grabFrameHough(frame);
 						}
 
-						if (!isDebug) {
-
-							// Find robot vector
-
-						}
-
 						// finds the pixels to cm Ratio
+
 						Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10),
 								((S_CORNER.getValue() / 100) * 255 - 10), ((V_CORNER.getValue() / 100) * 255 - 10));
 						Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10),
 								((S_CORNER.getValue() / 100) * 255 + 10), ((V_CORNER.getValue() / 100) * 255 + 10));
-/*					
-						  Point p = ip.findColor(frame, minValuesc, maxValuesc);
-						  ip.findCorners(frame, p, (int)TRESHOLD.getValue());
-						  updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
-						 
+
+						Point p = ip.findColor(frame, minValuesc, maxValuesc);
+						ip.findCorners(frame, p, (int) TRESHOLD.getValue());
+						updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+
 						// finds the front and back of the robot
-						//ip.findBackAndFront(frame)
-						updateImageView(robotImage, Utils.mat2Image(frame));
-*/
+
+						updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame)));
+
 						Mat out = new Mat();
-						
+
 						// Check if image needs to flipped before displaying
-						if(frame.width()<frame.height()) {
-							
+						if (frame.width() < frame.height()) {
+
 							Mat dst = new Mat();
 							Core.flip(frame, dst, -1);
-							Core.rotate(dst, out, Core.ROTATE_90_CLOCKWISE); //ROTATE_180 or ROTATE_90_COUNTERCLOCKWISE
-							
+							Core.rotate(dst, out, Core.ROTATE_90_CLOCKWISE); // ROTATE_180 or ROTATE_90_COUNTERCLOCKWISE
+
 						} else {
-							
+
 							out = frame;
 						}
-						
 
+						// convert and show the frame
+						/*
+						 * Mat resizeimage = new Mat(); Size scaleSize = new Size(600, 320);
+						 * Imgproc.resize(frame, resizeimage, scaleSize, 0, 0, Imgproc.INTER_AREA);
+						 */
 						Image imageToShow = Utils.mat2Image(out);
 						updateImageView(videoFrame, imageToShow);
-
 					}
 				};
 
@@ -288,7 +276,7 @@ public class FXController {
 		if (!this.robotActive) {
 
 			this.robotActive = true;
-			//rc.start();
+			rc.start();
 			// update the button content
 			this.robotButton.setText("Stop Camera");
 			System.out.println("Robot starting...");
@@ -318,7 +306,7 @@ public class FXController {
 				if (isDebug == true) {
 
 					// read from from test image
-					frame = Imgcodecs.imread(debugImg);
+					frame = Imgcodecs.imread(debugImg1);
 
 				} else {
 
@@ -364,7 +352,7 @@ public class FXController {
 			// remember: H ranges 0-180, S and V range 0-255
 			Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
 					this.valueStart.getValue());
-			
+
 			Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(),
 					this.valueStop.getValue());
 
@@ -373,7 +361,7 @@ public class FXController {
 					+ minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: " + minValues.val[2] + "-"
 					+ maxValues.val[2];
 
-			Utils.onFXThread(this.b_ValuesProp, valuesToPrint);
+			Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
 
 			// threshold HSV image to select tennis balls
 			Core.inRange(hsvImage, minValues, maxValues, mask);
@@ -416,6 +404,11 @@ public class FXController {
 			// init
 
 			Mat grayImage = new Mat();
+
+			Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
+
+			Imgproc.medianBlur(grayImage, grayImage, 5);
+
 			Mat circles = new Mat();
 
 			int min_dist = new Integer((int) this.H_minDist.getValue());
@@ -424,14 +417,11 @@ public class FXController {
 			int minRad = new Integer((int) this.H_minRad.getValue());
 			int maxRad = new Integer((int) this.H_maxRad.getValue());
 
-			Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
-			Imgproc.medianBlur(grayImage, grayImage, 5);
-
 			// show the current selected HSV range
 			String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh + ", Center Threshold: "
 					+ cTresh + ", Min Radius: " + minRad + ", Max Radius: " + maxRad;
 
-			Utils.onFXThread(this.b_ValuesProp, valuesToPrint);
+			Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
 
 			Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double) grayImage.rows() / min_dist,
 					uThresh, cTresh, minRad, maxRad);
@@ -476,10 +466,9 @@ public class FXController {
 		 * dst = new Mat(downscaledSize, frame.type()); Imgproc.resize(frame, dst,
 		 * downscaledSize);
 		 */
-		Mat noImg = Imgcodecs.imread(defaultImg);
+		Mat debugImg1 = Imgcodecs.imread(noImg);
 		Mat detectedEdges = new Mat();
 		Mat edges = new Mat();
-		Mat dilatedEdges = new Mat();
 		Mat blurredImage = new Mat();
 		Mat hsvImage = new Mat();
 		Mat mask = new Mat();
@@ -502,12 +491,10 @@ public class FXController {
 				+ minValues.val[1] + "-" + maxValues.val[1] + "\tValue range: " + minValues.val[2] + "-"
 				+ maxValues.val[2];
 
-		Utils.onFXThread(this.pf_ValuesProp, valuesToPrint);
+		Utils.onFXThread(this.hsvValuesProp, valuesToPrint);
 
-		// In HSV space, the red color wraps around 180. So we need the H values to be
-		// both in [0,10] and [170, 180].
+		// threshold HSV image to select tennis balls
 		Core.inRange(hsvImage, minValues, maxValues, mask);
-
 		// show the partial output
 		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
 
@@ -519,10 +506,10 @@ public class FXController {
 		// canny detector, with ratio of lower:upper threshold of 3:1
 		Imgproc.Canny(detectedEdges, edges, this.C_Low.getValue(), this.C_Max.getValue(), 3, true);
 		// STEP 5: makes the object in white bigger to join nearby lines
-		Imgproc.dilate(edges, dilatedEdges, new Mat(), new Point(-1, -1), 1); // 1
+		Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
 
 		List<MatOfPoint> contours = new ArrayList<>();
-		Imgproc.findContours(dilatedEdges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		// STEP 7: Sort the contours by length and only keep the largest one
 
 		if (contours.size() > 0) {
@@ -583,50 +570,60 @@ public class FXController {
 					dstPoints.fromArray(arrDstPoints);
 					homography = Calib3d.findHomography(maxCurve, dstPoints);
 
+					// Draws circles around the corners of the found rectangle
+
+					/*
+					 * double temp_double[] = dstPoints.get(0, 0); Point p1 = new
+					 * Point(temp_double[0], temp_double[1]); Imgproc.circle(frame, new Point(p1.x,
+					 * p1.y), 20, new Scalar(255, 0, 0), 5); //p1 is colored red
+					 * 
+					 * temp_double = dstPoints.get(1, 0); Point p2 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(frame, new Point(p2.x, p2.y), 20, new
+					 * Scalar(0, 255, 0), 5); //p2 is colored green
+					 * 
+					 * temp_double = dstPoints.get(2, 0); Point p3 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(frame, new Point(p3.x, p3.y), 20, new
+					 * Scalar(0, 0, 255), 5); //p3 is colored blue
+					 * 
+					 * temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(frame, new Point(p4.x, p4.y), 20, new
+					 * Scalar(0, 255, 255), 5); //p1 is colored violet
+					 */
+
 					// Warp the input image using the computed homography matrix
 					Imgproc.warpPerspective(frame, result, homography, size);
-					
-					// Draws circles around the corners of the found rectangle
-					 /*double temp_double[] = dstPoints.get(0, 0); Point p1 = new
-							  Point(temp_double[0], temp_double[1]); Imgproc.circle(result, new Point(p1.x,
-							  p1.y), 20, new Scalar(255, 0, 0), -1); //p1 is colored red
-							  
-							  temp_double = dstPoints.get(1, 0); Point p2 = new Point(temp_double[0],
-							  temp_double[1]); Imgproc.circle(result, new Point(p2.x, p2.y), 20, new
-							  Scalar(0, 255, 0), -1); //p2 is colored green
-							  
-							  temp_double = dstPoints.get(2, 0); Point p3 = new Point(temp_double[0],
-							  temp_double[1]); Imgproc.circle(result, new Point(p3.x, p3.y), 20, new
-							  Scalar(0, 0, 255), -1); //p3 is colored blue
-							  
-							 temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
-							  temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
-							  Scalar(0, 255, 255), -1); //p1 is colored violet*/
 
-							  
-							  if(frame.width() < frame.height()) {
-								  
-								  System.out.println("FLIP IT!");
-								  
-								  Mat flippedImage = new Mat();
-								  Core.flip(result, flippedImage, -1);
-								  
-								  result = flippedImage;
-								  
-							  }
-							  
+					// Draws circles around the corners of the found rectangle
+					/*
+					 * double temp_double[] = dstPoints.get(0, 0); Point p1 = new
+					 * Point(temp_double[0], temp_double[1]); Imgproc.circle(result, new Point(p1.x,
+					 * p1.y), 20, new Scalar(255, 0, 0), -1); //p1 is colored red
+					 * 
+					 * temp_double = dstPoints.get(1, 0); Point p2 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(result, new Point(p2.x, p2.y), 20, new
+					 * Scalar(0, 255, 0), -1); //p2 is colored green
+					 * 
+					 * temp_double = dstPoints.get(2, 0); Point p3 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(result, new Point(p3.x, p3.y), 20, new
+					 * Scalar(0, 0, 255), -1); //p3 is colored blue
+					 * 
+					 * temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
+					 * Scalar(0, 255, 255), -1); //p1 is colored violet
+					 */
+
 					frame = result;
 
 				} else {
 
-					frame = noImg;
+					frame = debugImg1;
 
 				}
 			}
 
 		} else {
 
-			frame = noImg;
+			frame = debugImg1;
 		}
 
 		return frame;
@@ -665,11 +662,9 @@ public class FXController {
 	 * Given a binary image containing one or more closed surfaces, use it as a mask
 	 * to find and highlight the objects contours
 	 * 
-	 * @param maskedImage
-	 *            the binary image to be used as a mask
-	 * @param frame
-	 *            the original {@link Mat} image to be used for drawing the objects
-	 *            contours
+	 * @param maskedImage the binary image to be used as a mask
+	 * @param frame       the original {@link Mat} image to be used for drawing the
+	 *                    objects contours
 	 * @return the {@link Mat} image with the objects contours framed
 	 */
 	private Mat findAndDrawBalls(Mat maskedImage, Mat frame) {
@@ -739,10 +734,8 @@ public class FXController {
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image
-	 *            the {@link ImageView} to use
-	 * @param dimension
-	 *            the width of the image to set
+	 * @param image     the {@link ImageView} to use
+	 * @param dimension the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -775,10 +768,8 @@ public class FXController {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view
-	 *            the {@link ImageView} to update
-	 * @param image
-	 *            the {@link Image} to show
+	 * @param view  the {@link ImageView} to update
+	 * @param image the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
