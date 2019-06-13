@@ -38,9 +38,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import nu.pattern.OpenCV;
-import objects.Ball;
-import objects.BallList;
-import objects.Robot;
+import objects.*;
 import tools.OpenCVUtil;
 import tools.Utils;
 
@@ -601,8 +599,11 @@ public class FXController {
 							 temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
 							  temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
 							  Scalar(0, 255, 255), -1); //p1 is colored violet
-
 							  
+								// save frane size for use in robotController
+								FrameSize fSize =  FrameSize.getInstance();
+								fSize.setX(frame.width());
+								fSize.setY(frame.height());
 							  if(frame.width() < frame.height()) {
 								  
 								  System.out.println("FLIP IT!");

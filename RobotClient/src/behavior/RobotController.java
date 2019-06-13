@@ -12,6 +12,7 @@ import dto.DTO;
 import dto.I_DTO;
 import objects.Ball;
 import objects.BallList;
+import objects.FrameSize;
 import objects.Robot;
 
 public class RobotController {
@@ -31,12 +32,13 @@ public class RobotController {
 	public void getView() {
 		path = new ArrayList<Coordinate>();
 	//hardcoded test!!! 
-	cs = new CSystem(800,600);
 	
 	
+	 FrameSize framesize = FrameSize.getInstance();
 	 Robot rob=Robot.getInstance();
 	 BallList bl = BallList.getInstance();
 	 
+	 cs = new CSystem(framesize.getX(),framesize.getY());
 	 
 	 ballist = bl.getBallList();
 	 

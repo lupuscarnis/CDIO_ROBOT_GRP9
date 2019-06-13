@@ -4,7 +4,25 @@ import java.util.ArrayList;
 
 public class CSystem {
 	
-	int xLength, yLength;
+	double xLength, yLength;
+	
+	public double getXLength() {
+		return xLength;
+	}
+
+	public void setXLength(double xLength) {
+		this.xLength = xLength;
+	}
+
+	public double getYLength() {
+		return yLength;
+	}
+
+	public void setYLength(double yLength) {
+		this.yLength = yLength;
+	}
+
+
 	public ArrayList<Coordinate> balls;
 	public ArrayList<Coordinate> border;
 	public ArrayList<Coordinate> robot;
@@ -32,7 +50,7 @@ public boolean isEmpty() {
 }
 
 
-public CSystem(int xLength, int yLength) {
+public CSystem(double xLength, double yLength) {
 	
 	this.xLength = xLength;
 	this.yLength = yLength;
