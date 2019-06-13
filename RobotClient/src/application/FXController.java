@@ -214,18 +214,20 @@ public class FXController {
 
 						}
 						// finds the pixels to cm Ratio
-						Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10),
+						
+							Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10),
 								((S_CORNER.getValue() / 100) * 255 - 10), ((V_CORNER.getValue() / 100) * 255 - 10));
 						Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10),
 								((S_CORNER.getValue() / 100) * 255 + 10), ((V_CORNER.getValue() / 100) * 255 + 10));
-/*					
+
+					
 						  Point p = ip.findColor(frame, minValuesc, maxValuesc);
 						  ip.findCorners(frame, p, (int)TRESHOLD.getValue());
 						  updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
-*/						 
+	 
 						// finds the front and back of the robot
 					
-						updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame)));
+						  updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame)));
 
 						// convert and show the frame
 						Mat resizeimage = new Mat();

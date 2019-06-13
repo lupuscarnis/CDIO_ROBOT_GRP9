@@ -53,13 +53,23 @@ public class ImageProssesing implements I_ImageProssesing {
 	 */
 	@Override
 	public Mat findBackAndFront(Mat frame) {
+		
+		
+		
+/*
 		Scalar minValuesf = new Scalar(((H_FRONT.getValue()/2)-15),((S_FRONT.getValue()/100)*255-10),((V_FRONT.getValue()/100)*255-10));
 		Scalar maxValuesf = new Scalar(((H_FRONT.getValue()/2)+15),((S_FRONT.getValue()/100)*255+10),((V_FRONT.getValue()/100)*255+10));
 		
 		Scalar minValuesb = new Scalar(((H_BACK.getValue()/2)-15),((S_BACK.getValue()/100)*255-10),((V_BACK.getValue()/100)*255-10));
 		Scalar maxValuesb = new Scalar(((H_BACK.getValue()/2)+15),((S_BACK.getValue()/100)*255+10),((V_BACK.getValue()/100)*255+10));
-
+*/
+		Scalar minValuesf = new Scalar(93,140,180);
+		Scalar maxValuesf = new Scalar(113,165,210);
 		
+		Scalar minValuesb = new Scalar(17,120,255);
+		Scalar maxValuesb = new Scalar(37,150,255);
+
+	
 		
 		Point back = findColor(frame,minValuesb ,maxValuesb);
 		Point front = findColor(frame, minValuesf, maxValuesf);
@@ -72,13 +82,6 @@ public class ImageProssesing implements I_ImageProssesing {
 
 		
 		Imgproc.line(frame, back, front, new Scalar(350, 255, 255));
-		/*
-		 * System.out.println("Distance: " + Math.sqrt(Math.pow(s.getBackX() -
-		 * s.getFrontX(), 2) + Math.pow(s.getBackY() - s.getFrontY(), 2)));
-		 * System.out.println("Distance in cm: " + (Math.sqrt(Math.pow(s.getBackX() -
-		 * s.getFrontX(), 2) + Math.pow(s.getBackY() - s.getFrontY(), 2))) /
-		 * s.getPixelToCM());
-		 */
 		return frame;
 
 	}
