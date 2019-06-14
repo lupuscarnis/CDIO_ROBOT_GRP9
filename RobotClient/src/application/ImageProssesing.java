@@ -66,6 +66,7 @@ public class ImageProssesing implements I_ImageProssesing {
 		Scalar maxValuesb = new Scalar(175,84,171);
 
 
+
 		Scalar minValuesf = new Scalar(105,92,151);
 		Scalar maxValuesf = new Scalar(125,112,171);
 		
