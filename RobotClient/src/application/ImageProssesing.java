@@ -62,12 +62,17 @@ public class ImageProssesing implements I_ImageProssesing {
 		Scalar maxValuesb = new Scalar(((H_BACK.getValue()/2)+15),((S_BACK.getValue()/100)*255+10),((V_BACK.getValue()/100)*255+10));
 */
 		
-Scalar minValuesb = new Scalar(165,79,161);
-Scalar maxValuesb = new Scalar(175,89,171);
 
 
-Scalar minValuesf = new Scalar(105,92,151);
-Scalar maxValuesf = new Scalar(125,112,171);
+
+		Scalar minValuesb = new Scalar(165,74,161);
+		Scalar maxValuesb = new Scalar(175,84,171);
+
+
+
+
+		Scalar minValuesf = new Scalar(105,92,151);
+		Scalar maxValuesf = new Scalar(125,112,171);
 		
 		
 		Point back = findColor(frame,minValuesb ,maxValuesb);
@@ -81,13 +86,7 @@ Scalar maxValuesf = new Scalar(125,112,171);
 
 		
 		Imgproc.line(frame, back, front, new Scalar(350, 255, 255));
-		/*
-		 * System.out.println("Distance: " + Math.sqrt(Math.pow(s.getBackX() -
-		 * s.getFrontX(), 2) + Math.pow(s.getBackY() - s.getFrontY(), 2)));
-		 * System.out.println("Distance in cm: " + (Math.sqrt(Math.pow(s.getBackX() -
-		 * s.getFrontX(), 2) + Math.pow(s.getBackY() - s.getFrontY(), 2))) /
-		 * s.getPixelToCM());
-		 */
+	
 		return frame;
 
 	}
