@@ -77,8 +77,8 @@ public class RobotController {
 	double goalX = 10;
 	Coordinate frontOfGoal = new Coordinate(goalX,goalY);
 	//calculating direction to drive in front of goal
-		
-	double	dir = getDirection(frontOfGoal);
+		System.out.println("the next thing comes grom scoreGoal");
+	double	dir =0;// getDirection(frontOfGoal);
 	
 		//dir = Math.toDegrees()
 		//System.out.println("got measurement");
@@ -87,7 +87,7 @@ public class RobotController {
 		//pixels get converted to cm
 		distance = distance*ratio;
 		
-System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal");
+//System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal");
 		//send message to drive in front of goal
 		
 		I_DTO dtoo = new DTO();
@@ -107,7 +107,7 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 		
 		Coordinate goal = new Coordinate(0,cs.getYLength()/2);
 	System.out.println(goal.getX()+" goal tal "+goal.getY());
-		dir = getDirection(goal);
+		//dir = getDirection(goal);
 		
 		System.out.println("vi sender "+dir+"distance for at komme parallelt med maalet");
 		
@@ -195,7 +195,7 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 		
 		
 		//dir = calcDirection(cs.robot.get(0),cs.robot.get(1),nextBall);
-		dir = calcDirection(cs.robot.get(0),cs.robot.get(1),nextBall);
+		dir = calcDirection(robotCenter,cs.robot.get(1),nextBall);
 		//supposedly correct
 	//	dir = Math.toDegrees(Math.acos(dir));
 	//	System.out.println("a2 = "+a2+" b2 = "+b2+" c2 = "+c2+" denom = "+denominator);
@@ -207,7 +207,7 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 		distance = distance/ratio;
 		
 		
-		System.out.println("hej fra vores "+calcDirection(cs.robot.get(0),cs.robot.get(1),nextBall));
+		//System.out.println("hej fra vores "+calcDirection(cs.robot.get(0),cs.robot.get(1),nextBall));
 		//System.out.println("vi sender "+dir+"distance"+distance);
 		
 		I_DTO dtoo = new DTO();
@@ -227,7 +227,7 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 		
 		/*
 		I_DTO dtooo = new DTO();
-		dtooo.setDistance((float) 100);
+		dtooo.setDistance((float) 10);
 		dtooo.setClawMove(-180);
 		
 		I_DAO data2 = new DAO();  
@@ -287,40 +287,16 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 		
 	}
 	
-	public double getDirection(/*Coordinate robotFront, Coordinate robotBack, */Coordinate destination) {
-		//could easily be changed to work for none robot directions, if needed
-		//front =0 back = 1
-		double a2 = getDistance(destination, cs.robot.get(0))*getDistance(destination, cs.robot.get(0));
-		double c2 = getDistance(destination, cs.robot.get(1))*getDistance(destination, cs.robot.get(1));
-		double b2 = getDistance(cs.robot.get(0) ,cs.robot.get(0))*getDistance(cs.robot.get(0), cs.robot.get(0));
-		double denominator = 2*getDistance(destination, cs.robot.get(0))*getDistance(cs.robot.get(0) ,cs.robot.get(0));
-		double dir = (a2+c2-b2)/denominator;
-		dir = Math.acos(dir);
-		
-		
-		return 0;
-	}
+
 	
 	public double calcDirection(Coordinate robotFront, Coordinate robotBack, Coordinate ball){
-		/*
-		Coordinate mix = new Coordinate(robot.getX(),ball.getY());
-		
-		double hypo = getDistance(robot,ball);
-		System.out.println( "mix bold x="+mix.getX()+" mix bold y = "+mix.getY());
-		double opposite = getDistance(ball,mix);
-		
-		System.out.println("in degrees "+Math.toDegrees(Math.asin(opposite/hypo))+" radians "+Math.asin(opposite/hypo) );
-		return Math.toDegrees(Math.asin(opposite/hypo)) ;
-		*/
+	
 		
 	
 		
 		
 		Coordinate vector1 = new Coordinate( (robotFront.getX()-robotBack.getX()), (robotFront.getY()-robotBack.getY()));
 		Coordinate vector2 = new Coordinate( (ball.getX()-robotBack.getX()), (ball.getY()-robotBack.getY()));
-		
-//		Coordinate vector1 = new Coordinate( Math.abs(robotFront.getX()-robotBack.getX()), Math.abs(robotFront.getY()-robotBack.getY()));
-//		Coordinate vector2 = new Coordinate( Math.abs(ball.getX()-robotBack.getX()), Math.abs(ball.getY()-robotBack.getY()));
 		
 		double upper = vector1.getX()*vector2.getX()+vector1.getY()*vector2.getY();
 		double lower = getDistance(robotBack,robotFront)*getDistance(robotBack,ball);
@@ -332,33 +308,14 @@ System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal
 				double det = vector1.getX()*vector2.getY() - vector1.getY()*vector2.getX();      // determinant
 				double angle = Math.atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
 				angle = Math.toDegrees(angle);
-		
-	//System.out.println("not in degrees from vector "+Math.toDegrees(angle));
-		//return Math.toDegrees((Math.acos(upper/lower)));
+		angle = 0-angle;
 	System.out.println("signes ankel "+angle);
 	return angle;
 		
 	}
 //hvis x i robot er stoerre end x i bold
 	
-public static double getAngle(Coordinate roboPt, Coordinate targetPt) {
-		
-		double angle = Math.toDegrees(Math.atan2(targetPt.getY() - roboPt.getY(), targetPt.getX() - roboPt.getX()));
-		angle = angle*(-1);
-System.out.println("Den rene ankel"+angle);
 
-/*
-if(angle<-90) {
-	System.out.println("kaspers ankel =   "+Math.abs(angle+180)*(-1));
-	return Math.abs((angle+180)*(-1));
-	
-	
-}
-System.out.println("kaspers ankel =   "+(angle-90)*(-1));
-*/
-	    return (angle);
-		
-	}
 
 public class Node {
 int x=0,y=0,id=0,deg=361;
