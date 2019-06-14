@@ -37,6 +37,7 @@ public class RobotController {
 	 FrameSize framesize = FrameSize.getInstance();
 	 Robot rob=Robot.getInstance();
 	 BallList bl = BallList.getInstance();
+	 System.out.println("getView kald "+rob.getBackX()+rob.getFrontX());
 	 
 	 cs = new CSystem(framesize.getX(),framesize.getY());
 	 

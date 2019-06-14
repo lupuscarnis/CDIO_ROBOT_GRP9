@@ -65,14 +65,14 @@ public class ImageProssesing implements I_ImageProssesing {
 
 
 
-		Scalar minValuesb = new Scalar(165,74,161);
-		Scalar maxValuesb = new Scalar(175,84,171);
+		Scalar minValuesb = new Scalar(160,87,174);
+		Scalar maxValuesb = new Scalar(170,97,184);
 
 
 
 
-		Scalar minValuesf = new Scalar(105,92,151);
-		Scalar maxValuesf = new Scalar(125,112,171);
+		Scalar minValuesf = new Scalar(99,135,153);
+		Scalar maxValuesf = new Scalar(119,155,173);
 		
 		
 		Point back = findColor(frame,minValuesb ,maxValuesb);

@@ -441,7 +441,7 @@ public class FXController {
 				Point center = new Point(Math.round(c[0]), Math.round(c[1]));
 				if (!(center.x==0 && center.y==0)){
 				p.add(center);
-				System.out.println("fandt bold  x "+center.x+" og y er "+ center.y);
+				//System.out.println("fandt bold  x "+center.x+" og y er "+ center.y);
 				}
 				// circle center
 
