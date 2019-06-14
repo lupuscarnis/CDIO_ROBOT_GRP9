@@ -160,11 +160,11 @@ public class FXController {
 	private int webcamID = 0;
 
 	// Switch between debug/production mode
-	private boolean isDebug = false;
+	private boolean isDebug = true;
 
 	// Debug image file
 	//private String debugImg = "Debugging/newvinkelret.jpg";
-	private String debugImg = "Debugging/pic01.jpg";
+	private String debugImg = "Debugging/Robo_w_Balls.png";
 
 	// Empty image file
 	private String defaultImg = "Debugging/Default.jpg";
@@ -476,8 +476,14 @@ public class FXController {
 
 		return frame;
 	}
-
-
+	
+	/**
+	 * Playing Field Detection and Perspective Transform
+	 * 
+	 * 
+	 * 
+	 * @return the {@link Image} to show
+	 */
 	private Mat findAndDrawRect(Mat frame) {
 
 		/*
@@ -493,13 +499,26 @@ public class FXController {
 		Mat blurredImage = new Mat();
 		Mat hsvImage = new Mat();
 		Mat mask = new Mat();
-
-		// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
-		Imgproc.GaussianBlur(frame, blurredImage, new Size(45, 45), 0);
-
+		Mat normalized = new Mat();
+		Mat adapt = new Mat();
+		
 		// convert the frame to HSV
-		Imgproc.cvtColor(blurredImage, hsvImage, Imgproc.COLOR_BGR2HSV);
+		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 
+		//Imgproc.GaussianBlur(hsvImage, blurredImage, new Size(45, 45), 0);
+		
+		// Limit color range to reds in the image
+		Mat redMask1 = new Mat();
+		Mat redMask2 = new Mat();
+		Mat redMaskf = new Mat();
+
+		Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255), redMask1);
+		Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180, 255, 255), redMask2);
+		Core.bitwise_or(redMask1, redMask2, redMaskf);
+
+		//Imgproc.adaptiveThreshold(redMaskf, adapt, 125, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 11, 12);
+		//Core.normalize(redMaskf, redMaskf, 0.0, 255.0 / 2, Core.NORM_MINMAX);
+		
 		// get thresholding values from the UI
 		// remember: H ranges 0-180, S and V range 0-255
 		Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
@@ -517,27 +536,24 @@ public class FXController {
 		// In HSV space, the red color wraps around 180. So we need the H values to be
 		// both in [0,10] and [170, 180].
 		Core.inRange(hsvImage, minValues, maxValues, mask);
-
-		// show the partial output
-		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
-
-		// try to filter everything inside the rectangle
-		Imgproc.medianBlur(mask, detectedEdges, 9);
-
-		// Imgproc.erode(detectedEdges, detectedEdges, new Mat());
-
+		
+		//Imgproc.erode(blurredImage, detectedEdges, new Mat());
+		Imgproc.medianBlur(redMaskf, blurredImage, 9);
 		// canny detector, with ratio of lower:upper threshold of 3:1
-		Imgproc.Canny(detectedEdges, edges, this.C_Low.getValue(), this.C_Max.getValue(), 3, true);
+		//Imgproc.Canny(blurredImage, edges, this.C_Low.getValue(), this.C_Max.getValue(), 3, true);
+		Imgproc.Canny(blurredImage, edges, 300, 600, 5, true);
 		// STEP 5: makes the object in white bigger to join nearby lines
 		Imgproc.dilate(edges, dilatedEdges, new Mat(), new Point(-1, -1), 1); // 1
 
+		this.updateImageView(this.morphImage, Utils.mat2Image(dilatedEdges));
+		
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(dilatedEdges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		// STEP 7: Sort the contours by length and only keep the largest one
 
 		if (contours.size() > 0) {
 
-			double maxArea = 0;
+			/*double maxArea = -1;
 			int maxAreaIdx = -1;
 
 			for (int idx = 0; idx != contours.size(); ++idx) {
@@ -547,7 +563,37 @@ public class FXController {
 					maxArea = contourarea;
 					maxAreaIdx = idx;
 				}
+				
+				System.out.println(contours.size());
 
+			}*/
+			
+			double maxArea = -1;
+			int maxAreaIdx = -1;
+			System.out.println("size: "+Integer.toString(contours.size()));
+			MatOfPoint temp_contour = contours.get(0); //the largest is at the index 0 for starting point
+			MatOfPoint2f approxCurve = new MatOfPoint2f();
+			MatOfPoint largest_contour = contours.get(0);
+
+			List<MatOfPoint> largest_contours = new ArrayList<MatOfPoint>();
+
+			for (int idx = 0; idx < contours.size(); idx++) {
+			    temp_contour = contours.get(idx);
+			    double contourarea = Imgproc.contourArea(temp_contour);
+			    //compare this contour to the previous largest contour found
+			    if (contourarea > maxArea) {
+			        //check if this contour is a square
+			        MatOfPoint2f new_mat = new MatOfPoint2f( temp_contour.toArray() );
+			        int contourSize = (int)temp_contour.total();
+			        MatOfPoint2f approxCurve_temp = new MatOfPoint2f();
+			        Imgproc.approxPolyDP(new_mat, approxCurve_temp, contourSize*0.05, true);
+			        if (approxCurve_temp.total() == 4) {
+			            maxArea = contourarea;
+			            maxAreaIdx = idx;
+			            approxCurve=approxCurve_temp;
+			            largest_contour = temp_contour;
+			        }
+			    }
 			}
 
 			if (maxAreaIdx >= 0) {
@@ -595,44 +641,44 @@ public class FXController {
 
 					// Warp the input image using the computed homography matrix
 					Imgproc.warpPerspective(frame, result, homography, size);
-					
+
 					// Draws circles around the corners of the found rectangle
-					 /*double temp_double[] = dstPoints.get(0, 0); Point p1 = new
-							  Point(temp_double[0], temp_double[1]); Imgproc.circle(result, new Point(p1.x,
-							  p1.y), 20, new Scalar(255, 0, 0), -1); //p1 is colored red
-							  
-							  temp_double = dstPoints.get(1, 0); Point p2 = new Point(temp_double[0],
-							  temp_double[1]); Imgproc.circle(result, new Point(p2.x, p2.y), 20, new
-							  Scalar(0, 255, 0), -1); //p2 is colored green
-							  
-							  temp_double = dstPoints.get(2, 0); Point p3 = new Point(temp_double[0],
-							  temp_double[1]); Imgproc.circle(result, new Point(p3.x, p3.y), 20, new
-							  Scalar(0, 0, 255), -1); //p3 is colored blue
-							  
-							 temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
-							  temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
+					/*
+					 * double temp_double[] = dstPoints.get(0, 0); Point p1 = new
+					 * Point(temp_double[0], temp_double[1]); Imgproc.circle(result, new Point(p1.x,
+					 * p1.y), 20, new Scalar(255, 0, 0), -1); //p1 is colored red
+					 * 
+					 * temp_double = dstPoints.get(1, 0); Point p2 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(result, new Point(p2.x, p2.y), 20, new
+					 * Scalar(0, 255, 0), -1); //p2 is colored green
+					 * 
+					 * temp_double = dstPoints.get(2, 0); Point p3 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(result, new Point(p3.x, p3.y), 20, new
+					 * Scalar(0, 0, 255), -1); //p3 is colored blue
+					 * 
+					 * temp_double = dstPoints.get(3, 0); Point p4 = new Point(temp_double[0],
+					 * temp_double[1]); Imgproc.circle(result, new Point(p4.x, p4.y), 20, new
+					 * 
+					 * Scalar(0, 255, 255), -1); //p1 is colored violet
+					 * 
+					 * Scalar(0, 255, 255), -1); //p1 is colored violet
+					 */
 
-							  Scalar(0, 255, 255), -1); //p1 is colored violet
+					// save frame size for use in robotController
+					FrameSize fSize = FrameSize.getInstance();
+					fSize.setX(frame.width());
+					fSize.setY(frame.height());
+					if (frame.width() < frame.height()) {
 
-							  Scalar(0, 255, 255), -1); //p1 is colored violet*/
+						System.out.println("FLIP IT!");
 
+						Mat flippedImage = new Mat();
+						Core.flip(result, flippedImage, -1);
 
-							  
-								// save frane size for use in robotController
-								FrameSize fSize =  FrameSize.getInstance();
-								fSize.setX(frame.width());
-								fSize.setY(frame.height());
-							  if(frame.width() < frame.height()) {
-								  
-								  System.out.println("FLIP IT!");
-								  
-								  Mat flippedImage = new Mat();
-								  Core.flip(result, flippedImage, -1);
-								  
-								  result = flippedImage;
-								  
-							  }
-							  
+						result = flippedImage;
+
+					}
+
 					frame = result;
 
 				} else {
