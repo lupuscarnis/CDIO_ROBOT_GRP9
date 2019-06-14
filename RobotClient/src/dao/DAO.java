@@ -46,7 +46,7 @@ public class DAO implements I_DAO {
 			e.printStackTrace();
 		}
 		
-		
+		System.out.println(data.toString());
 		out.println(data.toString());
 		return true;
 		

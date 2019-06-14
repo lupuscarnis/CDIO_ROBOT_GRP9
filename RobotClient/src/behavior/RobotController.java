@@ -195,7 +195,9 @@ public class RobotController {
 		
 		
 		//dir = calcDirection(cs.robot.get(0),cs.robot.get(1),nextBall);
-		dir = calcDirection(robotCenter,cs.robot.get(1),nextBall);
+		
+		
+		
 		//supposedly correct
 	//	dir = Math.toDegrees(Math.acos(dir));
 	//	System.out.println("a2 = "+a2+" b2 = "+b2+" c2 = "+c2+" denom = "+denominator);
@@ -208,13 +210,40 @@ public class RobotController {
 		
 		
 		//System.out.println("hej fra vores "+calcDirection(cs.robot.get(0),cs.robot.get(1),nextBall));
+		
 		//System.out.println("vi sender "+dir+"distance"+distance);
+		dir=100;
+		Coordinate temp = robotCenter;
+		while(dir>3) {
+			
+		while(cs.robot.get(0).getX()==temp.getX() &&cs.robot.get(0).getY()==temp.getY() ) {
+			getView();
+			 temp = new Coordinate(cs.robot.get(0).getX(),cs.robot.get(0).getY());
+		}
+		dir = calcDirection(robotCenter,cs.robot.get(1),nextBall);
 		
 		I_DTO dtoo = new DTO();
 		
 		dtoo.setRotation((float) dir);
+		dtoo.setDistance((float) 0);
+		dtoo.setClawMove(180);
+		dtoo.setBackClawMove(0);
+		//System.out.println(dtoo.toString());
+		
+		I_DAO data = new DAO();  
+		data.sendData(dtoo);
+			
+			
+		
+		data.reciveData();
+		}
+		
+I_DTO dtoo = new DTO();
+		
+		dtoo.setRotation((float) 0);
 		dtoo.setDistance((float) distance);
 		dtoo.setClawMove(180);
+		dtoo.setBackClawMove(0);
 		//System.out.println(dtoo.toString());
 		
 		I_DAO data = new DAO();  
