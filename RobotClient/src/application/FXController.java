@@ -497,13 +497,7 @@ public class FXController {
 				s.add(new Ball(B.x, B.y));
 			}
 
-		}
-		BallList s = BallList.getInstance();
-		s.clearList();
-		for (Point B : p) {
-			s.add(new Ball(B.x, B.y));
-		}
-
+	
 
 		for (int i = 0; i < p.size(); i++) {
 			// System.out.println("Point (X,Y): "+p.get(i));
@@ -512,6 +506,7 @@ public class FXController {
 
 		return frame;
 	}
+
 
 	private Mat findAndDrawRect(Mat frame) {
 
