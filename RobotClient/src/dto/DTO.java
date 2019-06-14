@@ -149,6 +149,7 @@ public class DTO implements I_DTO {
 			}
 
 		}
+		s.setBackClawMove(map.get("backClawMove"));
 		s.setClawMove(map.get("clawMove"));
 		s.setDistance(map.get("Distance"));
 		s.setRotation(map.get("Rotation"));
