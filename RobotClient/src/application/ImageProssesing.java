@@ -1,6 +1,7 @@
 
 package application;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,7 +17,9 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Slider;
+import javafx.scene.layout.BorderPane;
 import objects.Robot;
 import tools.I_Size_Scale;
 import tools.Size_scale;
@@ -25,25 +28,13 @@ import tools.Size_scale;
 
 public class ImageProssesing implements I_ImageProssesing {
 
-	@FXML
-	private Slider H_FRONT;	
-	@FXML
-	private Slider S_FRONT;
-	@FXML
-	private Slider V_FRONT;
-	@FXML
-	private Slider H_BACK;
-	@FXML
-	private Slider S_BACK;
-	@FXML
-	private Slider V_BACK;
-
 
 	// the FXML area for showing the mask
 	Mat output;
 
 	public ImageProssesing() {
-		// TODO Auto-generated constructor stub
+		
+		  
 	}
 
 	/*
@@ -52,31 +43,23 @@ public class ImageProssesing implements I_ImageProssesing {
 	 * @see application.I_ImageProssesing#findBackAndFront(org.opencv.core.Mat)
 	 */
 	@Override
-	public Mat findBackAndFront(Mat frame) {
+	public Mat findBackAndFront(Mat frame, List<Scalar> values) {
 		
-		/*
-		Scalar minValuesf = new Scalar(((H_FRONT.getValue()/2)-15),((S_FRONT.getValue()/100)*255-10),((V_FRONT.getValue()/100)*255-10));
-		Scalar maxValuesf = new Scalar(((H_FRONT.getValue()/2)+15),((S_FRONT.getValue()/100)*255+10),((V_FRONT.getValue()/100)*255+10));
 		
-		Scalar minValuesb = new Scalar(((H_BACK.getValue()/2)-15),((S_BACK.getValue()/100)*255-10),((V_BACK.getValue()/100)*255-10));
-		Scalar maxValuesb = new Scalar(((H_BACK.getValue()/2)+15),((S_BACK.getValue()/100)*255+10),((V_BACK.getValue()/100)*255+10));
-*/
+	
+	
 		
-
-
-
+/*
 		Scalar minValuesb = new Scalar(160,87,174);
 		Scalar maxValuesb = new Scalar(170,97,184);
-
-
-
-
 		Scalar minValuesf = new Scalar(99,135,153);
 		Scalar maxValuesf = new Scalar(119,155,173);
+
+*/
+
+		Point front = findColor(frame, values.get(0), values.get(1));
 		
-		
-		Point back = findColor(frame,minValuesb ,maxValuesb);
-		Point front = findColor(frame, minValuesf, maxValuesf);
+		Point back = findColor(frame,values.get(2), values.get(3));
 
 		Robot s = Robot.getInstance();
 		s.setBackX(back.x);
@@ -118,9 +101,9 @@ public class ImageProssesing implements I_ImageProssesing {
 	 * org.opencv.core.Point, int)
 	 */
 	@Override
-	public void findCorners(Mat frame, org.opencv.core.Point center, int threshold) {
+	public Mat findCorners(Mat frame, org.opencv.core.Point center, int threshold) {
 
-		double tresh = 4;
+		System.out.println("Im Here");
 		Mat srcGray = new Mat();
 		Mat dst = new Mat();
 		Mat dstNorm = new Mat();
@@ -140,18 +123,26 @@ public class ImageProssesing implements I_ImageProssesing {
 		Core.normalize(dst, dstNorm, 0, 255, Core.NORM_MINMAX);
 		Core.convertScaleAbs(dstNorm, dstNormScaled);
 		lengths.clear();
+		
 		float[] dstNormData = new float[(int) (dstNorm.total() * dstNorm.channels())];
 		dstNorm.get(0, 0, dstNormData);
+		
 		for (int i = 0; i < dstNorm.rows(); i++) {
+			if(iter > 200) {
+				break;
+			}
 			for (int j = 0; j < dstNorm.cols(); j++) {
 				if ((int) dstNormData[i * dstNorm.cols() + j] > threshold) {
 					cornors.add(new Point(j, i));
 					Imgproc.circle(dstNormScaled, new Point(j, i), 2, new Scalar(255, 255, 255));
 					iter++;
-				}
+					if(iter > 200) {
+						break;
+					}
+				} 
 			}
 		}
-		//System.out.println("Itrations" + iter);
+		System.out.println("Itrations" + iter);
 		if (cornors.size() > 4) {
 
 			lengths = convertPointsToVectorsDistancesFromCenter(cornors, center);
@@ -176,6 +167,7 @@ public class ImageProssesing implements I_ImageProssesing {
 			
 		}
 		output = dstNormScaled;
+		return dstNormScaled;
 	}
 
 	/*
@@ -219,7 +211,7 @@ public class ImageProssesing implements I_ImageProssesing {
 			y += b.y;
 
 		}
-		org.opencv.core.Point zonecenter = new org.opencv.core.Point(x / iter, y / iter);
+		org.opencv.core.Point zonecenter = new org.opencv.core.Point((x / iter), (y / iter));
 
 		return zonecenter;
 
