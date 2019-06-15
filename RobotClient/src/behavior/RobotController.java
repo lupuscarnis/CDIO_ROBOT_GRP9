@@ -76,8 +76,8 @@ public class RobotController {
 	double goalX = 10;
 	Coordinate frontOfGoal = new Coordinate(goalX,goalY);
 	//calculating direction to drive in front of goal
-		System.out.println("the next thing comes grom scoreGoal");
-	double	dir =0;// getDirection(frontOfGoal);
+		
+	double	dir = getDirection(frontOfGoal);
 	
 	
 		//distance to in front of goal
@@ -85,9 +85,9 @@ public class RobotController {
 		//pixels get converted to cm
 		distance = distance*ratio;
 		
-//System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal");
+System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran maal");
 		//send message to drive in front of goal
-		
+		/*
 		I_DTO dtoo = new DTO();
 		
 		dtoo.setRotation((float) dir);
