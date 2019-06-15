@@ -182,7 +182,9 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
+
 	private int webcamID = 1;
+
 
 	// Switch between debug/production mode
 	private boolean isDebug = false;
@@ -468,7 +470,7 @@ public class FXController {
 				Point center = new Point(Math.round(c[0]), Math.round(c[1]));
 				if (!(center.x == 0 && center.y == 0)) {
 					p.add(center);
-					// System.out.println("fandt bold x "+center.x+" og y er "+ center.y);
+					 System.out.println("fandt bold x "+center.x+" og y er "+ center.y);
 				}
 				// circle center
 
@@ -945,6 +947,9 @@ double threshold = S_THRESHOLD_ROBOT.getValue();
 		Scalar minValuesb = new Scalar((hueBack - threshold), (satBack - threshold), (valBack - threshold));
 		values.add(minValuesb);
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
+
+		values.add(maxValuesf);
+		
 		values.add(maxValuesb);
 		String valuesToPrint = "Hue range Front: " + df.format(minValuesf.val[0]) + "-" + df.format(maxValuesf.val[0]) + "\tSaturation range: "
 				+ df.format(minValuesf.val[1]) + "-" + df.format(maxValuesf.val[1]) + "\tValue range: " + df.format(minValuesf.val[2]) + "-"
@@ -953,6 +958,7 @@ double threshold = S_THRESHOLD_ROBOT.getValue();
 				+ df.format(maxValuesb.val[2]);
 
 		Utils.onFXThread(this.r_ValuesProp, valuesToPrint);
+
 
 		return values;
 	}
