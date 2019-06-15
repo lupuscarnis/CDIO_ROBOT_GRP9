@@ -31,7 +31,7 @@ public class RobotController {
 	
 	public void getView() {
 		path = new ArrayList<Coordinate>();
-	//hardcoded test!!! 
+	
 	
 	
 	 FrameSize framesize = FrameSize.getInstance();
@@ -215,7 +215,7 @@ public class RobotController {
 		//System.out.println("vi sender "+dir+"distance"+distance);
 		dir=100;
 		Coordinate temp = robotCenter;
-		while(dir>3) {
+		while(dir>2) {
 			
 		while(cs.robot.get(0).getX()==temp.getX() &&cs.robot.get(0).getY()==temp.getY() ) {
 			getView();
