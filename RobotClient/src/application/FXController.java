@@ -182,7 +182,7 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 2;
+	private int webcamID = 1;
 
 	// Switch between debug/production mode
 	private boolean isDebug = false;
