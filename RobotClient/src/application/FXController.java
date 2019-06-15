@@ -717,7 +717,6 @@ public class FXController {
 	 * @param frame
 	 * @return
 	 */
-	
 	private Mat checkRotation(Mat frame) {
 
 		Mat result = new Mat();
@@ -743,6 +742,7 @@ public class FXController {
 		Size Sz = new Size(100, 100);
 		Imgproc.resize(frame, sizeimg, Sz);
 
+		this.updateImageView(this.crossImage1, Utils.mat2Image(sizeimg));
 		/*
 		 * Mat img = Imgcodecs.imread(defaultImg); Rect roi = new Rect(0,0,100,100); Mat
 		 * Cropped = new Mat(img, roi); Mat imwrite = new Mat(); Mat hsvImage = new
