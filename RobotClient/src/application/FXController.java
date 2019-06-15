@@ -234,10 +234,10 @@ public class FXController {
 						Mat frame = new Mat();
 
 						frame = grabFrame();
-						System.out.println("Real Frame Sizes rows: " + frame.rows() + " cols: " + frame.cols());
+						
 						// Find the rectangle of the playing field and crop the image
 						frame = findAndDrawRect(frame);
-						System.out.println("After resize Frame Sizes rows: " + frame.rows() + " cols: " + frame.cols());
+						
 						if (UseHSVImgDetection) {
 							frame = grabFrameHSV(frame);
 						} else {
@@ -435,7 +435,7 @@ public class FXController {
 	 */
 	private Mat grabFrameHough(Mat frame) {
 
-		System.out.println("test132");
+		
 
 		// if the frame is not empty, process it
 		if (!frame.empty()) {
@@ -589,7 +589,7 @@ public class FXController {
 					maxAreaIdx = idx;
 				}
 
-				System.out.println(contours.size());
+				//System.out.println(contours.size());
 
 			}
 			/*

@@ -103,7 +103,7 @@ public class ImageProssesing implements I_ImageProssesing {
 	@Override
 	public Mat findCorners(Mat frame, org.opencv.core.Point center, int threshold) {
 
-		System.out.println("Im Here");
+		
 		Mat srcGray = new Mat();
 		Mat dst = new Mat();
 		Mat dstNorm = new Mat();
@@ -142,7 +142,7 @@ public class ImageProssesing implements I_ImageProssesing {
 				} 
 			}
 		}
-		System.out.println("Itrations" + iter);
+		
 		if (cornors.size() > 4) {
 
 			lengths = convertPointsToVectorsDistancesFromCenter(cornors, center);
