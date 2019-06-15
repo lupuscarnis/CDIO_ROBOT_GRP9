@@ -5,7 +5,6 @@ import java.util.List;
 
 import application.CSystem;
 import application.Coordinate;
-import behavior.RouteFinder.Node;
 import dao.DAO;
 import dao.I_DAO;
 import dto.DTO;
@@ -47,18 +46,17 @@ public class RobotController {
 	 for(int i =0; i<ballist.size(); i++) {
 		 if(!(ballist.get(i).getX()==0  && ballist.get(i).getY()==0)) {
 		 cs.balls.add(new Coordinate (ballist.get(i).getX(), ballist.get(i).getY()));
-		 System.out.println("ball found in robotcontroller ");
+		 System.out.println("ball found in robotcontroller X "+(ballist.get(i).getX()+" og Y"+ballist.get(i).getY()));
 		 }
-		 System.out.println(ballist.get(i).getX()+ ballist.get(i).getY());
+		
 	 }
 	 
 	 
 	 
 	//front
 	 //System.out.println(cs.balls.size());
-	 System.out.println("Ballist "+ballist.get(0).getX()+"dens y er" +ballist.get(0).getY());
 	 //System.out.println("Ballist nummer 2 er "+ballist.get(1).getX()+"dens y er"+ballist.get(1).getY());
-	 System.out.println("her er en ball"+cs.balls.get(0).getX());
+	 System.out.println("her er en ball 0's X "+cs.balls.get(0).getX()+" og Y "+cs.balls.get(0).getX());
 	cs.robot.add(new Coordinate((int)rob.getFrontX(),(int) rob.getFrontY()));
 	//back
 	cs.robot.add(new Coordinate((int)rob.getBackX(),(int)rob.getBackY()));
@@ -81,8 +79,7 @@ public class RobotController {
 		System.out.println("the next thing comes grom scoreGoal");
 	double	dir =0;// getDirection(frontOfGoal);
 	
-		//dir = Math.toDegrees()
-		//System.out.println("got measurement");
+	
 		//distance to in front of goal
 		double distance = getDistance(cs.robot.get(0), frontOfGoal);
 		//pixels get converted to cm
@@ -157,7 +154,7 @@ public class RobotController {
 			}else {
 			
 		path = findRoute();
-		//System.out.println("i need ball"+path.size());
+		
 		
 		getBall(path);
 		nrBalls++;
@@ -178,42 +175,18 @@ public class RobotController {
 		Coordinate nextBall = currentPath.get(0);
 		double ballX = nextBall.getX();
 		double ballY = nextBall.getY();
-		//System.out.println("i got next ball");
 		//direction needed for robot to move towards ball
-		System.out.println("nextBallx = "+nextBall.getX()+"    y "+nextBall.getY());
-		double dir = Math.toDegrees(Math.atan((ballY-cs.robot.get(0).getY())/(ballX-cs.robot.get(0).getX())));
-		double a2 = getDistance(nextBall, cs.robot.get(0))*getDistance(nextBall, cs.robot.get(0));
-		double c2 = getDistance(nextBall, cs.robot.get(1))*getDistance(nextBall, cs.robot.get(1));
-		double b2 = getDistance(cs.robot.get(1) ,cs.robot.get(0))*getDistance(cs.robot.get(0), cs.robot.get(1));
-		//supposedly correct
-		//double denominator = 2*getDistance(nextBall, cs.robot.get(0))*getDistance(nextBall, cs.robot.get(1));
-		double denominator = 2*getDistance(nextBall, cs.robot.get(0))*getDistance(cs.robot.get(1) ,cs.robot.get(0));
-	//supposedly correct
-	//	dir = (a2+c2-b2)/denominator;
 		double X = (cs.robot.get(0).getX()+cs.robot.get(0).getX())/2;
 		double Y = ( cs.robot.get(1).getY()+ cs.robot.get(1).getY())/2;
 		Coordinate robotCenter = new Coordinate(X,Y);
 		
-		
-		//dir = calcDirection(cs.robot.get(0),cs.robot.get(1),nextBall);
-		
-		
-		
-		//supposedly correct
-	//	dir = Math.toDegrees(Math.acos(dir));
-	//	System.out.println("a2 = "+a2+" b2 = "+b2+" c2 = "+c2+" denom = "+denominator);
-		//dir = Math.toDegrees()
-		//System.out.println("got measurement");
 		double distance = getDistance(cs.robot.get(0), nextBall);
 		//pixels get converted to cm
-		//System.out.println("distance i pixel "+distance);
 		distance = distance/ratio;
 		
 		
-		//System.out.println("hej fra vores "+calcDirection(cs.robot.get(0),cs.robot.get(1),nextBall));
 		
-		//System.out.println("vi sender "+dir+"distance"+distance);
-		dir=100;
+		double dir = 4;
 		Coordinate temp = robotCenter;
 		while(dir>2) {
 			
@@ -227,14 +200,12 @@ public class RobotController {
 		
 		dtoo.setRotation((float) dir);
 		dtoo.setDistance((float) 0);
-		dtoo.setClawMove(180);
+		dtoo.setClawMove(0);
 		dtoo.setBackClawMove(0);
-		//System.out.println(dtoo.toString());
+	
 		
 		I_DAO data = new DAO();  
 		data.sendData(dtoo);
-			
-			
 		
 		data.reciveData();
 		}
@@ -242,15 +213,26 @@ public class RobotController {
 I_DTO dtoo = new DTO();
 		
 		dtoo.setRotation((float) 0);
-		dtoo.setDistance((float) distance);
+		dtoo.setDistance((float) (distance-0.1));
 		dtoo.setClawMove(180);
 		dtoo.setBackClawMove(0);
-		//System.out.println(dtoo.toString());
+	
 		
 		I_DAO data = new DAO();  
 		data.sendData(dtoo);
-			
-			
+		
+		data.reciveData();
+		
+dtoo = new DTO();
+		
+		dtoo.setRotation((float) 0);
+		dtoo.setDistance((float) 0.1);
+		//may need seperate dto, to happen after movement
+		dtoo.setClawMove(-180);
+		dtoo.setBackClawMove(0);
+		
+		data = new DAO();  
+		data.sendData(dtoo);	
 		
 		data.reciveData();
 		
@@ -267,8 +249,7 @@ I_DTO dtoo = new DTO();
 	
 	
 	public ArrayList<Coordinate> findRoute() {
-		//System.out.println("er jeg tom"+cs.balls.size());
-		//System.out.println("finder rute");
+		
     	Coordinate robotFront = cs.robot.get(0);
     	Coordinate robotBack = cs.robot.get(1);
     	double X = (double) (robotFront.getX()-robotBack.getX());
@@ -285,11 +266,11 @@ I_DTO dtoo = new DTO();
 		Coordinate robotCenter = new Coordinate(X,Y);
 		
 		//fuck it, right now it will just find the nearest ball
-		//System.out.println("er udenfor while");
+		
 		while(!cs.balls.isEmpty()) {
-			//System.out.println("er i while");
+			
 		for(int i =0; i< cs.balls.size(); i++) {
-			//System.out.println("er i for");
+			
 		if(getDistance(cs.balls.get(i),robotCenter)<min) {
 		min = getDistance(cs.balls.get(i),robotCenter);
 		closest = cs.balls.get(i);
@@ -302,8 +283,7 @@ I_DTO dtoo = new DTO();
 		sortedList.add(cs.balls.get(closestid));
 		cs.balls.remove(closestid);
 		min = 10000;
-		//System.out.println("added"+closestid);
-		
+	
 		}
 		return sortedList;
     	
@@ -343,32 +323,10 @@ I_DTO dtoo = new DTO();
 	return angle;
 		
 	}
-//hvis x i robot er stoerre end x i bold
 	
 
 
-public class Node {
-int x=0,y=0,id=0,deg=361;
-boolean marked =false;
 
-public Node(int x, int y) {
-
-	this.x = x;
-	this.y = y;
-}
-
-
-	
-}
-
-/*
-cs.balls.add(new Coordinate(85,7));
-cs.balls.add(new Coordinate(200,64));
-cs.balls.add(new Coordinate(600,245));
-
-cs.balls.add(new Coordinate (ballist.get(0).getX(), ballist.get(0).getY()));
-cs.balls.add(new Coordinate (ballist.get(1).getX(), ballist.get(1).getY()));
-*/
 	
 	
 	

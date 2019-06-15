@@ -175,7 +175,7 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 2;
+	private int webcamID = 0;
 
 	// Switch between debug/production mode
 	private boolean isDebug = false;
@@ -890,6 +890,7 @@ public class FXController {
 		values.add(maxValuesf);
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
 		values.add(maxValuesf);
+		System.out.println("he rer huge pack = "+hueBack);
 		return values;
 	}
 
