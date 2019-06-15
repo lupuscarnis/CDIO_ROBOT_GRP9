@@ -175,7 +175,7 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 2;
+	private int webcamID = 1;
 
 	// Switch between debug/production mode
 	private boolean isDebug = false;
@@ -246,16 +246,16 @@ public class FXController {
 
 						Point p = ip.findColor(frame, minValuesc, maxValuesc);
 						ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
-						// updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+						 updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
 
 						// finds the front and back of the robot
 						// slider values
 						List<Scalar> values = new ArrayList<Scalar>();
 						values = getRobotValues();
-						// updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame,
-						// values)));
+						 updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame,
+						 values)));
 						Graph graph = new Graph();
-						updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
+						//updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
 						Mat out = new Mat();
 
 						// Check if image needs to flipped before displaying
@@ -875,10 +875,13 @@ public class FXController {
 		List<Scalar> values = new ArrayList<Scalar>();
 
 		double threshold = S_THRESHOLD_ROBOT.getValue();
+		
 		double hueFront = (H_FRONT.getValue() / 2);
 		double hueBack = (H_BACK.getValue() / 2);
+		
 		double satFront = ((S_FRONT.getValue() / 100) * 255);
 		double satBack = ((S_BACK.getValue() / 100) * 255);
+		
 		double valFront = ((V_FRONT.getValue() / 100) * 255);
 		double valBack = ((V_BACK.getValue() / 100) * 255);
 
@@ -886,6 +889,9 @@ public class FXController {
 		values.add(minValuesf);
 		Scalar maxValuesf = new Scalar((hueFront + threshold), (satFront + threshold), (valFront + threshold));
 		values.add(maxValuesf);
+	
+		
+		
 		Scalar minValuesb = new Scalar((hueBack - threshold), (satBack - threshold), (valBack - threshold));
 		values.add(maxValuesf);
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
