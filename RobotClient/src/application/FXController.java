@@ -522,6 +522,7 @@ public class FXController {
 		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 
 		//Imgproc.GaussianBlur(hsvImage, blurredImage, new Size(45, 45), 0);
+		/*
 		
 		// Limit color range to reds in the image
 		Mat redMask1 = new Mat();
@@ -531,7 +532,7 @@ public class FXController {
 		Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255), redMask1);
 		Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180, 255, 255), redMask2);
 		Core.bitwise_or(redMask1, redMask2, redMaskf);
-
+*/
 		//Imgproc.adaptiveThreshold(redMaskf, adapt, 125, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 11, 12);
 		//Core.normalize(redMaskf, redMaskf, 0.0, 255.0 / 2, Core.NORM_MINMAX);
 		
@@ -551,10 +552,10 @@ public class FXController {
 
 		// In HSV space, the red color wraps around 180. So we need the H values to be
 		// both in [0,10] and [170, 180].
-		//Core.inRange(hsvImage, minValues, maxValues, mask);
+		Core.inRange(hsvImage, minValues, maxValues, mask);
 		
 		//Imgproc.erode(blurredImage, detectedEdges, new Mat());
-		Imgproc.medianBlur(redMaskf, blurredImage, 9);
+		Imgproc.medianBlur(mask, blurredImage, 9);
 		// canny detector, with ratio of lower:upper threshold of 3:1
 		//Imgproc.Canny(blurredImage, edges, this.C_Low.getValue(), this.C_Max.getValue(), 3, true);
 		Imgproc.Canny(blurredImage, edges, 300, 600, 5, true);
