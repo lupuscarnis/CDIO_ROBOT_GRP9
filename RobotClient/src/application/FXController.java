@@ -183,7 +183,7 @@ public class FXController {
 
 	// Sets the id of the systems webcam
 
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 
 	// Switch between debug/production mode
@@ -252,10 +252,10 @@ public class FXController {
 								((S_CORNER.getValue() / 100) * 255 - 10), ((V_CORNER.getValue() / 100) * 255 - 10));
 						Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10),
 								((S_CORNER.getValue() / 100) * 255 + 10), ((V_CORNER.getValue() / 100) * 255 + 10));
-
-						Point p = ip.findColor(frame, minValuesc, maxValuesc);
-						ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
-						updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+								
+						//Point p = ip.findColor(frame, minValuesc, maxValuesc);
+					//	ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
+						//updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
 
 						// finds the front and back of the robot
 						// slider values
@@ -930,6 +930,12 @@ DecimalFormat df = new DecimalFormat("#.00");
 
 double threshold = S_THRESHOLD_ROBOT.getValue();
 
+String valuesToPrint = "Hue range Front: " + H_FRONT.getValue()  + "\tSaturation range: "
+		+ S_FRONT.getValue() + "\tValue range: " + V_FRONT.getValue()  + "\n"+ "Hue range back: " + H_BACK.getValue() + "\tSaturation range: "
+		+ S_BACK.getValue() + "\tValue range: " +V_BACK.getValue()+"\n Data range "+S_THRESHOLD_ROBOT.getValue();
+
+
+
 		double hueFront = (H_FRONT.getValue() / 2);
 		double hueBack = (H_BACK.getValue() / 2);
 
@@ -951,12 +957,13 @@ double threshold = S_THRESHOLD_ROBOT.getValue();
 		values.add(maxValuesf);
 		
 		values.add(maxValuesb);
+		/*
 		String valuesToPrint = "Hue range Front: " + df.format(minValuesf.val[0]) + "-" + df.format(maxValuesf.val[0]) + "\tSaturation range: "
 				+ df.format(minValuesf.val[1]) + "-" + df.format(maxValuesf.val[1]) + "\tValue range: " + df.format(minValuesf.val[2]) + "-"
 				+ df.format(maxValuesf.val[2]) + "\n"+ "Hue range back: " + df.format(minValuesb.val[0]) + "-" +df.format( maxValuesb.val[0]) + "\tSaturation range: "
 				+ df.format(minValuesb.val[1]) + "-" + df.format(maxValuesb.val[1]) + "\tValue range: " + df.format(minValuesb.val[2]) + "-"
-				+ df.format(maxValuesb.val[2]);
-
+			+ df.format(maxValuesb.val[2]);
+*/
 		Utils.onFXThread(this.r_ValuesProp, valuesToPrint);
 
 

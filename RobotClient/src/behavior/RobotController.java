@@ -56,7 +56,7 @@ public class RobotController {
 	//front
 	 //System.out.println(cs.balls.size());
 	 //System.out.println("Ballist nummer 2 er "+ballist.get(1).getX()+"dens y er"+ballist.get(1).getY());
-	 System.out.println("her er en ball 0's X "+cs.balls.get(0).getX()+" og Y "+cs.balls.get(0).getX());
+	 System.out.println("her er en ball 0's X "+cs.balls.get(0).getX()+" og Y "+cs.balls.get(0).getY());
 	cs.robot.add(new Coordinate((int)rob.getFrontX(),(int) rob.getFrontY()));
 	//back
 	cs.robot.add(new Coordinate((int)rob.getBackX(),(int)rob.getBackY()));
@@ -188,6 +188,22 @@ public class RobotController {
 		
 		double dir = 4;
 		Coordinate temp = robotCenter;
+		dir = calcDirection(cs.robot.get(0),robotCenter,nextBall);
+		
+		System.out.println("her er dir "+dir+" og her er dist "+ distance);
+		
+I_DTO dtoo = new DTO();
+		
+		dtoo.setRotation((float) dir);
+		dtoo.setDistance((float) (distance+0.1));
+		dtoo.setClawMove(0);
+		dtoo.setBackClawMove(0);
+	
+		
+		I_DAO data = new DAO();  
+		data.sendData(dtoo);
+		
+		/*
 		while(dir>2) {
 			
 		while(cs.robot.get(0).getX()==temp.getX() &&cs.robot.get(0).getY()==temp.getY() ) {
@@ -236,7 +252,7 @@ dtoo = new DTO();
 		
 		data.reciveData();
 		
-		
+		*/
 		/*
 		I_DTO dtooo = new DTO();
 		dtooo.setDistance((float) 10);
@@ -246,6 +262,12 @@ dtoo = new DTO();
 		data2.sendData(dtooo);
 		*/
 	}
+	
+public boolean detectObstacle(){
+		return true;
+	}
+
+
 	
 	
 	public ArrayList<Coordinate> findRoute() {

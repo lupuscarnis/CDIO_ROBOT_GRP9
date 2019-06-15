@@ -48,22 +48,22 @@ public class ImageProssesing implements I_ImageProssesing {
 		
 	
 	
-		
+		/*
 
-		Scalar minValuesb = new Scalar(160,70,170);
-		Scalar maxValuesb = new Scalar(180,90,190);
-		Scalar minValuesf = new Scalar(105,100,175);
-		Scalar maxValuesf = new Scalar(125,129,210);
-/*
+		Scalar minValuesf = new Scalar(97,171,194);
+		Scalar maxValuesf = new Scalar(117,191,214);
+		
+		Scalar minValuesb = new Scalar(161,82,191);
+		Scalar maxValuesb = new Scalar(171,92,201);
+*/
 		Point front = findColor(frame, values.get(0), values.get(1));
 		
 		Point back = findColor(frame,values.get(2), values.get(3));
-*/
-
+/*
 		Point front = findColor(frame, minValuesf, maxValuesf);
 		
 		Point back = findColor(frame,minValuesb, maxValuesb);
-
+*/
 		Robot s = Robot.getInstance();
 		s.setBackX(back.x);
 		s.setBackY(back.y);
