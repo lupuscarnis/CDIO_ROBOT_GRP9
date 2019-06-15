@@ -74,7 +74,13 @@ public class FXController {
 
 	@FXML
 	private ImageView robotImage;
+	
+	@FXML
+	private ImageView crossImage1;
 
+	@FXML
+	private ImageView crossImage2;
+	
 	// FXML slider for setting HSV ranges
 	@FXML
 	private Slider hueStart;
