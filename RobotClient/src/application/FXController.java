@@ -175,10 +175,10 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 0;
+	private int webcamID = 2;
 
 	// Switch between debug/production mode
-	private boolean isDebug = true;
+	private boolean isDebug = false;
 
 	// Debug image file
 
@@ -427,6 +427,8 @@ public class FXController {
 	 */
 	private Mat grabFrameHough(Mat frame) {
 
+		System.out.println("test132");
+		
 		// if the frame is not empty, process it
 		if (!frame.empty()) {
 			// init
@@ -505,6 +507,7 @@ public class FXController {
 		 * dst = new Mat(downscaledSize, frame.type()); Imgproc.resize(frame, dst,
 		 * downscaledSize);
 		 */
+		
 		Mat noImg = Imgcodecs.imread(defaultImg);
 		Mat detectedEdges = new Mat();
 		Mat edges = new Mat();
@@ -548,7 +551,7 @@ public class FXController {
 
 		// In HSV space, the red color wraps around 180. So we need the H values to be
 		// both in [0,10] and [170, 180].
-		Core.inRange(hsvImage, minValues, maxValues, mask);
+		//Core.inRange(hsvImage, minValues, maxValues, mask);
 		
 		//Imgproc.erode(blurredImage, detectedEdges, new Mat());
 		Imgproc.medianBlur(redMaskf, blurredImage, 9);
@@ -566,7 +569,7 @@ public class FXController {
 
 		if (contours.size() > 0) {
 
-			/*double maxArea = -1;
+			double maxArea = -1;
 			int maxAreaIdx = -1;
 
 			for (int idx = 0; idx != contours.size(); ++idx) {
@@ -579,8 +582,8 @@ public class FXController {
 				
 				System.out.println(contours.size());
 
-			}*/
-			
+			}
+			/*
 			double maxArea = -1;
 			int maxAreaIdx = -1;
 			System.out.println("size: "+Integer.toString(contours.size()));
@@ -608,7 +611,7 @@ public class FXController {
 			        }
 			    }
 			}
-
+*/
 			if (maxAreaIdx >= 0) {
 
 				MatOfPoint largestContour = contours.get(maxAreaIdx);
