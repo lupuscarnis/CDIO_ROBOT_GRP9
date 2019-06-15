@@ -254,7 +254,9 @@ public class FXController {
 						values = getRobotValues();
 						updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame, values)));
 						Graph graph = new Graph();
+
 						// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
+
 						Mat out = new Mat();
 
 						// Check if image needs to flipped before displaying
@@ -876,9 +878,20 @@ public class FXController {
 		values.add(maxValuesf);
 
 		Scalar minValuesb = new Scalar((hueBack - threshold), (satBack - threshold), (valBack - threshold));
-		values.add(maxValuesf);
+		values.add(minValuesb);
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
-		values.add(maxValuesf);
+		values.add(maxValuesb);
+		String valuesToPrint = "Hue range Front: " + minValuesf.val[0] + "-" + maxValuesf.val[0] + "\tSaturation range: "
+				+ minValuesf.val[1] + "-" + maxValuesf.val[1] + "\tValue range: " + minValuesf.val[2] + "-"
+				+ maxValuesf.val[2] + "\n"+ "Hue range back: " + minValuesb.val[0] + "-" + maxValuesb.val[0] + "\tSaturation range: "
+				+ minValuesb.val[1] + "-" + maxValuesb.val[1] + "\tValue range: " + minValuesb.val[2] + "-"
+				+ maxValuesb.val[2];
+
+		Utils.onFXThread(this.r_ValuesProp, valuesToPrint);
+
+		
+		
+		
 		return values;
 	}
 
