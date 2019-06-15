@@ -159,6 +159,8 @@ public class FXController {
 	private boolean cameraActive;
 	// a flag to change the button behavior
 	private boolean robotActive;
+	// Set the flag for the run once method call, when first starting the system
+	private boolean initialized = false;
 	// property for object binding
 	private ObjectProperty<String> pf_ValuesProp;
 	// property for object binding
@@ -175,6 +177,22 @@ public class FXController {
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
 
+	/**
+	 * Switches between debug/production mode
+	 * 
+	 * DebugMode: Run image analysis on a static/local image using scheduleAtFixedRate
+	 * 
+	 * ProductionMode: Bypass automatic image analysis and let the robot control when the update occurs
+	 * 
+	 * !DebugMode and !ProductionMode: Run image analysis on webcam feed using scheduleAtFixedRate
+	 * 
+	 * 
+	 * NOTE: Only one of the flags below can be true!
+	 * 
+	 */
+	private boolean isDebugMode = true;
+	private boolean isProductionMode = false;
+
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
 
@@ -185,12 +203,7 @@ public class FXController {
 
 	private int webcamID = 0;
 
-
-	// Switch between debug/production mode
-	private boolean isDebug = false;
-
 	// Debug image file
-
 	// private String debugImg = "Debugging/newvinkelret.jpg";
 	private String debugImg = "Debugging/bane_til_kasper.png";
 
@@ -222,87 +235,55 @@ public class FXController {
 			// start the video capture
 			this.capture.open(webcamID);
 
-			// is the video stream available?
-			if (this.capture.isOpened() || isDebug) {
+			if (this.capture.isOpened()) {
 
-				this.cameraActive = true;
+				if (isDebugMode) {
 
-				// grab a frame every 33 ms (30 frames/sec)
-				Runnable frameGrabber = new Runnable() {
+					this.cameraActive = true;
 
-					@Override
-					public void run() {
+					// Run the image analysis at a fixed rate with a delay for debugging purposes
+					Runnable frameGrabber = new Runnable() {
 
-						Mat frame = new Mat();
+						@Override
+						public void run() {
 
-						frame = grabFrame();
-						
-						// Find the rectangle of the playing field and crop the image
-						frame = findAndDrawRect(frame);
-						
-						if (UseHSVImgDetection) {
-							frame = grabFrameHSV(frame);
-						} else {
-							frame = grabFrameHough(frame);
+							runAnalysis();
+
 						}
+					};
 
-						// finds the pixels to cm Ratio
+					this.timer = Executors.newSingleThreadScheduledExecutor();
+					this.timer.scheduleAtFixedRate(frameGrabber, 0, captureRate, TimeUnit.MILLISECONDS);
 
-						Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10),
-								((S_CORNER.getValue() / 100) * 255 - 10), ((V_CORNER.getValue() / 100) * 255 - 10));
-						Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10),
-								((S_CORNER.getValue() / 100) * 255 + 10), ((V_CORNER.getValue() / 100) * 255 + 10));
-								
-						//Point p = ip.findColor(frame, minValuesc, maxValuesc);
-					//	ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
-						//updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+					// update the button content
+					this.cameraButton.setText("Stop Camera");
 
-						// finds the front and back of the robot
-						// slider values
-						List<Scalar> values = new ArrayList<Scalar>();
-						values = getRobotValues();
-						updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame, values)));
-						Graph graph = new Graph();
+					// Run once call to runAnalysis
+				} else if (isProductionMode && !initialized) {
 
-						// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
+					runAnalysis();
+					initialized = true;
+					// update the button content
+					this.cameraButton.setText("Stop Camera");
 
-						Mat out = new Mat();
+				} else {
 
-						// Check if image needs to flipped before displaying
-						if (frame.width() < frame.height()) {
+					// log the error
+					System.err.println("Failed to open the camera connection...");
 
-							Mat dst = new Mat();
-							Core.flip(frame, dst, -1);
-							Core.rotate(dst, out, Core.ROTATE_90_CLOCKWISE); // ROTATE_180 or ROTATE_90_COUNTERCLOCKWISE
+				}
 
-						} else {
-
-							out = frame;
-						}
-
-						Image imageToShow = Utils.mat2Image(out);
-						updateImageView(videoFrame, imageToShow);
-
-					}
-				};
-
-				this.timer = Executors.newSingleThreadScheduledExecutor();
-				this.timer.scheduleAtFixedRate(frameGrabber, 0, captureRate, TimeUnit.MILLISECONDS);
-
-				// update the button content
-				this.cameraButton.setText("Stop Camera");
 			} else {
-				// log the error
-				System.err.println("Failed to open the camera connection...");
-			}
-		} else {
-			// the camera is not active at this point
-			this.cameraActive = false;
-			// update again the button content
-			this.cameraButton.setText("Start Camera");
 
-			// stop the timer
-			this.stopAcquisition();
+				// the camera is not active at this point
+				this.cameraActive = false;
+				// update again the button content
+				this.cameraButton.setText("Start Camera");
+
+				// stop the timer
+				this.stopAcquisition();
+			}
+
 		}
 	}
 
@@ -331,6 +312,71 @@ public class FXController {
 	}
 
 	/**
+	 * Image analysis using openCV methods
+	 * 
+	 * 
+	 */
+
+	void runAnalysis() {
+
+		Mat frame = new Mat();
+
+		frame = grabFrame();
+
+		// Find the rectangle of the playing field and crop the image
+		frame = findAndDrawRect(frame);
+
+		if (UseHSVImgDetection) {
+			frame = grabFrameHSV(frame);
+		} else {
+			frame = grabFrameHough(frame);
+		}
+
+		// finds the pixels to cm Ratio
+
+		/**
+		 * TODO
+		 * 
+		 * De her skal ud i deres egen metode hvis de skal bruges
+		 */
+		Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10), ((S_CORNER.getValue() / 100) * 255 - 10),
+				((V_CORNER.getValue() / 100) * 255 - 10));
+		Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10), ((S_CORNER.getValue() / 100) * 255 + 10),
+				((V_CORNER.getValue() / 100) * 255 + 10));
+
+		// Point p = ip.findColor(frame, minValuesc, maxValuesc);
+		// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
+		// updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+
+		// finds the front and back of the robot
+		// slider values
+		List<Scalar> values = new ArrayList<Scalar>();
+		values = getRobotValues();
+		updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame, values)));
+		Graph graph = new Graph();
+
+		// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
+
+		Mat out = new Mat();
+
+		// Check if image needs to flipped before displaying
+		if (frame.width() < frame.height()) {
+
+			Mat dst = new Mat();
+			Core.flip(frame, dst, -1);
+			Core.rotate(dst, out, Core.ROTATE_90_CLOCKWISE); // ROTATE_180 or ROTATE_90_COUNTERCLOCKWISE
+
+		} else {
+
+			out = frame;
+		}
+
+		Image imageToShow = Utils.mat2Image(out);
+		updateImageView(videoFrame, imageToShow);
+
+	}
+
+	/**
 	 * Get a frame from the opened video stream (if any)
 	 * 
 	 * @return the {@link Image} to show
@@ -339,10 +385,10 @@ public class FXController {
 		Mat frame = new Mat();
 
 		// check if the capture is open
-		if (this.capture.isOpened() || isDebug) {
+		if (this.capture.isOpened() || isDebugMode) {
 			try {
 
-				if (isDebug == true) {
+				if (isDebugMode == true) {
 
 					// read from from test image
 					frame = Imgcodecs.imread(debugImg);
@@ -437,8 +483,6 @@ public class FXController {
 	 */
 	private Mat grabFrameHough(Mat frame) {
 
-		
-
 		// if the frame is not empty, process it
 		if (!frame.empty()) {
 			// init
@@ -470,7 +514,7 @@ public class FXController {
 				Point center = new Point(Math.round(c[0]), Math.round(c[1]));
 				if (!(center.x == 0 && center.y == 0)) {
 					p.add(center);
-					 System.out.println("fandt bold x "+center.x+" og y er "+ center.y);
+					System.out.println("fandt bold x " + center.x + " og y er " + center.y);
 				}
 				// circle center
 
@@ -591,7 +635,7 @@ public class FXController {
 					maxAreaIdx = idx;
 				}
 
-				//System.out.println(contours.size());
+				// System.out.println(contours.size());
 
 			}
 			/*
@@ -686,18 +730,9 @@ public class FXController {
 					FrameSize fSize = FrameSize.getInstance();
 					fSize.setX(frame.width());
 					fSize.setY(frame.height());
-					if (frame.width() < frame.height()) {
 
-						// System.out.println("FLIP IT!");
-
-						Mat flippedImage = new Mat();
-						Core.flip(result, flippedImage, -1);
-
-						result = flippedImage;
-
-					}
-
-					frame = result;
+					// Check if frame needs to be rotated before displaying it in GUI
+					result = checkRotation(result);
 
 				} else {
 
@@ -717,13 +752,14 @@ public class FXController {
 
 	/**
 	 * Rotates frame if the frame height > frame width
+	 * 
 	 * @param frame
 	 * @return
 	 */
 	private Mat checkRotation(Mat frame) {
 
 		Mat result = new Mat();
-		
+
 		if (frame.width() < frame.height()) {
 
 			// System.out.println("FLIP IT!");
@@ -801,9 +837,11 @@ public class FXController {
 	 * Given a binary image containing one or more closed surfaces, use it as a mask
 	 * to find and highlight the objects contours
 	 * 
-	 * @param maskedImage the binary image to be used as a mask
-	 * @param frame       the original {@link Mat} image to be used for drawing the
-	 *                    objects contours
+	 * @param maskedImage
+	 *            the binary image to be used as a mask
+	 * @param frame
+	 *            the original {@link Mat} image to be used for drawing the objects
+	 *            contours
 	 * @return the {@link Mat} image with the objects contours framed
 	 */
 	private Mat findAndDrawBalls(Mat maskedImage, Mat frame) {
@@ -873,8 +911,10 @@ public class FXController {
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image     the {@link ImageView} to use
-	 * @param dimension the width of the image to set
+	 * @param image
+	 *            the {@link ImageView} to use
+	 * @param dimension
+	 *            the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -907,10 +947,12 @@ public class FXController {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view  the {@link ImageView} to update
-	 * @param image the {@link Image} to show
+	 * @param view
+	 *            the {@link ImageView} to update
+	 * @param image
+	 *            the {@link Image} to show
 	 */
-	private void updateImageView(ImageView view, Image image) {
+	protected static void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
 	}
 
@@ -924,17 +966,14 @@ public class FXController {
 	private List<Scalar> getRobotValues() {
 		List<Scalar> values = new ArrayList<Scalar>();
 
+		DecimalFormat df = new DecimalFormat("#.00");
 
-DecimalFormat df = new DecimalFormat("#.00");
+		double threshold = S_THRESHOLD_ROBOT.getValue();
 
-
-double threshold = S_THRESHOLD_ROBOT.getValue();
-
-String valuesToPrint = "Hue range Front: " + H_FRONT.getValue()  + "\tSaturation range: "
-		+ S_FRONT.getValue() + "\tValue range: " + V_FRONT.getValue()  + "\n"+ "Hue range back: " + H_BACK.getValue() + "\tSaturation range: "
-		+ S_BACK.getValue() + "\tValue range: " +V_BACK.getValue()+"\n Data range "+S_THRESHOLD_ROBOT.getValue();
-
-
+		String valuesToPrint = "Hue range Front: " + H_FRONT.getValue() + "\tSaturation range: " + S_FRONT.getValue()
+				+ "\tValue range: " + V_FRONT.getValue() + "\n" + "Hue range back: " + H_BACK.getValue()
+				+ "\tSaturation range: " + S_BACK.getValue() + "\tValue range: " + V_BACK.getValue() + "\n Data range "
+				+ S_THRESHOLD_ROBOT.getValue();
 
 		double hueFront = (H_FRONT.getValue() / 2);
 		double hueBack = (H_BACK.getValue() / 2);
@@ -955,17 +994,20 @@ String valuesToPrint = "Hue range Front: " + H_FRONT.getValue()  + "\tSaturation
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
 
 		values.add(maxValuesf);
-		
+
 		values.add(maxValuesb);
 		/*
-		String valuesToPrint = "Hue range Front: " + df.format(minValuesf.val[0]) + "-" + df.format(maxValuesf.val[0]) + "\tSaturation range: "
-				+ df.format(minValuesf.val[1]) + "-" + df.format(maxValuesf.val[1]) + "\tValue range: " + df.format(minValuesf.val[2]) + "-"
-				+ df.format(maxValuesf.val[2]) + "\n"+ "Hue range back: " + df.format(minValuesb.val[0]) + "-" +df.format( maxValuesb.val[0]) + "\tSaturation range: "
-				+ df.format(minValuesb.val[1]) + "-" + df.format(maxValuesb.val[1]) + "\tValue range: " + df.format(minValuesb.val[2]) + "-"
-			+ df.format(maxValuesb.val[2]);
-*/
+		 * String valuesToPrint = "Hue range Front: " + df.format(minValuesf.val[0]) +
+		 * "-" + df.format(maxValuesf.val[0]) + "\tSaturation range: " +
+		 * df.format(minValuesf.val[1]) + "-" + df.format(maxValuesf.val[1]) +
+		 * "\tValue range: " + df.format(minValuesf.val[2]) + "-" +
+		 * df.format(maxValuesf.val[2]) + "\n"+ "Hue range back: " +
+		 * df.format(minValuesb.val[0]) + "-" +df.format( maxValuesb.val[0]) +
+		 * "\tSaturation range: " + df.format(minValuesb.val[1]) + "-" +
+		 * df.format(maxValuesb.val[1]) + "\tValue range: " +
+		 * df.format(minValuesb.val[2]) + "-" + df.format(maxValuesb.val[2]);
+		 */
 		Utils.onFXThread(this.r_ValuesProp, valuesToPrint);
-
 
 		return values;
 	}
