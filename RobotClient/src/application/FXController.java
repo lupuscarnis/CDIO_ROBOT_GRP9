@@ -1,5 +1,6 @@
 package application;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -873,7 +874,11 @@ public class FXController {
 	private List<Scalar> getRobotValues() {
 		List<Scalar> values = new ArrayList<Scalar>();
 
-		double threshold = S_THRESHOLD_ROBOT.getValue();
+
+DecimalFormat df = new DecimalFormat("#.00");
+
+
+double threshold = S_THRESHOLD_ROBOT.getValue();
 		
 		double hueFront = (H_FRONT.getValue() / 2);
 		double hueBack = (H_BACK.getValue() / 2);
@@ -895,11 +900,11 @@ public class FXController {
 		values.add(minValuesb);
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
 		values.add(maxValuesb);
-		String valuesToPrint = "Hue range Front: " + minValuesf.val[0] + "-" + maxValuesf.val[0] + "\tSaturation range: "
-				+ minValuesf.val[1] + "-" + maxValuesf.val[1] + "\tValue range: " + minValuesf.val[2] + "-"
-				+ maxValuesf.val[2] + "\n"+ "Hue range back: " + minValuesb.val[0] + "-" + maxValuesb.val[0] + "\tSaturation range: "
-				+ minValuesb.val[1] + "-" + maxValuesb.val[1] + "\tValue range: " + minValuesb.val[2] + "-"
-				+ maxValuesb.val[2];
+		String valuesToPrint = "Hue range Front: " + df.format(minValuesf.val[0]) + "-" + df.format(maxValuesf.val[0]) + "\tSaturation range: "
+				+ df.format(minValuesf.val[1]) + "-" + df.format(maxValuesf.val[1]) + "\tValue range: " + df.format(minValuesf.val[2]) + "-"
+				+ df.format(maxValuesf.val[2]) + "\n"+ "Hue range back: " + df.format(minValuesb.val[0]) + "-" +df.format( maxValuesb.val[0]) + "\tSaturation range: "
+				+ df.format(minValuesb.val[1]) + "-" + df.format(maxValuesb.val[1]) + "\tValue range: " + df.format(minValuesb.val[2]) + "-"
+				+ df.format(maxValuesb.val[2]);
 
 		Utils.onFXThread(this.r_ValuesProp, valuesToPrint);
 
