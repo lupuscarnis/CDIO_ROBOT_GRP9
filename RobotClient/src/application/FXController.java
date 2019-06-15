@@ -76,6 +76,12 @@ public class FXController {
 	@FXML
 	private ImageView robotImage;
 
+	@FXML
+	private ImageView crossImage1;
+
+	@FXML
+	private ImageView crossImage2;
+
 	// FXML slider for setting HSV ranges
 	@FXML
 	private Slider hueStart;
@@ -176,7 +182,7 @@ public class FXController {
 	private int captureRate = 500;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 1;
+	private int webcamID = 2;
 
 	// Switch between debug/production mode
 	private boolean isDebug = false;
@@ -255,7 +261,9 @@ public class FXController {
 						values = getRobotValues();
 						updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame, values)));
 						Graph graph = new Graph();
-		//				updateImageView(robotImage,Utils.mat2Image(graph.updateGraph(frame)));
+
+						// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
+
 						Mat out = new Mat();
 
 						// Check if image needs to flipped before displaying
@@ -428,7 +436,7 @@ public class FXController {
 	private Mat grabFrameHough(Mat frame) {
 
 		System.out.println("test132");
-		
+
 		// if the frame is not empty, process it
 		if (!frame.empty()) {
 			// init
@@ -507,7 +515,7 @@ public class FXController {
 		 * dst = new Mat(downscaledSize, frame.type()); Imgproc.resize(frame, dst,
 		 * downscaledSize);
 		 */
-		
+
 		Mat noImg = Imgcodecs.imread(defaultImg);
 		Mat detectedEdges = new Mat();
 		Mat edges = new Mat();
@@ -517,24 +525,24 @@ public class FXController {
 		Mat mask = new Mat();
 		Mat normalized = new Mat();
 		Mat adapt = new Mat();
-		
+
 		// convert the frame to HSV
 		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 
-		//Imgproc.GaussianBlur(hsvImage, blurredImage, new Size(45, 45), 0);
-		
-		// Limit color range to reds in the image
-		Mat redMask1 = new Mat();
-		Mat redMask2 = new Mat();
-		Mat redMaskf = new Mat();
+		// Imgproc.GaussianBlur(hsvImage, blurredImage, new Size(45, 45), 0);
+		/*
+		 * 
+		 * // Limit color range to reds in the image Mat redMask1 = new Mat(); Mat
+		 * redMask2 = new Mat(); Mat redMaskf = new Mat();
+		 * 
+		 * Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255),
+		 * redMask1); Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180,
+		 * 255, 255), redMask2); Core.bitwise_or(redMask1, redMask2, redMaskf);
+		 */
+		// Imgproc.adaptiveThreshold(redMaskf, adapt, 125,
+		// Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 11, 12);
+		// Core.normalize(redMaskf, redMaskf, 0.0, 255.0 / 2, Core.NORM_MINMAX);
 
-		Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255), redMask1);
-		Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180, 255, 255), redMask2);
-		Core.bitwise_or(redMask1, redMask2, redMaskf);
-
-		//Imgproc.adaptiveThreshold(redMaskf, adapt, 125, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 11, 12);
-		//Core.normalize(redMaskf, redMaskf, 0.0, 255.0 / 2, Core.NORM_MINMAX);
-		
 		// get thresholding values from the UI
 		// remember: H ranges 0-180, S and V range 0-255
 		Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(),
@@ -551,18 +559,19 @@ public class FXController {
 
 		// In HSV space, the red color wraps around 180. So we need the H values to be
 		// both in [0,10] and [170, 180].
-		//Core.inRange(hsvImage, minValues, maxValues, mask);
-		
-		//Imgproc.erode(blurredImage, detectedEdges, new Mat());
-		Imgproc.medianBlur(redMaskf, blurredImage, 9);
+		Core.inRange(hsvImage, minValues, maxValues, mask);
+
+		// Imgproc.erode(blurredImage, detectedEdges, new Mat());
+		Imgproc.medianBlur(mask, blurredImage, 9);
 		// canny detector, with ratio of lower:upper threshold of 3:1
-		//Imgproc.Canny(blurredImage, edges, this.C_Low.getValue(), this.C_Max.getValue(), 3, true);
+		// Imgproc.Canny(blurredImage, edges, this.C_Low.getValue(),
+		// this.C_Max.getValue(), 3, true);
 		Imgproc.Canny(blurredImage, edges, 300, 600, 5, true);
 		// STEP 5: makes the object in white bigger to join nearby lines
 		Imgproc.dilate(edges, dilatedEdges, new Mat(), new Point(-1, -1), 1); // 1
 
 		this.updateImageView(this.morphImage, Utils.mat2Image(dilatedEdges));
-		
+
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(dilatedEdges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 		// STEP 7: Sort the contours by length and only keep the largest one
@@ -579,39 +588,30 @@ public class FXController {
 					maxArea = contourarea;
 					maxAreaIdx = idx;
 				}
-				
+
 				System.out.println(contours.size());
 
 			}
 			/*
-			double maxArea = -1;
-			int maxAreaIdx = -1;
-			System.out.println("size: "+Integer.toString(contours.size()));
-			MatOfPoint temp_contour = contours.get(0); //the largest is at the index 0 for starting point
-			MatOfPoint2f approxCurve = new MatOfPoint2f();
-			MatOfPoint largest_contour = contours.get(0);
-
-			List<MatOfPoint> largest_contours = new ArrayList<MatOfPoint>();
-
-			for (int idx = 0; idx < contours.size(); idx++) {
-			    temp_contour = contours.get(idx);
-			    double contourarea = Imgproc.contourArea(temp_contour);
-			    //compare this contour to the previous largest contour found
-			    if (contourarea > maxArea) {
-			        //check if this contour is a square
-			        MatOfPoint2f new_mat = new MatOfPoint2f( temp_contour.toArray() );
-			        int contourSize = (int)temp_contour.total();
-			        MatOfPoint2f approxCurve_temp = new MatOfPoint2f();
-			        Imgproc.approxPolyDP(new_mat, approxCurve_temp, contourSize*0.05, true);
-			        if (approxCurve_temp.total() == 4) {
-			            maxArea = contourarea;
-			            maxAreaIdx = idx;
-			            approxCurve=approxCurve_temp;
-			            largest_contour = temp_contour;
-			        }
-			    }
-			}
-*/
+			 * double maxArea = -1; int maxAreaIdx = -1;
+			 * System.out.println("size: "+Integer.toString(contours.size())); MatOfPoint
+			 * temp_contour = contours.get(0); //the largest is at the index 0 for starting
+			 * point MatOfPoint2f approxCurve = new MatOfPoint2f(); MatOfPoint
+			 * largest_contour = contours.get(0);
+			 * 
+			 * List<MatOfPoint> largest_contours = new ArrayList<MatOfPoint>();
+			 * 
+			 * for (int idx = 0; idx < contours.size(); idx++) { temp_contour =
+			 * contours.get(idx); double contourarea = Imgproc.contourArea(temp_contour);
+			 * //compare this contour to the previous largest contour found if (contourarea
+			 * > maxArea) { //check if this contour is a square MatOfPoint2f new_mat = new
+			 * MatOfPoint2f( temp_contour.toArray() ); int contourSize =
+			 * (int)temp_contour.total(); MatOfPoint2f approxCurve_temp = new
+			 * MatOfPoint2f(); Imgproc.approxPolyDP(new_mat, approxCurve_temp,
+			 * contourSize*0.05, true); if (approxCurve_temp.total() == 4) { maxArea =
+			 * contourarea; maxAreaIdx = idx; approxCurve=approxCurve_temp; largest_contour
+			 * = temp_contour; } } }
+			 */
 			if (maxAreaIdx >= 0) {
 
 				MatOfPoint largestContour = contours.get(maxAreaIdx);
@@ -686,7 +686,7 @@ public class FXController {
 					fSize.setY(frame.height());
 					if (frame.width() < frame.height()) {
 
-						//System.out.println("FLIP IT!");
+						// System.out.println("FLIP IT!");
 
 						Mat flippedImage = new Mat();
 						Core.flip(result, flippedImage, -1);
@@ -708,6 +708,60 @@ public class FXController {
 
 			frame = noImg;
 		}
+
+		return frame;
+
+	}
+
+	/**
+	 * Rotates frame if the frame height > frame width
+	 * @param frame
+	 * @return
+	 */
+	
+	private Mat checkRotation(Mat frame) {
+
+		Mat result = new Mat();
+		
+		if (frame.width() < frame.height()) {
+
+			// System.out.println("FLIP IT!");
+			Mat flippedImage = new Mat();
+			Core.flip(result, flippedImage, -1);
+
+			result = flippedImage;
+
+		}
+
+		return result;
+
+	}
+
+	private Mat findAndDrawX(Mat frame) {
+
+		// Mat Cropped = cropImage(frame,rect);;
+		Mat sizeimg = new Mat();
+		Size Sz = new Size(100, 100);
+		Imgproc.resize(frame, sizeimg, Sz);
+
+		/*
+		 * Mat img = Imgcodecs.imread(defaultImg); Rect roi = new Rect(0,0,100,100); Mat
+		 * Cropped = new Mat(img, roi); Mat imwrite = new Mat(); Mat hsvImage = new
+		 * Mat();
+		 * 
+		 * 
+		 * 
+		 * // convert the frame to HSV Imgproc.cvtColor(frame, hsvImage,
+		 * Imgproc.COLOR_BGR2HSV);
+		 * 
+		 * 
+		 * // Limit color range to reds in the image Mat SkinMaskX1 = new Mat(); Mat
+		 * SkinMaskX2= new Mat(); Mat SkinMaskX= new Mat();
+		 * 
+		 * Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255),
+		 * SkinMaskX1); Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180,
+		 * 255, 255), SkinMaskX2); Core.bitwise_or(SkinMaskX1, SkinMaskX2, SkinMaskX);
+		 */
 
 		return frame;
 
@@ -745,11 +799,9 @@ public class FXController {
 	 * Given a binary image containing one or more closed surfaces, use it as a mask
 	 * to find and highlight the objects contours
 	 * 
-	 * @param maskedImage
-	 *            the binary image to be used as a mask
-	 * @param frame
-	 *            the original {@link Mat} image to be used for drawing the objects
-	 *            contours
+	 * @param maskedImage the binary image to be used as a mask
+	 * @param frame       the original {@link Mat} image to be used for drawing the
+	 *                    objects contours
 	 * @return the {@link Mat} image with the objects contours framed
 	 */
 	private Mat findAndDrawBalls(Mat maskedImage, Mat frame) {
@@ -819,10 +871,8 @@ public class FXController {
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image
-	 *            the {@link ImageView} to use
-	 * @param dimension
-	 *            the width of the image to set
+	 * @param image     the {@link ImageView} to use
+	 * @param dimension the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -855,10 +905,8 @@ public class FXController {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view
-	 *            the {@link ImageView} to update
-	 * @param image
-	 *            the {@link Image} to show
+	 * @param view  the {@link ImageView} to update
+	 * @param image the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
@@ -879,13 +927,13 @@ DecimalFormat df = new DecimalFormat("#.00");
 
 
 double threshold = S_THRESHOLD_ROBOT.getValue();
-		
+
 		double hueFront = (H_FRONT.getValue() / 2);
 		double hueBack = (H_BACK.getValue() / 2);
-		
+
 		double satFront = ((S_FRONT.getValue() / 100) * 255);
 		double satBack = ((S_BACK.getValue() / 100) * 255);
-		
+
 		double valFront = ((V_FRONT.getValue() / 100) * 255);
 		double valBack = ((V_BACK.getValue() / 100) * 255);
 
@@ -893,9 +941,7 @@ double threshold = S_THRESHOLD_ROBOT.getValue();
 		values.add(minValuesf);
 		Scalar maxValuesf = new Scalar((hueFront + threshold), (satFront + threshold), (valFront + threshold));
 		values.add(maxValuesf);
-	
-		
-		
+
 		Scalar minValuesb = new Scalar((hueBack - threshold), (satBack - threshold), (valBack - threshold));
 		values.add(minValuesb);
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
@@ -908,9 +954,6 @@ double threshold = S_THRESHOLD_ROBOT.getValue();
 
 		Utils.onFXThread(this.r_ValuesProp, valuesToPrint);
 
-		
-		
-		
 		return values;
 	}
 
