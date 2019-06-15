@@ -705,6 +705,44 @@ public class FXController {
 		return frame;
 
 	}
+	
+	private Mat findAndDrawX(Mat frame) {
+		
+		
+		//Mat Cropped = cropImage(frame,rect);;
+		Mat sizeimg = new Mat();
+		Size  Sz = new Size(100,100);
+		Imgproc.resize(frame, sizeimg, Sz);
+		
+		
+		
+		
+		/*Mat img = Imgcodecs.imread(defaultImg);
+		Rect roi = new Rect(0,0,100,100);
+		Mat Cropped = new Mat(img, roi);
+		Mat imwrite = new Mat();
+		Mat hsvImage = new Mat();
+		
+		
+		
+		// convert the frame to HSV
+		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
+		
+
+		// Limit color range to reds in the image
+		Mat SkinMaskX1 = new Mat();
+		Mat SkinMaskX2= new Mat();
+		Mat SkinMaskX= new Mat();
+
+		Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255), SkinMaskX1);
+		Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180, 255, 255), SkinMaskX2);
+		Core.bitwise_or(SkinMaskX1, SkinMaskX2, SkinMaskX);
+*/
+		
+		return frame;
+		
+		
+	}
 
 	/**
 	 * Calculates the area of a rectangle based on the points from MatOfPoint2f
