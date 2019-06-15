@@ -246,15 +246,15 @@ public class FXController {
 						
 						Point p = ip.findColor(frame, minValuesc, maxValuesc);
 						ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
-						//updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+						updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
 
 						// finds the front and back of the robot
 						// slider values
 						List<Scalar> values = new ArrayList<Scalar>();
 						values = getRobotValues();
-					//	updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame, values)));
+						updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame, values)));
 						Graph graph = new Graph();
-						updateImageView(robotImage,Utils.mat2Image(graph.updateGraph(frame)));
+		//				updateImageView(robotImage,Utils.mat2Image(graph.updateGraph(frame)));
 						Mat out = new Mat();
 
 						// Check if image needs to flipped before displaying
@@ -830,9 +830,20 @@ public class FXController {
 		Scalar maxValuesf = new Scalar((hueFront + threshold), (satFront + threshold), (valFront + threshold));
 		values.add(maxValuesf);
 		Scalar minValuesb = new Scalar((hueBack - threshold), (satBack - threshold), (valBack - threshold));
-		values.add(maxValuesf);
+		values.add(minValuesb);
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
-		values.add(maxValuesf);
+		values.add(maxValuesb);
+		String valuesToPrint = "Hue range Front: " + minValuesf.val[0] + "-" + maxValuesf.val[0] + "\tSaturation range: "
+				+ minValuesf.val[1] + "-" + maxValuesf.val[1] + "\tValue range: " + minValuesf.val[2] + "-"
+				+ maxValuesf.val[2] + "\n"+ "Hue range back: " + minValuesb.val[0] + "-" + maxValuesb.val[0] + "\tSaturation range: "
+				+ minValuesb.val[1] + "-" + maxValuesb.val[1] + "\tValue range: " + minValuesb.val[2] + "-"
+				+ maxValuesb.val[2];
+
+		Utils.onFXThread(this.r_ValuesProp, valuesToPrint);
+
+		
+		
+		
 		return values;
 	}
 
