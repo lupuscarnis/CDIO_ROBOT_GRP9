@@ -74,13 +74,13 @@ public class FXController {
 
 	@FXML
 	private ImageView robotImage;
-	
+
 	@FXML
 	private ImageView crossImage1;
 
 	@FXML
 	private ImageView crossImage2;
-	
+
 	// FXML slider for setting HSV ranges
 	@FXML
 	private Slider hueStart;
@@ -711,43 +711,59 @@ public class FXController {
 		return frame;
 
 	}
+
+	/**
+	 * Rotates frame if the frame height > frame width
+	 * @param frame
+	 * @return
+	 */
 	
+	private Mat checkRotation(Mat frame) {
+
+		Mat result = new Mat();
+		
+		if (frame.width() < frame.height()) {
+
+			// System.out.println("FLIP IT!");
+			Mat flippedImage = new Mat();
+			Core.flip(result, flippedImage, -1);
+
+			result = flippedImage;
+
+		}
+
+		return result;
+
+	}
+
 	private Mat findAndDrawX(Mat frame) {
-		
-		
-		//Mat Cropped = cropImage(frame,rect);;
+
+		// Mat Cropped = cropImage(frame,rect);;
 		Mat sizeimg = new Mat();
-		Size  Sz = new Size(100,100);
+		Size Sz = new Size(100, 100);
 		Imgproc.resize(frame, sizeimg, Sz);
-		
-		
-		
-		
-		/*Mat img = Imgcodecs.imread(defaultImg);
-		Rect roi = new Rect(0,0,100,100);
-		Mat Cropped = new Mat(img, roi);
-		Mat imwrite = new Mat();
-		Mat hsvImage = new Mat();
-		
-		
-		
-		// convert the frame to HSV
-		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
-		
 
-		// Limit color range to reds in the image
-		Mat SkinMaskX1 = new Mat();
-		Mat SkinMaskX2= new Mat();
-		Mat SkinMaskX= new Mat();
+		/*
+		 * Mat img = Imgcodecs.imread(defaultImg); Rect roi = new Rect(0,0,100,100); Mat
+		 * Cropped = new Mat(img, roi); Mat imwrite = new Mat(); Mat hsvImage = new
+		 * Mat();
+		 * 
+		 * 
+		 * 
+		 * // convert the frame to HSV Imgproc.cvtColor(frame, hsvImage,
+		 * Imgproc.COLOR_BGR2HSV);
+		 * 
+		 * 
+		 * // Limit color range to reds in the image Mat SkinMaskX1 = new Mat(); Mat
+		 * SkinMaskX2= new Mat(); Mat SkinMaskX= new Mat();
+		 * 
+		 * Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255),
+		 * SkinMaskX1); Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180,
+		 * 255, 255), SkinMaskX2); Core.bitwise_or(SkinMaskX1, SkinMaskX2, SkinMaskX);
+		 */
 
-		Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255), SkinMaskX1);
-		Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180, 255, 255), SkinMaskX2);
-		Core.bitwise_or(SkinMaskX1, SkinMaskX2, SkinMaskX);
-*/
-		
 		return frame;
-		
-		
+
 	}
 
 	/**
@@ -925,17 +941,14 @@ public class FXController {
 		values.add(minValuesb);
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
 		values.add(maxValuesb);
-		String valuesToPrint = "Hue range Front: " + minValuesf.val[0] + "-" + maxValuesf.val[0] + "\tSaturation range: "
-				+ minValuesf.val[1] + "-" + maxValuesf.val[1] + "\tValue range: " + minValuesf.val[2] + "-"
-				+ maxValuesf.val[2] + "\n"+ "Hue range back: " + minValuesb.val[0] + "-" + maxValuesb.val[0] + "\tSaturation range: "
-				+ minValuesb.val[1] + "-" + maxValuesb.val[1] + "\tValue range: " + minValuesb.val[2] + "-"
-				+ maxValuesb.val[2];
+		String valuesToPrint = "Hue range Front: " + minValuesf.val[0] + "-" + maxValuesf.val[0]
+				+ "\tSaturation range: " + minValuesf.val[1] + "-" + maxValuesf.val[1] + "\tValue range: "
+				+ minValuesf.val[2] + "-" + maxValuesf.val[2] + "\n" + "Hue range back: " + minValuesb.val[0] + "-"
+				+ maxValuesb.val[0] + "\tSaturation range: " + minValuesb.val[1] + "-" + maxValuesb.val[1]
+				+ "\tValue range: " + minValuesb.val[2] + "-" + maxValuesb.val[2];
 
 		Utils.onFXThread(this.r_ValuesProp, valuesToPrint);
 
-		
-		
-		
 		return values;
 	}
 
