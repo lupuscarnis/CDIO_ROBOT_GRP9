@@ -45,7 +45,13 @@ public class RobotController {
 
 		do {
 			fx.runAnalysis(true);
-
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (Robot.getInstance().getBackX() == 0 || Robot.getInstance().getFrontX() == 0) {
 				System.err.println("Couldn't find robot");
 				robotFound = false;
@@ -164,7 +170,7 @@ public class RobotController {
 			firsttime = false;
 		} while (!((dir >= 5) && (dir <= -5)) );
 
-//addcheck for obstacle and if new course
+		//addcheck for obstacle and if new course
 		dto.clearData();
 		dto.setDistance(((float)getDistance(cs.robot.get(0), path.get(0))));
 		dao.sendData(dto);
