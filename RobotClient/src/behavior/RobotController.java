@@ -19,6 +19,8 @@ public class RobotController {
 	int goals=0;
 	double ratio = 310;
 	double robotDirection = 0;
+	double frameHeight = 0;
+	double frameWidth = 0; 
 	
 	CSystem cs;
 	ArrayList<Coordinate> path;
@@ -31,13 +33,12 @@ public class RobotController {
 	public void getView() {
 		path = new ArrayList<Coordinate>();
 	
-	
-	
 	 FrameSize framesize = FrameSize.getInstance();
 	 Robot rob=Robot.getInstance();
 	 BallList bl = BallList.getInstance();
 	 System.out.println("getView kald "+rob.getBackX()+rob.getFrontX());
-	 
+	 frameWidth = framesize.getX();
+	 frameHeight = framesize.getY();
 	 cs = new CSystem(framesize.getX(),framesize.getY());
 	 
 	 ballist = bl.getBallList();
@@ -263,7 +264,12 @@ dtoo = new DTO();
 		*/
 	}
 	
-public boolean detectObstacle(){
+public boolean detectObstacle(Coordinate robotFront, Coordinate robotBack, Coordinate ball){
+	double dir = calcDirection( robotFront,  robotBack,ball);
+	//need working frame sizes, not sure these work
+	Coordinate cross = new Coordinate(frameWidth,frameHeight);
+	
+	
 		return true;
 	}
 

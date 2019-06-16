@@ -954,7 +954,7 @@ String valuesToPrint = "Hue range Front: " + H_FRONT.getValue()  + "\tSaturation
 		values.add(minValuesb);
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
 
-		values.add(maxValuesf);
+	
 		
 		values.add(maxValuesb);
 		/*
@@ -962,7 +962,7 @@ String valuesToPrint = "Hue range Front: " + H_FRONT.getValue()  + "\tSaturation
 				+ df.format(minValuesf.val[1]) + "-" + df.format(maxValuesf.val[1]) + "\tValue range: " + df.format(minValuesf.val[2]) + "-"
 				+ df.format(maxValuesf.val[2]) + "\n"+ "Hue range back: " + df.format(minValuesb.val[0]) + "-" +df.format( maxValuesb.val[0]) + "\tSaturation range: "
 				+ df.format(minValuesb.val[1]) + "-" + df.format(maxValuesb.val[1]) + "\tValue range: " + df.format(minValuesb.val[2]) + "-"
-			+ df.format(maxValuesb.val[2]);
+			+ df.format(maxValuesb.val[2]);x`
 */
 		Utils.onFXThread(this.r_ValuesProp, valuesToPrint);
 
