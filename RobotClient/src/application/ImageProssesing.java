@@ -178,7 +178,7 @@ public class ImageProssesing implements I_ImageProssesing {
 		Mat adapted = new Mat();
 		
 		Mat filtered = new Mat();
-		Imgproc.adaptiveThreshold(frame, adapted, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11,2);
+		//Imgproc.adaptiveThreshold(frame, adapted, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11,2);
 		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 		
 		Core.inRange(hsvImage, minValues, maxValues, output);

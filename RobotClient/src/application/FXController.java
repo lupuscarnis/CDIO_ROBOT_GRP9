@@ -25,6 +25,7 @@ import org.opencv.imgproc.Moments;
 import org.opencv.videoio.VideoCapture;
 
 import behavior.RobotController;
+import connection.ConsoleOutput;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -224,11 +225,11 @@ public class FXController {
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
 		this.imageViewProperties(this.maskImage, 200);
-		this.imageViewProperties(this.cornerImage, 200);
+		this.imageViewProperties(this.cornerImage,200);
 		this.imageViewProperties(this.morphImage, 200);
 		this.imageViewProperties(this.robotImage, 200);
 
-		System.out.println("Pushed Start");
+		
 
 		if (!this.cameraActive) {
 			// start the video capture
@@ -295,9 +296,11 @@ public class FXController {
 	private void startRobot() {
 
 		if (!this.robotActive) {
-			RobotController rc = new RobotController();
+			
 			this.robotActive = true;
-			rc.start();
+			Thread robot = new Thread( new RobotController());
+				robot.start();
+			
 			// update the button content
 			this.robotButton.setText("Stop Robot");
 			System.out.println("Robot starting...");
@@ -514,7 +517,7 @@ public class FXController {
 				Point center = new Point(Math.round(c[0]), Math.round(c[1]));
 				if (!(center.x == 0 && center.y == 0)) {
 					p.add(center);
-					System.out.println("fandt bold x " + center.x + " og y er " + center.y);
+				//	System.out.println("fandt bold x " + center.x + " og y er " + center.y);
 				}
 				// circle center
 
