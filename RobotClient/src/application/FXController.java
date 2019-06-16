@@ -183,8 +183,8 @@ public class FXController {
 	 * 
 	 */
 
-	private boolean isStaticDebugMode = false;
-	private boolean isWebcamDebugMode = true;
+	private boolean isStaticDebugMode = true;
+	private boolean isWebcamDebugMode = false;
 
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
@@ -196,7 +196,7 @@ public class FXController {
 	private int webcamID = 0;
 
 	// Debug image file
-	// private String debugImg = "Debugging/newvinkelret.jpg";
+	//private String debugImg = "Debugging/pic01.jpg";
 	private String debugImg = "Debugging/Robo_w_Balls.png";
 
 	// Empty image file
@@ -464,6 +464,7 @@ public class FXController {
 
 			Mat grayImage = new Mat();
 			Mat circles = new Mat();
+			Mat mask = new Mat();
 
 			int min_dist = new Integer((int) this.H_minDist.getValue());
 			double uThresh = new Double(this.H_uThresh.getValue());
@@ -474,6 +475,10 @@ public class FXController {
 			Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
 			Imgproc.medianBlur(grayImage, grayImage, 5);
 
+			
+			
+			//Imgproc.adaptiveThreshold(grayImage, mask, 125, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 11, 12);
+			
 			// show the current selected HSV range
 			String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh + ", Center Threshold: "
 					+ cTresh + ", Min Radius: " + minRad + ", Max Radius: " + maxRad;
@@ -570,6 +575,17 @@ public class FXController {
 		// both in [0,10] and [170, 180].
 		Core.inRange(blurredImage, minValues, maxValues, mask);
 
+		// Limit color range to reds in the image Mat redMask1 = new Mat(); Mat
+		Mat redMask1 = new Mat();
+		Mat redMask2 = new Mat();
+		Mat redMaskf = new Mat();
+
+		/*Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255), redMask1);
+		Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180, 255, 255), redMask2);
+		Core.bitwise_or(redMask1, redMask2, redMaskf);*/
+
+		Imgproc.adaptiveThreshold(mask, mask, 125, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 11, 12);
+
 		// show the partial output
 		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
 
@@ -601,8 +617,6 @@ public class FXController {
 			}
 
 			if (maxAreaIdx >= 0) {
-
-				System.out.println("1111111111");
 
 				MatOfPoint largestContour = contours.get(maxAreaIdx);
 
@@ -636,8 +650,6 @@ public class FXController {
 
 				if (finalCorners.toArray().length == 4) {
 					Size size = getRectangleSize(finalCorners);
-
-					System.out.println("test");
 
 					maxCurve = polygon;
 

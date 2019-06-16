@@ -212,8 +212,8 @@
 														<Slider fx:id="H_minDist" blockIncrement="1" max="64.0" min="0" value="64.0" />
 														<Label text="Upper Threshold (Def. 30.0)" />
 														<Slider fx:id="H_uThresh" blockIncrement="1" min="1.0" value="30.0" />
-														<Label text="Center Threshold (Def. 28.0)" />
-														<Slider fx:id="H_cTresh" blockIncrement="1" min="1.0" value="28.0" />
+														<Label text="Center Threshold (Def. 20.0)" />
+														<Slider fx:id="H_cTresh" blockIncrement="1" min="1.0" value="20.0" />
 														<Label text="Min Radius (Def. 1)" />
 														<Slider fx:id="H_minRad" blockIncrement="1" max="10.0" min="0" value="1.0" />
 														<Label text="Max Radius (Def. 15)" />
