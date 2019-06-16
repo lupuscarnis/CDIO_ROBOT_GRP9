@@ -43,7 +43,7 @@ public class ImageProssesing implements I_ImageProssesing {
 	 * @see application.I_ImageProssesing#findBackAndFront(org.opencv.core.Mat)
 	 */
 	@Override
-	public Mat findBackAndFront(Mat frame, List<Scalar> values) {
+	public Mat findBackAndFront(Mat frame, List<Scalar> values, boolean robot) {
 		
 		
 	
@@ -64,12 +64,14 @@ public class ImageProssesing implements I_ImageProssesing {
 		
 		Point back = findColor(frame,minValuesb, maxValuesb);
 */
-		Robot s = Robot.getInstance();
+		if(robot) {
+			
+			Robot s = Robot.getInstance();
 		s.setBackX(back.x);
 		s.setBackY(back.y);
 		s.setFrontX(front.x);
 		s.setFrontY(front.y);
-
+		}
 		
 		Imgproc.line(frame, back, front, new Scalar(350, 255, 255));
 	

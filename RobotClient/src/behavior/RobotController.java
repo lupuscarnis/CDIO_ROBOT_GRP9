@@ -6,6 +6,7 @@ import java.util.List;
 import application.CSystem;
 import application.Coordinate;
 import application.FXController;
+import application.staticFXCont;
 import dao.DAO;
 import dao.I_DAO;
 import dto.DTO;
@@ -39,11 +40,11 @@ public class RobotController {
 	}
 
 	public void getView() {
-		FXController fx = new FXController();
+		FXController fx = staticFXCont.getInstance().getfxInstance();
 		boolean robotFound = false, ballsFound = false;
 
 		do {
-			fx.runAnalysis();
+			fx.runAnalysis(true);
 
 			if (Robot.getInstance().getBackX() == 0 || Robot.getInstance().getFrontX() == 0) {
 				System.err.println("Couldn't find robot");

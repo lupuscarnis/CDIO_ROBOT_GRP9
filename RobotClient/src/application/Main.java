@@ -50,6 +50,8 @@ public class Main extends Application {
 			
 			// set the proper behavior on closing the application
 			FXController controller = loader.getController();
+			staticFXCont.getInstance().setFXController(controller);
+			
 			primaryStage.setOnCloseRequest((new EventHandler<WindowEvent>() {
 				public void handle(WindowEvent we)
 				{
