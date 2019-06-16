@@ -22,6 +22,8 @@ public class RobotController {
 	double robotDirection = 0;
 	double frameHeight = 0;
 	double frameWidth = 0;
+	DAO dao = new DAO();
+	DTO dto = new DTO();
 
 	CSystem cs;
 	ArrayList<Coordinate> path;
@@ -145,9 +147,7 @@ public class RobotController {
 
 	public void start() {
 		boolean firsttime = true;
-		DAO dao = new DAO();
-		DTO dto = new DTO();
-		double dir = 10000;
+		double dir = 0;
 		do {
 			if (firsttime) {
 				dao.reciveData();
@@ -156,6 +156,9 @@ public class RobotController {
 			getView();
 			path = findRoute();
 			dir= getDir(path);
+			
+			dto.setRotation((float) dir);
+			dao.sendData(dto);
 			firsttime = false;
 		} while (!((dir >= 5) && (dir <= -5)) );
 
@@ -188,16 +191,6 @@ public class RobotController {
 		double dir = 4;
 		Coordinate temp = robotCenter;
 		dir = calcDirection(cs.robot.get(0), robotCenter, nextBall);
-
-		I_DTO dtoo = new DTO();
-
-		dtoo.setRotation((float) dir);
-		dtoo.setDistance((float) (0));
-		dtoo.setClawMove(0);
-		dtoo.setBackClawMove(0);
-
-		I_DAO data = new DAO();
-		data.sendData(dtoo);
 		return dir;
 		/*
 		 * while(dir>2) {
