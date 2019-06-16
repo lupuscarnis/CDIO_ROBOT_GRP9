@@ -156,13 +156,13 @@ public class RobotController {
 			getView();
 			path = findRoute();
 			dir= getDir(path);
-			
+			dto.clearData();
 			dto.setRotation((float) dir);
 			dao.sendData(dto);
 			firsttime = false;
 		} while (!((dir >= 5) && (dir <= -5)) );
 
-
+		dto.clearData();
 		dto.setDistance(((float)getDistance(cs.robot.get(0), path.get(0))));
 		dao.sendData(dto);
 		dao.reciveData();	
