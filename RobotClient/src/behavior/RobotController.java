@@ -240,11 +240,28 @@ public class RobotController {
 		 * I_DAO data2 = new DAO(); data2.sendData(dtooo);
 		 */
 	}
+	
+	
 
 	public boolean detectObstacle(Coordinate robotFront, Coordinate robotBack, Coordinate ball) {
 		double dir = calcDirection(robotFront, robotBack, ball);
 		// need working frame sizes, not sure these work
-		Coordinate cross = new Coordinate(frameWidth, frameHeight);
+		Coordinate cross = new Coordinate(frameWidth/2, frameHeight/2);
+		
+		for(int i =0; i<frameWidth/2;i++) {
+			
+			if(robotFront.getX()*i>(cross.getX()-30) && robotFront.getX()*i<cross.getX()+30) {
+				
+				if(robotFront.getY()*i>(cross.getY()-30) && robotFront.getY()*i<cross.getY()+30) {
+					//you are on a collision course with the cross
+					
+				}
+				
+				//if(robotFront.getX()*i && robotFront.getY()*i)
+				
+			}
+				
+		}
 
 		return true;
 	}
