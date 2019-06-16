@@ -190,7 +190,7 @@ public class FXController {
 	 * NOTE: Only one of the flags below can be true!
 	 * 
 	 */
-	private boolean isDebugMode = true;
+	private boolean isDebugMode = false;
 	private boolean isProductionMode = false;
 
 	// Use HSV or Hough for image analysis?
