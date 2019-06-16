@@ -201,7 +201,7 @@ public class FXController {
 
 	// Sets the id of the systems webcam
 
-	private int webcamID = 0;
+	private int webcamID = 1;
 
 	// Debug image file
 	// private String debugImg = "Debugging/newvinkelret.jpg";
@@ -237,7 +237,7 @@ public class FXController {
 
 			if (this.capture.isOpened()) {
 
-				if (isDebugMode) {
+				if (isDebugMode == false) {
 
 					this.cameraActive = true;
 
@@ -246,7 +246,7 @@ public class FXController {
 
 						@Override
 						public void run() {
-
+							
 							runAnalysis();
 
 						}
@@ -298,14 +298,14 @@ public class FXController {
 			this.robotActive = true;
 			rc.start();
 			// update the button content
-			this.robotButton.setText("Stop Camera");
+			this.robotButton.setText("Stop Robot");
 			System.out.println("Robot starting...");
 
 		} else {
 
 			this.robotActive = false;
 			// update the button content
-			this.robotButton.setText("Start Camera");
+			this.robotButton.setText("Start Robot");
 
 		}
 
