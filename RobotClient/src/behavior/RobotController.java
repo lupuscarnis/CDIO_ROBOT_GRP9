@@ -22,15 +22,16 @@ public class RobotController {
 	double robotDirection = 0;
 	double frameHeight = 0;
 	double frameWidth = 0;
-	DAO dao = new DAO();
-	DTO dto = new DTO();
+	DAO dao ;
+	DTO dto ;
 
 	CSystem cs;
 	ArrayList<Coordinate> path;
 	List<Ball> ballist;
 
 	public RobotController() {
-
+		dao = new DAO();
+		dto = new DTO();
 	}
 
 	public void runningAnalysis() {

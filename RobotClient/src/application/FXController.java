@@ -194,8 +194,8 @@ public class FXController {
 	 */
 	
 	private boolean isStaticDebugMode = false;
-	private boolean isWebcamDebugMode = false;
-	private boolean isProductionMode = true;
+	private boolean isWebcamDebugMode = true;
+	private boolean isProductionMode = false;
 
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
@@ -205,7 +205,7 @@ public class FXController {
 
 	// Sets the id of the systems webcam
 
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Debug image file
 	// private String debugImg = "Debugging/newvinkelret.jpg";
