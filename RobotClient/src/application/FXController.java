@@ -530,7 +530,7 @@ public class FXController {
 
 			BallList s = BallList.getInstance();
 
-			// s.clearList();
+			 s.clearList();
 
 			for (Point B : p) {
 				s.add(new Ball(B.x, B.y));
