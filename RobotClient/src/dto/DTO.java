@@ -164,6 +164,13 @@ public class DTO implements I_DTO {
 
 
 	}
+		public void clearData() {
+			distance = 0;
+			rotation = 0;
+			clawMove = 0;
+			backClawMove = 0; 
+			ballpickup = false;
+		}
 	
 
 }
