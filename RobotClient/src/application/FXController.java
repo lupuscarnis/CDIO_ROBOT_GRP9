@@ -179,16 +179,12 @@ public class FXController {
 	 * isWebcamDebugMode: Run image analysis on a webcam feed using
 	 * scheduleAtFixedRate
 	 * 
-	 * isProductionMode: Bypass automatic image analysis and let the robot control
-	 * when the update occurs
-	 * 
-	 * 
 	 * NOTE: Only one of the flags below can be true!
 	 * 
 	 */
 
-	private boolean isStaticDebugMode = true;
-	private boolean isWebcamDebugMode = false;
+	private boolean isStaticDebugMode = false;
+	private boolean isWebcamDebugMode = true;
 
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
@@ -197,12 +193,11 @@ public class FXController {
 	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
-
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Debug image file
-	private String debugImg = "Debugging/newvinkelret.jpg";
-	//private String debugImg = "Debugging/Robo_w_Balls.png";
+	// private String debugImg = "Debugging/newvinkelret.jpg";
+	private String debugImg = "Debugging/Robo_w_Balls.png";
 
 	// Empty image file
 	private String defaultImg = "Debugging/Default.jpg";
@@ -232,11 +227,11 @@ public class FXController {
 			// start the video capture
 			this.capture.open(webcamID);
 
-			if (this.capture.isOpened() || isStaticDebugMode) {
+			if (this.capture.isOpened()) {
+
+				this.cameraActive = true;
 
 				if (isStaticDebugMode || isWebcamDebugMode) {
-
-					this.cameraActive = true;
 
 					// Run the image analysis at a fixed rate with a delay for debugging purposes
 					Runnable frameGrabber = new Runnable() {
@@ -254,26 +249,24 @@ public class FXController {
 
 					// update the button content
 					this.cameraButton.setText("Stop Camera");
-
-					// Run once call to runAnalysis
-				} else {
-
-					// log the error
-					System.err.println("Failed to open the camera connection...");
-
 				}
 
 			} else {
 
-				// the camera is not active at this point
-				this.cameraActive = false;
-				// update again the button content
-				this.cameraButton.setText("Start Camera");
+				// log the error
+				System.err.println("Failed to open the camera connection...");
 
-				// stop the timer
-				this.stopAcquisition();
 			}
 
+		} else {
+
+			// the camera is not active at this point
+			this.cameraActive = false;
+			// update again the button content
+			this.cameraButton.setText("Start Camera");
+
+			// stop the timer
+			this.stopAcquisition();
 		}
 	}
 
@@ -599,20 +592,18 @@ public class FXController {
 			double maxArea = 0;
 			int maxAreaIdx = 0;
 
-			for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++)
-			{
-			    double contourArea = Imgproc.contourArea(contours.get(contourIdx));
-			    if (maxArea < contourArea)
-			    {
-			    	maxArea = contourArea;
-			        maxAreaIdx = contourIdx;
-			    }
+			for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
+				double contourArea = Imgproc.contourArea(contours.get(contourIdx));
+				if (maxArea < contourArea) {
+					maxArea = contourArea;
+					maxAreaIdx = contourIdx;
+				}
 			}
 
 			if (maxAreaIdx >= 0) {
 
 				System.out.println("1111111111");
-				
+
 				MatOfPoint largestContour = contours.get(maxAreaIdx);
 
 				// STEP 8: Generate the convex hull of this contour
@@ -625,7 +616,6 @@ public class FXController {
 				MatOfPoint2f polygon = new MatOfPoint2f();
 				Imgproc.approxPolyDP(OpenCVUtil.convert(hullPoint), polygon, 40, true);
 
-				
 				List<MatOfPoint> tmp = new ArrayList<>();
 				tmp.add(OpenCVUtil.convert(polygon));
 				// restoreScaleMatOfPoint(tmp, 0.9);
@@ -634,7 +624,7 @@ public class FXController {
 
 				// show the partial output
 				this.updateImageView(this.maskImage, Utils.mat2Image(convexHullMask));
-				
+
 				MatOfPoint2f finalCorners = new MatOfPoint2f();
 				MatOfPoint2f maxCurve = new MatOfPoint2f();
 				Point[] tmpPoints = polygon.toArray();
@@ -648,7 +638,7 @@ public class FXController {
 					Size size = getRectangleSize(finalCorners);
 
 					System.out.println("test");
-					
+
 					maxCurve = polygon;
 
 					Mat result = Mat.zeros(size, frame.type());
@@ -728,9 +718,9 @@ public class FXController {
 			Core.rotate(result, result, Core.ROTATE_90_CLOCKWISE); // ROTATE_180 or ROTATE_90_COUNTERCLOCKWISE
 
 		} else {
-			
+
 			result = frame;
-			
+
 		}
 
 		return result;
