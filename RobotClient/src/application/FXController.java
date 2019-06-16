@@ -992,9 +992,6 @@ public class FXController {
 		Scalar minValuesb = new Scalar((hueBack - threshold), (satBack - threshold), (valBack - threshold));
 		values.add(minValuesb);
 		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
-
-		values.add(maxValuesf);
-
 		values.add(maxValuesb);
 		/*
 		 * String valuesToPrint = "Hue range Front: " + df.format(minValuesf.val[0]) +
