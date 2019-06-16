@@ -317,7 +317,7 @@ public class FXController {
 	 * 
 	 */
 
-	void runAnalysis() {
+	public void runAnalysis() {
 
 		Mat frame = new Mat();
 
