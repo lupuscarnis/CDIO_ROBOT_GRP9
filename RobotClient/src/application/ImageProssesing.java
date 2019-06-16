@@ -43,33 +43,24 @@ public class ImageProssesing implements I_ImageProssesing {
 	 * @see application.I_ImageProssesing#findBackAndFront(org.opencv.core.Mat)
 	 */
 	@Override
-	public Mat findBackAndFront(Mat frame, List<Scalar> values) {
+	public Mat findBackAndFront(Mat frame, List<Scalar> values, boolean robot) {
 		
 		
 	
 	
-		/*
 
-		Scalar minValuesf = new Scalar(97,171,194);
-		Scalar maxValuesf = new Scalar(117,191,214);
-		
-		Scalar minValuesb = new Scalar(161,82,191);
-		Scalar maxValuesb = new Scalar(171,92,201);
-*/
 		Point front = findColor(frame, values.get(0), values.get(1));
 		
 		Point back = findColor(frame,values.get(2), values.get(3));
-/*
-		Point front = findColor(frame, minValuesf, maxValuesf);
+
+		if(robot) {
 		
-		Point back = findColor(frame,minValuesb, maxValuesb);
-*/
-		Robot s = Robot.getInstance();
+			Robot s = Robot.getInstance();
 		s.setBackX(back.x);
 		s.setBackY(back.y);
 		s.setFrontX(front.x);
 		s.setFrontY(front.y);
-
+		}
 		
 		Imgproc.line(frame, back, front, new Scalar(350, 255, 255));
 	
@@ -184,10 +175,12 @@ public class ImageProssesing implements I_ImageProssesing {
 
 		Mat hsvImage = new Mat();
 		Mat output = new Mat();
+		Mat adapted = new Mat();
+		
 		Mat filtered = new Mat();
-
+		//Imgproc.adaptiveThreshold(frame, adapted, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11,2);
 		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
-
+		
 		Core.inRange(hsvImage, minValues, maxValues, output);
 
 		// init

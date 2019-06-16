@@ -6,6 +6,7 @@ import java.util.List;
 import application.CSystem;
 import application.Coordinate;
 import application.FXController;
+import application.staticFXCont;
 import dao.DAO;
 import dao.I_DAO;
 import dto.DTO;
@@ -15,7 +16,7 @@ import objects.BallList;
 import objects.FrameSize;
 import objects.Robot;
 
-public class RobotController {
+public class RobotController  implements Runnable{
 	int nrBalls = 0;
 	int goals = 0;
 	double ratio = 310;
@@ -24,27 +25,30 @@ public class RobotController {
 	double frameWidth = 0;
 	DAO dao ;
 	DTO dto ;
+	int iter = 0;
 
 	CSystem cs;
 	ArrayList<Coordinate> path;
 	List<Ball> ballist;
 
 	public RobotController() {
-		dao = new DAO();
-		dto = new DTO();
-	}
+		//dao = new DAO();
+		//dto = new DTO();
+		}
 
 	public void runningAnalysis() {
 
 	}
 
 	public void getView() {
-		FXController fx = new FXController();
+		FXController fx = staticFXCont.getInstance().getfxInstance();
 		boolean robotFound = false, ballsFound = false;
 
 		do {
-			fx.runAnalysis();
-
+			fx.runAnalysis(true);
+			
+			
+		
 			if (Robot.getInstance().getBackX() == 0 || Robot.getInstance().getFrontX() == 0) {
 				System.err.println("Couldn't find robot");
 				robotFound = false;
@@ -60,19 +64,19 @@ public class RobotController {
 			}
 
 		} while (!(robotFound && ballsFound));
-
-		path = new ArrayList<Coordinate>();
 		FrameSize framesize = FrameSize.getInstance();
+		path = new ArrayList<Coordinate>();
 		Robot rob = Robot.getInstance();
 		BallList bl = BallList.getInstance();
-
 		frameWidth = framesize.getX();
 		frameHeight = framesize.getY();
 		cs = new CSystem(framesize.getX(), framesize.getY());
 		ballist = bl.getBallList();
-		for (int i = 0; i < ballist.size(); i++) {
-			if (!(ballist.get(i).getX() == 0 && ballist.get(i).getY() == 0)) {
-				cs.balls.add(new Coordinate(ballist.get(i).getX(), ballist.get(i).getY()));
+	
+			for(Ball ball: ballist) {
+			if (ball.getX() != 0 && ball.getY() != 0) {
+				System.out.println();
+				cs.balls.add(new Coordinate(ball.getX(), ball.getY()));
 			}
 
 		}
@@ -146,29 +150,37 @@ public class RobotController {
 
 	}
 
-	public void start() {
+	public void run() {
 		boolean firsttime = true;
-		double dir = 0;
+		double dir = 10;
 		do {
 			if (!firsttime) {
 				dao.reciveData();
 			}
-
+			
 			getView();
 			path = findRoute();
-			dir= getDir(path);
+			dir = getDir(path);
+			System.out.println("dir:" + dir);
+			System.out.println("Iter: " + iter);
+			iter++;
+			/*
 			dto.clearData();
 			dto.setRotation((float) dir);
 			dao.sendData(dto);
+			
 			firsttime = false;
+			*/
 		} while (!((dir >= 5) && (dir <= -5)) );
 
-//addcheck for obstacle and if new course
+		//addcheck for obstacle and if new course
+		
+		/*
 		dto.clearData();
 		dto.setDistance(((float)getDistance(cs.robot.get(0), path.get(0))));
 		dao.sendData(dto);
 		dao.reciveData();	
-		
+		*/
 		
 	}
 
@@ -318,13 +330,10 @@ public class RobotController {
 				(robotFront.getY() - robotBack.getY()));
 		Coordinate vector2 = new Coordinate((ball.getX() - robotBack.getX()), (ball.getY() - robotBack.getY()));
 
-		double upper = vector1.getX() * vector2.getX() + vector1.getY() * vector2.getY();
-		double lower = getDistance(robotBack, robotFront) * getDistance(robotBack, ball);
-
+	
 		// double angle = (Math.atan2(vector2.getY(),vector2.getX()) -
 		// Math.atan2(vector1.getY(),vector1.getX()));
-		System.out.println();
-
+	
 		double dot = vector1.getX() * vector2.getX() + vector1.getY() * vector2.getY(); // dot product between [x1, y1]
 																						// and [x2, y2]
 		double det = vector1.getX() * vector2.getY() - vector1.getY() * vector2.getX(); // determinant

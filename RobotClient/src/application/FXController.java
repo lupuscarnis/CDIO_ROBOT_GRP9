@@ -4,11 +4,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import javax.sound.midi.Synthesizer;
 
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
@@ -18,30 +17,27 @@ import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
-import org.opencv.osgi.OpenCVInterface;
-import org.opencv.utils.Converters;
 import org.opencv.videoio.VideoCapture;
 
 import behavior.RobotController;
-import dao.DAO;
-import dao.I_DAO;
+import connection.ConsoleOutput;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import nu.pattern.OpenCV;
-import objects.*;
+import objects.Ball;
+import objects.BallList;
+import objects.FrameSize;
 import tools.Graph;
 import tools.OpenCVUtil;
 import tools.Utils;
@@ -51,7 +47,6 @@ import tools.Utils;
  * 
  * https://github.com/opencv-java
  */
-
 public class FXController {
 
 	// FXML camera button
@@ -171,8 +166,6 @@ public class FXController {
 	// Homemade Image prosessing
 	I_ImageProssesing ip = new ImageProssesing();
 
-	
-
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
@@ -183,7 +176,8 @@ public class FXController {
 	 * isStaticDebugMode: Run image analysis on a static/local image using
 	 * scheduleAtFixedRate
 	 * 
-	 * isWebcamDebugMode: Run image analysis on a webcam feed using scheduleAtFixedRate
+	 * isWebcamDebugMode: Run image analysis on a webcam feed using
+	 * scheduleAtFixedRate
 	 * 
 	 * isProductionMode: Bypass automatic image analysis and let the robot control
 	 * when the update occurs
@@ -192,9 +186,9 @@ public class FXController {
 	 * NOTE: Only one of the flags below can be true!
 	 * 
 	 */
-	
-	private boolean isStaticDebugMode = false;
-	private boolean isWebcamDebugMode = true;
+
+	private boolean isStaticDebugMode = true;
+	private boolean isWebcamDebugMode = false;
 	private boolean isProductionMode = false;
 
 	// Use HSV or Hough for image analysis?
@@ -205,15 +199,15 @@ public class FXController {
 
 	// Sets the id of the systems webcam
 
-	private int webcamID = 0;
+	private int webcamID = 1;
 
 	// Debug image file
 	// private String debugImg = "Debugging/newvinkelret.jpg";
 	private String debugImg = "Debugging/Robo_w_Balls.png";
 
 	// Empty image file
-	private String defaultImg = "Debugging/Default.jpg";	
-																																							
+	private String defaultImg = "Debugging/Default.jpg";
+
 	/**
 	 * The action triggered by pushing the button on the GUI
 	 */
@@ -226,16 +220,16 @@ public class FXController {
 		b_ValuesProp = new SimpleObjectProperty<>();
 		this.b_CurrentValues.textProperty().bind(b_ValuesProp);
 		r_ValuesProp = new SimpleObjectProperty<>();
-		this.r_CurrentValues.textProperty().bind(r_ValuesProp);										
+		this.r_CurrentValues.textProperty().bind(r_ValuesProp);
 
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
 		this.imageViewProperties(this.maskImage, 200);
-		this.imageViewProperties(this.cornerImage, 200);
+		this.imageViewProperties(this.cornerImage,200);
 		this.imageViewProperties(this.morphImage, 200);
 		this.imageViewProperties(this.robotImage, 200);
 
-		System.out.println("Pushed Start");
+		
 
 		if (!this.cameraActive) {
 			// start the video capture
@@ -253,7 +247,7 @@ public class FXController {
 						@Override
 						public void run() {
 
-							runAnalysis();
+							runAnalysis(false);
 
 						}
 					};
@@ -269,7 +263,7 @@ public class FXController {
 
 					this.cameraActive = true;
 
-					runAnalysis();
+					runAnalysis(false);
 					initialized = true;
 					// update the button content
 					this.cameraButton.setText("Stop Camera");
@@ -302,9 +296,11 @@ public class FXController {
 	private void startRobot() {
 
 		if (!this.robotActive) {
-			RobotController rc = new RobotController();
+			
 			this.robotActive = true;
-			rc.start();
+			Thread robot = new Thread( new RobotController());
+				robot.start();
+			
 			// update the button content
 			this.robotButton.setText("Stop Robot");
 			System.out.println("Robot starting...");
@@ -325,19 +321,19 @@ public class FXController {
 	 * 
 	 */
 
-	public void runAnalysis() {
+	public void runAnalysis(boolean robot) {
 
 		Mat frame = new Mat();
 
 		frame = grabFrame();
 
 		// Find the rectangle of the playing field and crop the image
-		//frame = findAndDrawRect(frame);
+		frame = findAndDrawRect(frame);
 
 		if (UseHSVImgDetection) {
 			frame = grabFrameHSV(frame);
 		} else {
-			frame = grabFrameHough(frame);
+			frame = grabFrameHough(frame, robot);
 		}
 
 		// finds the pixels to cm Ratio
@@ -347,12 +343,11 @@ public class FXController {
 		 * 
 		 * De her skal ud i deres egen metode hvis de skal bruges
 		 */
-		/*
 		Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10), ((S_CORNER.getValue() / 100) * 255 - 10),
 				((V_CORNER.getValue() / 100) * 255 - 10));
 		Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10), ((S_CORNER.getValue() / 100) * 255 + 10),
 				((V_CORNER.getValue() / 100) * 255 + 10));
-*/
+
 		// Point p = ip.findColor(frame, minValuesc, maxValuesc);
 		// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
 		// updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
@@ -361,7 +356,7 @@ public class FXController {
 		// slider values
 		List<Scalar> values = new ArrayList<Scalar>();
 		values = getRobotValues();
-		updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame, values)));
+		updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame, values, robot)));
 		Graph graph = new Graph();
 
 		// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
@@ -489,7 +484,7 @@ public class FXController {
 	 * 
 	 * @return the {@link Image} to show
 	 */
-	private Mat grabFrameHough(Mat frame) {
+	private Mat grabFrameHough(Mat frame, boolean robot) {
 
 		// if the frame is not empty, process it
 		if (!frame.empty()) {
@@ -522,7 +517,7 @@ public class FXController {
 				Point center = new Point(Math.round(c[0]), Math.round(c[1]));
 				if (!(center.x == 0 && center.y == 0)) {
 					p.add(center);
-					System.out.println("fandt bold x " + center.x + " og y er " + center.y);
+				//	System.out.println("fandt bold x " + center.x + " og y er " + center.y);
 				}
 				// circle center
 
@@ -535,20 +530,21 @@ public class FXController {
 				// Print center coordinates
 
 			}
+			if (robot) {
+				BallList s = BallList.getInstance();
 
-			BallList s = BallList.getInstance();
+				s.clearList();
 
-			 s.clearList();
+				for (Point B : p) {
+					s.add(new Ball(B.x, B.y));
+				}
 
-			for (Point B : p) {
-				s.add(new Ball(B.x, B.y));
+				for (int i = 0; i < p.size(); i++) {
+					// System.out.println("Point (X,Y): "+p.get(i));
+
+				}
+
 			}
-
-			for (int i = 0; i < p.size(); i++) {
-				// System.out.println("Point (X,Y): "+p.get(i));
-
-			}
-
 		}
 
 		return frame;
@@ -977,7 +973,7 @@ public class FXController {
 		DecimalFormat df = new DecimalFormat("#.00");
 
 		double threshold = S_THRESHOLD_ROBOT.getValue();
-	
+
 		String valuesToPrint = "Hue range Front: " + H_FRONT.getValue() + "\tSaturation range: " + S_FRONT.getValue()
 				+ "\tValue range: " + V_FRONT.getValue() + "\n" + "Hue range back: " + H_BACK.getValue()
 				+ "\tSaturation range: " + S_BACK.getValue() + "\tValue range: " + V_BACK.getValue() + "\n Data range "
