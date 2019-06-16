@@ -1,6 +1,5 @@
 package application;
 
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,20 +46,7 @@ import tools.Utils;
  * 
  * https://github.com/opencv-java
  */
-public class FXController implements Initializable {
-
-	private static FXController instance = null;
-
-	public static FXController getInstance() {
-		if (instance == null)
-			instance = new FXController();
-
-		return instance;
-	}
-	
-	 @Override public void initialize(URL url, ResourceBundle rb) {
-	 System.out.println("Initialize"); }
-	 
+public class FXController {
 
 	// FXML camera button
 	@FXML
