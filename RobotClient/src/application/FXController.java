@@ -1,9 +1,11 @@
 package application;
 
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +29,7 @@ import behavior.RobotController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -44,8 +47,20 @@ import tools.Utils;
  * 
  * https://github.com/opencv-java
  */
+public class FXController implements Initializable {
 
-public class FXController {
+	private static FXController instance = null;
+
+	public static FXController getInstance() {
+		if (instance == null)
+			instance = new FXController();
+
+		return instance;
+	}
+	
+	 @Override public void initialize(URL url, ResourceBundle rb) {
+	 System.out.println("Initialize"); }
+	 
 
 	// FXML camera button
 	@FXML
@@ -185,8 +200,8 @@ public class FXController {
 	 * 
 	 */
 
-	private boolean isStaticDebugMode = false;
-	private boolean isWebcamDebugMode = true;
+	private boolean isStaticDebugMode = true;
+	private boolean isWebcamDebugMode = false;
 	private boolean isProductionMode = false;
 
 	// Use HSV or Hough for image analysis?
