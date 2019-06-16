@@ -171,7 +171,7 @@ public class FXController {
 	// Homemade Image prosessing
 	I_ImageProssesing ip = new ImageProssesing();
 
-	RobotController rc = new RobotController();
+	
 
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
@@ -302,7 +302,7 @@ public class FXController {
 	private void startRobot() {
 
 		if (!this.robotActive) {
-
+			RobotController rc = new RobotController();
 			this.robotActive = true;
 			rc.start();
 			// update the button content
