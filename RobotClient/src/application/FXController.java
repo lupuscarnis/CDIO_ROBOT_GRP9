@@ -212,8 +212,8 @@ public class FXController {
 	private String debugImg = "Debugging/Robo_w_Balls.png";
 
 	// Empty image file
-	private String defaultImg = "Debugging/Default.jpg";
-
+	private String defaultImg = "Debugging/Default.jpg";	
+																																							
 	/**
 	 * The action triggered by pushing the button on the GUI
 	 */
@@ -226,7 +226,7 @@ public class FXController {
 		b_ValuesProp = new SimpleObjectProperty<>();
 		this.b_CurrentValues.textProperty().bind(b_ValuesProp);
 		r_ValuesProp = new SimpleObjectProperty<>();
-		this.r_CurrentValues.textProperty().bind(r_ValuesProp);
+		this.r_CurrentValues.textProperty().bind(r_ValuesProp);										
 
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
@@ -332,7 +332,7 @@ public class FXController {
 		frame = grabFrame();
 
 		// Find the rectangle of the playing field and crop the image
-		frame = findAndDrawRect(frame);
+		//frame = findAndDrawRect(frame);
 
 		if (UseHSVImgDetection) {
 			frame = grabFrameHSV(frame);
@@ -347,11 +347,12 @@ public class FXController {
 		 * 
 		 * De her skal ud i deres egen metode hvis de skal bruges
 		 */
+		/*
 		Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10), ((S_CORNER.getValue() / 100) * 255 - 10),
 				((V_CORNER.getValue() / 100) * 255 - 10));
 		Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10), ((S_CORNER.getValue() / 100) * 255 + 10),
 				((V_CORNER.getValue() / 100) * 255 + 10));
-
+*/
 		// Point p = ip.findColor(frame, minValuesc, maxValuesc);
 		// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
 		// updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
@@ -976,7 +977,7 @@ public class FXController {
 		DecimalFormat df = new DecimalFormat("#.00");
 
 		double threshold = S_THRESHOLD_ROBOT.getValue();
-
+	
 		String valuesToPrint = "Hue range Front: " + H_FRONT.getValue() + "\tSaturation range: " + S_FRONT.getValue()
 				+ "\tValue range: " + V_FRONT.getValue() + "\n" + "Hue range back: " + H_BACK.getValue()
 				+ "\tSaturation range: " + S_BACK.getValue() + "\tValue range: " + V_BACK.getValue() + "\n Data range "

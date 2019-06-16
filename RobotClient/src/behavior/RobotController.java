@@ -150,7 +150,7 @@ public class RobotController {
 		boolean firsttime = true;
 		double dir = 0;
 		do {
-			if (firsttime) {
+			if (!firsttime) {
 				dao.reciveData();
 			}
 

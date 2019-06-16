@@ -28,7 +28,7 @@ public class DAO implements I_DAO {
 	 */
 	@Override
 	public boolean sendData(I_DTO data) {
-	if(!(c==null)) {
+	if(!(s==null)) {
 		
 	
 		try {
@@ -51,7 +51,7 @@ public class DAO implements I_DAO {
 		return true;
 		
 	}
-	
+	System.out.println("No socket!");
 	return false;
 	}
 	

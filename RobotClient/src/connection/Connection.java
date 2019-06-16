@@ -19,8 +19,11 @@ public class Connection implements I_Connection {
 	public Socket Connect() {
 
 		Socket socket = null;
+		
 		try {
+			while(socket == null) {
 			socket = new Socket(ip, port);
+			}
 		} catch (UnknownHostException e) {
 			System.out.println("Host not found On Ip Adress" + ip);
 			e.printStackTrace();
@@ -28,14 +31,10 @@ public class Connection implements I_Connection {
 			System.out.println("IO Exception!");
 			e.printStackTrace();
 		}
-		if (socket.isConnected() == true) {
-			System.out.println("Connection established");
+	
+ 
 
-		} else {
-			System.out.println("Connection Failed!");
-		}
-
-		return socket;
+return socket;
 	}
 
 }
