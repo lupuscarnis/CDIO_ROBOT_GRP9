@@ -180,32 +180,36 @@ public class FXController {
 	/**
 	 * Switches between debug/production mode
 	 * 
-	 * DebugMode: Run image analysis on a static/local image using scheduleAtFixedRate
+	 * isStaticDebugMode: Run image analysis on a static/local image using
+	 * scheduleAtFixedRate
 	 * 
-	 * ProductionMode: Bypass automatic image analysis and let the robot control when the update occurs
+	 * isWebcamDebugMode: Run image analysis on a webcam feed using scheduleAtFixedRate
 	 * 
-	 * !DebugMode and !ProductionMode: Run image analysis on webcam feed using scheduleAtFixedRate
+	 * isProductionMode: Bypass automatic image analysis and let the robot control
+	 * when the update occurs
 	 * 
 	 * 
 	 * NOTE: Only one of the flags below can be true!
 	 * 
 	 */
-	private boolean isDebugMode = false;
+	
+	private boolean isStaticDebugMode = true;
+	private boolean isWebcamDebugMode = false;
 	private boolean isProductionMode = false;
 
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
 
-	// Sets the frames per second (33 = 33 frames per second)
-	private int captureRate = 500;
+	// Sets the frames per second (1000 = 1 frame per second*)
+	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
 
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Debug image file
 	// private String debugImg = "Debugging/newvinkelret.jpg";
-	private String debugImg = "Debugging/bane_til_kasper.png";
+	private String debugImg = "Debugging/Robo_w_Balls.png";
 
 	// Empty image file
 	private String defaultImg = "Debugging/Default.jpg";
@@ -231,13 +235,15 @@ public class FXController {
 		this.imageViewProperties(this.morphImage, 200);
 		this.imageViewProperties(this.robotImage, 200);
 
+		System.out.println("Pushed Start");
+
 		if (!this.cameraActive) {
 			// start the video capture
 			this.capture.open(webcamID);
 
-			if (this.capture.isOpened()) {
+			if (this.capture.isOpened() || isStaticDebugMode) {
 
-				if (isDebugMode == false) {
+				if (isStaticDebugMode || isWebcamDebugMode) {
 
 					this.cameraActive = true;
 
@@ -246,7 +252,7 @@ public class FXController {
 
 						@Override
 						public void run() {
-							
+
 							runAnalysis();
 
 						}
@@ -260,6 +266,8 @@ public class FXController {
 
 					// Run once call to runAnalysis
 				} else if (isProductionMode && !initialized) {
+
+					this.cameraActive = true;
 
 					runAnalysis();
 					initialized = true;
@@ -385,16 +393,15 @@ public class FXController {
 		Mat frame = new Mat();
 
 		// check if the capture is open
-		if (this.capture.isOpened() || isDebugMode) {
+		if (this.capture.isOpened() || isStaticDebugMode) {
 			try {
 
-				if (isDebugMode == true) {
+				if (isStaticDebugMode) {
 
 					// read from from test image
 					frame = Imgcodecs.imread(debugImg);
 
 				} else {
-
 					// read the current frame
 					this.capture.read(frame);
 
