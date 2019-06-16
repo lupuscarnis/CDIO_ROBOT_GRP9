@@ -112,9 +112,9 @@ public class RobotController {
 		System.out.println(dtoo.toString());
 
 		I_DAO data = new DAO();
-		data.sendData(dtoo);
+		dao.sendData(dtoo);
 
-		data.reciveData();
+		dao.reciveData();
 
 		// find direction to point towards goal
 
@@ -162,7 +162,7 @@ public class RobotController {
 			firsttime = false;
 		} while (!((dir >= 5) && (dir <= -5)) );
 
-
+//addcheck for obstacle and if new course
 		dto.setDistance(((float)getDistance(cs.robot.get(0), path.get(0))));
 		dao.sendData(dto);
 		dao.reciveData();	
