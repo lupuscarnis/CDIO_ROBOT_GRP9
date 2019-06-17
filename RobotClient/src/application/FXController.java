@@ -208,7 +208,7 @@ public class FXController {
 	private boolean isWebcamDebugMode = false;
 
 	// Use alternative (manual) mode for detecting the playing field?
-	boolean UseAltPFDetection = true;
+	boolean UseAltPFDetection = false;
 
 	// Use HSV or Hough for image analysis?
 	boolean UseAltHoughDetection = true;
