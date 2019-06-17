@@ -18,6 +18,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -230,7 +231,7 @@ public class FXController {
 	 */
 	@FXML
 	private void startCamera() {
-		
+
 		// bind a text property with the string containing the current range of
 		// HSV values for object detection
 		pf_ValuesProp = new SimpleObjectProperty<>();
@@ -332,8 +333,6 @@ public class FXController {
 		 * if (!testComplete) { runAnalysisTest(); testComplete = true; }
 		 */
 
-		
-		
 		Mat frame = new Mat();
 
 		frame = grabFrame();
@@ -401,7 +400,7 @@ public class FXController {
 	 * @return the {@link Image} to show
 	 */
 	private Mat grabFrame() {
-		
+
 		Mat frame = new Mat();
 
 		// check if the capture is open
@@ -443,9 +442,6 @@ public class FXController {
 
 			// init
 			Mat blurredImage = new Mat();
-			Mat hsvImage = new Mat();
-			Mat mask = new Mat();
-			Mat morphOutput = new Mat();
 			Mat grayImage = new Mat();
 			Mat circles = new Mat();
 
@@ -654,9 +650,9 @@ public class FXController {
 
 		if (!frame.empty()) {
 
-			//Output dims of frame (result)
+			// Output dims of frame (result)
 			Size size = new Size(800, 600);
-			
+
 			Point lb = new Point(this.pf_lb_x.getValue(), this.pf_lb_y.getValue());
 			Point lt = new Point(this.pf_lt_x.getValue(), this.pf_lt_y.getValue());
 			Point rb = new Point(this.pf_rb_x.getValue(), this.pf_rb_y.getValue());
@@ -674,7 +670,7 @@ public class FXController {
 
 			MatOfPoint2f srcPoints = new MatOfPoint2f();
 			srcPoints.fromArray(arrSrcPoints);
-			
+
 			Point[] arrDstPoints = { new Point(0, 0), new Point(size.width - 1, 0),
 					new Point(size.width - 1, size.height - 1), new Point(0, size.height - 1) };
 			MatOfPoint2f DstPoints = new MatOfPoint2f();
@@ -692,7 +688,7 @@ public class FXController {
 
 			// show the partial output
 			this.updateImageView(this.pfImage, Utils.mat2Image(frame));
-			
+
 			// save frame size for use in robotController
 			FrameSize fSize = FrameSize.getInstance();
 			fSize.setX(frame.width());
@@ -700,7 +696,7 @@ public class FXController {
 
 			// Check if frame needs to be rotated before displaying it in GUI
 			result = checkRotation(result);
-			
+
 			frame = result;
 
 		}
@@ -921,30 +917,26 @@ public class FXController {
 
 	private Mat findAndDrawX(Mat frame) {
 
-		// Mat Cropped = cropImage(frame,rect);;
-		Mat sizeimg = new Mat();
-		Size Sz = new Size(100, 100);
-		Imgproc.resize(frame, sizeimg, Sz);
+		Point p1 = new Point(frame.width() * .25, frame.height() * .25);
+		Point p4 = new Point(frame.width() * .50, frame.height() * .50);
 
-		this.updateImageView(this.crossImage1, Utils.mat2Image(sizeimg));
-		/*
-		 * Mat img = Imgcodecs.imread(defaultImg); Rect roi = new Rect(0,0,100,100); Mat
-		 * Cropped = new Mat(img, roi); Mat imwrite = new Mat(); Mat hsvImage = new
-		 * Mat();
-		 * 
-		 * 
-		 * 
-		 * // convert the frame to HSV Imgproc.cvtColor(frame, hsvImage,
-		 * Imgproc.COLOR_BGR2HSV);
-		 * 
-		 * 
-		 * // Limit color range to reds in the image Mat SkinMaskX1 = new Mat(); Mat
-		 * SkinMaskX2= new Mat(); Mat SkinMaskX= new Mat();
-		 * 
-		 * Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255),
-		 * SkinMaskX1); Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180,
-		 * 255, 255), SkinMaskX2); Core.bitwise_or(SkinMaskX1, SkinMaskX2, SkinMaskX);
-		 */
+		Rect rectCrop = new Rect((int) p1.x, (int) p1.y, (int) p4.x, (int) p4.y);
+		Mat croppedImage = new Mat(frame, rectCrop);
+
+		this.updateImageView(this.crossImage1, Utils.mat2Image(croppedImage));
+
+		Mat blurImg = new Mat();
+		Mat hsvImage = new Mat();
+		Mat color_range = new Mat();
+		Mat circles2 = new Mat();
+
+		// bluring image to filter small noises.
+		Imgproc.GaussianBlur(croppedImage, blurImg, new Size(65, 65), 0);
+
+		// filtering pixels based on given HSV color range
+		Core.inRange(blurImg, new Scalar(0, 0, 220), new Scalar(80, 80, 255), color_range);
+
+		this.updateImageView(this.crossImage1, Utils.mat2Image(color_range));
 
 		return frame;
 
