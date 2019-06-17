@@ -3,35 +3,28 @@ package application;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
-import org.opencv.core.RotatedRect;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.imgproc.Moments;
 import org.opencv.videoio.VideoCapture;
 
 import behavior.RobotController;
-import connection.ConsoleOutput;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -324,7 +317,7 @@ public class FXController {
 	/**
 	 * Image analysis using openCV methods
 	 * 
-	 * 
+	 * @author Kasper
 	 */
 
 	public void runAnalysis(boolean robot) {
@@ -395,7 +388,9 @@ public class FXController {
 	}
 
 	/**
-	 * Get a frame from the opened video stream (if any)
+	 * Get a frame from the opened video stream or read a frame from a debug image
+	 * 
+	 * @author Kasper
 	 * 
 	 * @return the {@link Image} to show
 	 */
@@ -429,9 +424,11 @@ public class FXController {
 	}
 
 	/**
-	 * HSV IMAGE ANALYSIS
+	 * HOUGH IMAGE ANALYSIS
 	 * 
-	 * Do image analysis using HSV values
+	 * Find balls in the image using HoughCircles, with normalization and adaptiveThreshold 
+	 * 
+	 * @author Kasper
 	 * 
 	 * @return the {@link Image} to show
 	 */
@@ -562,7 +559,9 @@ public class FXController {
 	/**
 	 * HOUGH IMAGE ANALYSIS
 	 * 
-	 * Get a frame from the opened video stream (if any)
+	 * Find balls in the image using HoughCircles 
+	 * 
+	 * @author Kasper
 	 * 
 	 * @return the {@link Image} to show
 	 */
@@ -642,7 +641,7 @@ public class FXController {
 	/**
 	 * Manual Playing Field Detection and Perspective Transform
 	 * 
-	 * 
+	 * @author Kasper
 	 * 
 	 * @return the {@link Image} to show
 	 */
@@ -706,7 +705,7 @@ public class FXController {
 	/**
 	 * Playing Field Detection and Perspective Transform
 	 * 
-	 * 
+	 * @author Kasper, Elias
 	 * 
 	 * @return the {@link Image} to show
 	 */
@@ -892,6 +891,8 @@ public class FXController {
 
 	/**
 	 * Rotates frame if the frame height > frame width
+	 * 
+	 * @author Kasper
 	 * 
 	 * @param frame
 	 * @return
