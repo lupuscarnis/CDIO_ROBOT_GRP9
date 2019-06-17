@@ -17,6 +17,7 @@ import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -741,32 +742,32 @@ public class FXController {
 
 	private Mat findAndDrawX(Mat frame) {
 
-		// Mat Cropped = cropImage(frame,rect);;
-		Mat sizeimg = new Mat();
-		Size Sz = new Size(100, 100);
-		Imgproc.resize(frame, sizeimg, Sz);
+		Point p1 = new Point(frame.width()*.25, frame.height()*.25);
+		Point p4 = new Point(frame.width()*.50, frame.height()*	.50);
+	
+	
+		Rect rectCrop = new Rect((int)p1.x, (int)p1.y ,(int)p4.x, (int)p4.y);
+		Mat croppedImage = new Mat(frame, rectCrop);
 
-		this.updateImageView(this.crossImage1, Utils.mat2Image(sizeimg));
-		/*
-		 * Mat img = Imgcodecs.imread(defaultImg); Rect roi = new Rect(0,0,100,100); Mat
-		 * Cropped = new Mat(img, roi); Mat imwrite = new Mat(); Mat hsvImage = new
-		 * Mat();
-		 * 
-		 * 
-		 * 
-		 * // convert the frame to HSV Imgproc.cvtColor(frame, hsvImage,
-		 * Imgproc.COLOR_BGR2HSV);
-		 * 
-		 * 
-		 * // Limit color range to reds in the image Mat SkinMaskX1 = new Mat(); Mat
-		 * SkinMaskX2= new Mat(); Mat SkinMaskX= new Mat();
-		 * 
-		 * Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255),
-		 * SkinMaskX1); Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180,
-		 * 255, 255), SkinMaskX2); Core.bitwise_or(SkinMaskX1, SkinMaskX2, SkinMaskX);
-		 */
+		this.updateImageView(this.crossImage1, Utils.mat2Image(croppedImage));
+		
+		Mat blurImg = new Mat();
+		Mat hsvImage = new Mat();
+		Mat color_range = new Mat();
+		Mat circles2 = new Mat();
 
-		return frame;
+		//bluring image to filter small noises.
+		Imgproc.GaussianBlur(croppedImage, blurImg, new Size(65,65),0);
+
+		//filtering pixels based on given HSV color range
+		Core.inRange(blurImg, new Scalar(0,0,220), new Scalar(80,80,255), color_range);
+
+
+		this.updateImageView(this.crossImage1, Utils.mat2Image(color_range));
+		
+
+
+        return frame;
 
 	}
 
