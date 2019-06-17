@@ -179,17 +179,12 @@ public class FXController {
 	 * isWebcamDebugMode: Run image analysis on a webcam feed using
 	 * scheduleAtFixedRate
 	 * 
-	 * isProductionMode: Bypass automatic image analysis and let the robot control
-	 * when the update occurs
-	 * 
-	 * 
 	 * NOTE: Only one of the flags below can be true!
 	 * 
 	 */
 
 	private boolean isStaticDebugMode = true;
 	private boolean isWebcamDebugMode = false;
-	private boolean isProductionMode = false;
 
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
@@ -198,11 +193,10 @@ public class FXController {
 	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
-
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Debug image file
-	// private String debugImg = "Debugging/newvinkelret.jpg";
+	//private String debugImg = "Debugging/pic01.jpg";
 	private String debugImg = "Debugging/Robo_w_Balls.png";
 
 	// Empty image file
@@ -225,21 +219,19 @@ public class FXController {
 		// set a fixed width for all the image to show and preserve image ratio
 		this.imageViewProperties(this.videoFrame, 400);
 		this.imageViewProperties(this.maskImage, 200);
-		this.imageViewProperties(this.cornerImage,200);
+		this.imageViewProperties(this.cornerImage, 200);
 		this.imageViewProperties(this.morphImage, 200);
 		this.imageViewProperties(this.robotImage, 200);
-
-		
 
 		if (!this.cameraActive) {
 			// start the video capture
 			this.capture.open(webcamID);
 
-			if (this.capture.isOpened() || isStaticDebugMode) {
+			if (this.capture.isOpened()) {
+
+				this.cameraActive = true;
 
 				if (isStaticDebugMode || isWebcamDebugMode) {
-
-					this.cameraActive = true;
 
 					// Run the image analysis at a fixed rate with a delay for debugging purposes
 					Runnable frameGrabber = new Runnable() {
@@ -257,35 +249,24 @@ public class FXController {
 
 					// update the button content
 					this.cameraButton.setText("Stop Camera");
-
-					// Run once call to runAnalysis
-				} else if (isProductionMode && !initialized) {
-
-					this.cameraActive = true;
-
-					runAnalysis(false);
-					initialized = true;
-					// update the button content
-					this.cameraButton.setText("Stop Camera");
-
-				} else {
-
-					// log the error
-					System.err.println("Failed to open the camera connection...");
-
 				}
 
 			} else {
 
-				// the camera is not active at this point
-				this.cameraActive = false;
-				// update again the button content
-				this.cameraButton.setText("Start Camera");
+				// log the error
+				System.err.println("Failed to open the camera connection...");
 
-				// stop the timer
-				this.stopAcquisition();
 			}
 
+		} else {
+
+			// the camera is not active at this point
+			this.cameraActive = false;
+			// update again the button content
+			this.cameraButton.setText("Start Camera");
+
+			// stop the timer
+			this.stopAcquisition();
 		}
 	}
 
@@ -296,11 +277,11 @@ public class FXController {
 	private void startRobot() {
 
 		if (!this.robotActive) {
-			
+
 			this.robotActive = true;
-			Thread robot = new Thread( new RobotController());
-				robot.start();
-			
+			Thread robot = new Thread(new RobotController());
+			robot.start();
+
 			// update the button content
 			this.robotButton.setText("Stop Robot");
 			System.out.println("Robot starting...");
@@ -328,12 +309,12 @@ public class FXController {
 		frame = grabFrame();
 
 		// Find the rectangle of the playing field and crop the image
-		frame = findAndDrawRect(frame);
+		frame = findRectangle(frame);
 
 		if (UseHSVImgDetection) {
-			frame = grabFrameHSV(frame);
+			frame = findBallsHSV(frame);
 		} else {
-			frame = grabFrameHough(frame, robot);
+			frame = findBallsHough(frame, robot);
 		}
 
 		// finds the pixels to cm Ratio
@@ -363,17 +344,8 @@ public class FXController {
 
 		Mat out = new Mat();
 
-		// Check if image needs to flipped before displaying
-		if (frame.width() < frame.height()) {
-
-			Mat dst = new Mat();
-			Core.flip(frame, dst, -1);
-			Core.rotate(dst, out, Core.ROTATE_90_CLOCKWISE); // ROTATE_180 or ROTATE_90_COUNTERCLOCKWISE
-
-		} else {
-
-			out = frame;
-		}
+		// Check if frame needs to be rotated before displaying it in GUI
+		out = checkRotation(frame);
 
 		Image imageToShow = Utils.mat2Image(out);
 		updateImageView(videoFrame, imageToShow);
@@ -420,7 +392,7 @@ public class FXController {
 	 * 
 	 * @return the {@link Image} to show
 	 */
-	private Mat grabFrameHSV(Mat frame) {
+	private Mat findBallsHSV(Mat frame) {
 
 		// if the frame is not empty, process it
 		if (!frame.empty()) {
@@ -484,7 +456,7 @@ public class FXController {
 	 * 
 	 * @return the {@link Image} to show
 	 */
-	private Mat grabFrameHough(Mat frame, boolean robot) {
+	private Mat findBallsHough(Mat frame, boolean robot) {
 
 		// if the frame is not empty, process it
 		if (!frame.empty()) {
@@ -492,6 +464,7 @@ public class FXController {
 
 			Mat grayImage = new Mat();
 			Mat circles = new Mat();
+			Mat mask = new Mat();
 
 			int min_dist = new Integer((int) this.H_minDist.getValue());
 			double uThresh = new Double(this.H_uThresh.getValue());
@@ -502,6 +475,10 @@ public class FXController {
 			Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
 			Imgproc.medianBlur(grayImage, grayImage, 5);
 
+			
+			
+			//Imgproc.adaptiveThreshold(grayImage, mask, 125, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 11, 12);
+			
 			// show the current selected HSV range
 			String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh + ", Center Threshold: "
 					+ cTresh + ", Min Radius: " + minRad + ", Max Radius: " + maxRad;
@@ -517,7 +494,7 @@ public class FXController {
 				Point center = new Point(Math.round(c[0]), Math.round(c[1]));
 				if (!(center.x == 0 && center.y == 0)) {
 					p.add(center);
-				//	System.out.println("fandt bold x " + center.x + " og y er " + center.y);
+					// System.out.println("fandt bold x " + center.x + " og y er " + center.y);
 				}
 				// circle center
 
@@ -557,7 +534,7 @@ public class FXController {
 	 * 
 	 * @return the {@link Image} to show
 	 */
-	private Mat findAndDrawRect(Mat frame) {
+	private Mat findRectangle(Mat frame) {
 
 		/*
 		 * double ratio = 600 / Math.max(frame.width(), frame.height()); Size
@@ -573,25 +550,12 @@ public class FXController {
 		Mat blurredImage = new Mat();
 		Mat hsvImage = new Mat();
 		Mat mask = new Mat();
-		Mat normalized = new Mat();
-		Mat adapt = new Mat();
 
 		// convert the frame to HSV
 		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 
-		// Imgproc.GaussianBlur(hsvImage, blurredImage, new Size(45, 45), 0);
-		/*
-		 * 
-		 * // Limit color range to reds in the image Mat redMask1 = new Mat(); Mat
-		 * redMask2 = new Mat(); Mat redMaskf = new Mat();
-		 * 
-		 * Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255),
-		 * redMask1); Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180,
-		 * 255, 255), redMask2); Core.bitwise_or(redMask1, redMask2, redMaskf);
-		 */
-		// Imgproc.adaptiveThreshold(redMaskf, adapt, 125,
-		// Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 11, 12);
-		// Core.normalize(redMaskf, redMaskf, 0.0, 255.0 / 2, Core.NORM_MINMAX);
+		// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
+		Imgproc.GaussianBlur(hsvImage, blurredImage, new Size(45, 45), 0);
 
 		// get thresholding values from the UI
 		// remember: H ranges 0-180, S and V range 0-255
@@ -609,18 +573,31 @@ public class FXController {
 
 		// In HSV space, the red color wraps around 180. So we need the H values to be
 		// both in [0,10] and [170, 180].
-		Core.inRange(hsvImage, minValues, maxValues, mask);
+		Core.inRange(blurredImage, minValues, maxValues, mask);
 
-		// Imgproc.erode(blurredImage, detectedEdges, new Mat());
-		Imgproc.medianBlur(mask, blurredImage, 9);
+		// Limit color range to reds in the image Mat redMask1 = new Mat(); Mat
+		Mat redMask1 = new Mat();
+		Mat redMask2 = new Mat();
+		Mat redMaskf = new Mat();
+
+		/*Core.inRange(hsvImage, new Scalar(0, 70, 50), new Scalar(10, 255, 255), redMask1);
+		Core.inRange(hsvImage, new Scalar(170, 70, 50), new Scalar(180, 255, 255), redMask2);
+		Core.bitwise_or(redMask1, redMask2, redMaskf);*/
+
+		Imgproc.adaptiveThreshold(mask, mask, 125, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 11, 12);
+
+		// show the partial output
+		this.updateImageView(this.morphImage, Utils.mat2Image(mask));
+
+		// try to filter everything inside the rectangle
+		Imgproc.medianBlur(mask, detectedEdges, 9);
+
+		// Imgproc.erode(detectedEdges, detectedEdges, new Mat());
+
 		// canny detector, with ratio of lower:upper threshold of 3:1
-		// Imgproc.Canny(blurredImage, edges, this.C_Low.getValue(),
-		// this.C_Max.getValue(), 3, true);
-		Imgproc.Canny(blurredImage, edges, 300, 600, 5, true);
+		Imgproc.Canny(detectedEdges, edges, this.C_Low.getValue(), this.C_Max.getValue(), 3, true);
 		// STEP 5: makes the object in white bigger to join nearby lines
-		Imgproc.dilate(edges, dilatedEdges, new Mat(), new Point(-1, -1), 1); // 1
-
-		this.updateImageView(this.morphImage, Utils.mat2Image(dilatedEdges));
+		Imgproc.dilate(edges, dilatedEdges, new Mat(), new Point(-1, -1), 2); // 1
 
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(dilatedEdges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -628,40 +605,17 @@ public class FXController {
 
 		if (contours.size() > 0) {
 
-			double maxArea = -1;
-			int maxAreaIdx = -1;
+			double maxArea = 0;
+			int maxAreaIdx = 0;
 
-			for (int idx = 0; idx != contours.size(); ++idx) {
-				Mat contour = contours.get(idx);
-				double contourarea = Imgproc.contourArea(contour);
-				if (contourarea > maxArea) {
-					maxArea = contourarea;
-					maxAreaIdx = idx;
+			for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
+				double contourArea = Imgproc.contourArea(contours.get(contourIdx));
+				if (maxArea < contourArea) {
+					maxArea = contourArea;
+					maxAreaIdx = contourIdx;
 				}
-
-				// System.out.println(contours.size());
-
 			}
-			/*
-			 * double maxArea = -1; int maxAreaIdx = -1;
-			 * System.out.println("size: "+Integer.toString(contours.size())); MatOfPoint
-			 * temp_contour = contours.get(0); //the largest is at the index 0 for starting
-			 * point MatOfPoint2f approxCurve = new MatOfPoint2f(); MatOfPoint
-			 * largest_contour = contours.get(0);
-			 * 
-			 * List<MatOfPoint> largest_contours = new ArrayList<MatOfPoint>();
-			 * 
-			 * for (int idx = 0; idx < contours.size(); idx++) { temp_contour =
-			 * contours.get(idx); double contourarea = Imgproc.contourArea(temp_contour);
-			 * //compare this contour to the previous largest contour found if (contourarea
-			 * > maxArea) { //check if this contour is a square MatOfPoint2f new_mat = new
-			 * MatOfPoint2f( temp_contour.toArray() ); int contourSize =
-			 * (int)temp_contour.total(); MatOfPoint2f approxCurve_temp = new
-			 * MatOfPoint2f(); Imgproc.approxPolyDP(new_mat, approxCurve_temp,
-			 * contourSize*0.05, true); if (approxCurve_temp.total() == 4) { maxArea =
-			 * contourarea; maxAreaIdx = idx; approxCurve=approxCurve_temp; largest_contour
-			 * = temp_contour; } } }
-			 */
+
 			if (maxAreaIdx >= 0) {
 
 				MatOfPoint largestContour = contours.get(maxAreaIdx);
@@ -674,12 +628,16 @@ public class FXController {
 				// Use approxPolyDP to simplify the convex hull (this should give a
 				// quadrilateral)
 				MatOfPoint2f polygon = new MatOfPoint2f();
-				Imgproc.approxPolyDP(OpenCVUtil.convert(hullPoint), polygon, 20, true);
+				Imgproc.approxPolyDP(OpenCVUtil.convert(hullPoint), polygon, 40, true);
+
 				List<MatOfPoint> tmp = new ArrayList<>();
 				tmp.add(OpenCVUtil.convert(polygon));
 				// restoreScaleMatOfPoint(tmp, 0.9);
 
 				Imgproc.drawContours(convexHullMask, tmp, 0, new Scalar(25, 25, 255), 2);
+
+				// show the partial output
+				this.updateImageView(this.maskImage, Utils.mat2Image(convexHullMask));
 
 				MatOfPoint2f finalCorners = new MatOfPoint2f();
 				MatOfPoint2f maxCurve = new MatOfPoint2f();
@@ -738,6 +696,8 @@ public class FXController {
 					// Check if frame needs to be rotated before displaying it in GUI
 					result = checkRotation(result);
 
+					frame = result;
+
 				} else {
 
 					frame = noImg;
@@ -766,11 +726,12 @@ public class FXController {
 
 		if (frame.width() < frame.height()) {
 
-			// System.out.println("FLIP IT!");
-			Mat flippedImage = new Mat();
-			Core.flip(result, flippedImage, -1);
+			Core.flip(frame, result, -1);
+			Core.rotate(result, result, Core.ROTATE_90_CLOCKWISE); // ROTATE_180 or ROTATE_90_COUNTERCLOCKWISE
 
-			result = flippedImage;
+		} else {
+
+			result = frame;
 
 		}
 
