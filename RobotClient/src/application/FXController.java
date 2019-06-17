@@ -183,8 +183,8 @@ public class FXController {
 	 * 
 	 */
 
-	private boolean isStaticDebugMode = true;
-	private boolean isWebcamDebugMode = false;
+	private boolean isStaticDebugMode = false;
+	private boolean isWebcamDebugMode = true;
 
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
