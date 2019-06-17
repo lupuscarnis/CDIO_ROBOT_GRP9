@@ -165,6 +165,10 @@ public class FXController {
 	// Homemade Image prosessing
 	I_ImageProssesing ip = new ImageProssesing();
 
+	// For access to all the points (balls) found
+	public List<Point> p = new ArrayList<>();
+	private Mat circlesGUI = new Mat();
+
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
@@ -189,7 +193,7 @@ public class FXController {
 	boolean UseAltPFDetection = false;
 
 	// Use HSV or Hough for image analysis?
-	boolean UseAltHoughDetection = true;
+	boolean UseAltHoughDetection = false;
 
 	// Sets the frames per second (1000 = 1 frame per second*)
 	private int captureRate = 1000;
@@ -362,6 +366,8 @@ public class FXController {
 
 		// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
 
+		frame = updateGUILast(frame, circlesGUI);
+
 		Mat out = new Mat();
 
 		// Check if frame needs to be rotated before displaying it in GUI
@@ -411,7 +417,8 @@ public class FXController {
 	/**
 	 * HOUGH IMAGE ANALYSIS
 	 * 
-	 * Find balls in the image using HoughCircles, with normalization and adaptiveThreshold 
+	 * Find balls in the image using HoughCircles, with normalization and
+	 * adaptiveThreshold
 	 * 
 	 * @author Kasper
 	 * 
@@ -478,7 +485,10 @@ public class FXController {
 			 */
 			Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double) grayImage.rows() / min_dist,
 					uThresh, cTresh, minRad, maxRad);
-			List<Point> p = new ArrayList<>();
+
+			circles.copyTo(circlesGUI);
+
+			// List<Point> p = new ArrayList<>();
 			for (int x = 0; x < circles.cols(); x++) {
 
 				double[] c = circles.get(0, x);
@@ -486,14 +496,21 @@ public class FXController {
 				if (!(center.x == 0 && center.y == 0)) {
 					p.add(center);
 					// System.out.println("fandt bold x " + center.x + " og y er " + center.y);
+
+					/*
+					 * Imgproc.putText(frame, "(["+x+"] "+(int)center.x+","+(int)center.y+")",
+					 * center, Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0,0,250), 2);
+					 */
+
 				}
 				// circle center
 
-				Imgproc.circle(frame, center, 1, new Scalar(0, 100, 100), 3, 8, 0);
-				// circle outline
-				int radius = (int) Math.round(c[2]);
-				Imgproc.circle(frame, center, radius, new Scalar(255, 0, 255), 3, 8, 0);
-				Imgproc.circle(frame, center, 1, new Scalar(0, 255, 255), 3, 8, 0);
+				/*
+				 * Imgproc.circle(frame, center, 1, new Scalar(0, 100, 100), 3, 8, 0); // circle
+				 * outline int radius = (int) Math.round(c[2]); Imgproc.circle(frame, center,
+				 * radius, new Scalar(255, 0, 0), 3, 8, 0); Imgproc.circle(frame, center, 1, new
+				 * Scalar(0, 0, 0), 3, 8, 0);
+				 */
 
 				// Print center coordinates
 
@@ -521,7 +538,7 @@ public class FXController {
 	/**
 	 * HOUGH IMAGE ANALYSIS
 	 * 
-	 * Find balls in the image using HoughCircles 
+	 * Find balls in the image using HoughCircles
 	 * 
 	 * @author Kasper
 	 * 
@@ -557,7 +574,9 @@ public class FXController {
 
 			Imgproc.HoughCircles(grayImage, circles, Imgproc.HOUGH_GRADIENT, 1.0, (double) grayImage.rows() / min_dist,
 					uThresh, cTresh, minRad, maxRad);
-			List<Point> p = new ArrayList<>();
+
+			circles.copyTo(circlesGUI);
+
 			for (int x = 0; x < circles.cols(); x++) {
 
 				double[] c = circles.get(0, x);
@@ -568,11 +587,12 @@ public class FXController {
 				}
 				// circle center
 
-				Imgproc.circle(frame, center, 1, new Scalar(0, 100, 100), 3, 8, 0);
-				// circle outline
-				int radius = (int) Math.round(c[2]);
-				Imgproc.circle(frame, center, radius, new Scalar(255, 0, 255), 3, 8, 0);
-				Imgproc.circle(frame, center, 1, new Scalar(0, 255, 255), 3, 8, 0);
+				/*
+				 * Imgproc.circle(frame, center, 1, new Scalar(0, 100, 100), 3, 8, 0); // circle
+				 * outline int radius = (int) Math.round(c[2]); Imgproc.circle(frame, center,
+				 * radius, new Scalar(255, 0, 255), 3, 8, 0); Imgproc.circle(frame, center, 1,
+				 * new Scalar(0, 255, 255), 3, 8, 0);
+				 */
 
 				// Print center coordinates
 
@@ -595,6 +615,44 @@ public class FXController {
 		}
 
 		return frame;
+	}
+
+	/**
+	 * Method for updating the GUI with circles and text AFTER all other image
+	 * analysis methods
+	 * 
+	 * @param frame
+	 * @param circles
+	 * @return
+	 */
+
+	private Mat updateGUILast(Mat frame, Mat circles) {
+
+		List<Point> p = new ArrayList<>();
+		for (int x = 0; x < circles.cols(); x++) {
+
+			double[] c = circles.get(0, x);
+			Point center = new Point(Math.round(c[0]), Math.round(c[1]));
+			if (!(center.x == 0 && center.y == 0)) {
+				p.add(center);
+				// System.out.println("fandt bold x " + center.x + " og y er " + center.y);
+
+				Imgproc.putText(frame, "[" + x + "]" + "[" + (int) center.x + "," + (int) center.y + "]", center,
+						Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 250), 2);
+
+			}
+
+			// circle center
+
+			Imgproc.circle(frame, center, 1, new Scalar(0, 100, 100), 3, 8, 0);
+			// circle outline
+			int radius = (int) Math.round(c[2]);
+			Imgproc.circle(frame, center, radius, new Scalar(255, 0, 0), 3, 8, 0);
+			Imgproc.circle(frame, center, 1, new Scalar(0, 0, 0), 3, 8, 0);
+		}
+
+		return frame;
+
 	}
 
 	/**
@@ -632,7 +690,8 @@ public class FXController {
 			DstPoints.fromArray(arrDstPoints);
 
 			Mat result = Mat.zeros(size, frame.type());
-			// Homography: Use findHomography to find the affine transformation of the rectangle
+			// Homography: Use findHomography to find the affine transformation of the
+			// rectangle
 			Mat h = new Mat();
 			h = Calib3d.findHomography(srcPoints, DstPoints);
 			// Warp the input image using the computed homography matrix
