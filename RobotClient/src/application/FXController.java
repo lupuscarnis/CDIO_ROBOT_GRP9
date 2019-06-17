@@ -59,20 +59,14 @@ public class FXController {
 	// the FXML area for showing the output of the morphological operations
 	@FXML
 	private ImageView pfImage;
-
 	@FXML
 	private ImageView cornerImage;
-
 	@FXML
 	private ImageView robotImage;
-
 	@FXML
 	private ImageView crossImage1;
-
 	@FXML
 	private ImageView crossImage2;
-
-	// FXML slider for setting HSV ranges
 	@FXML
 	private Slider hueStart;
 	@FXML
@@ -93,10 +87,8 @@ public class FXController {
 	private Slider V_CORNER;
 	@FXML
 	private Slider C_THRESHOLD;
-
 	@FXML
 	private Slider S_THRESHOLD_ROBOT;
-
 	@FXML
 	private Slider H_FRONT;
 	@FXML
@@ -109,7 +101,6 @@ public class FXController {
 	private Slider S_BACK;
 	@FXML
 	private Slider V_BACK;
-
 	// FXML label to show the current values set with the sliders
 	@FXML
 	private Label pf_CurrentValues;
@@ -128,33 +119,27 @@ public class FXController {
 	private Slider H_minRad;
 	@FXML
 	private Slider H_maxRad;
-
 	// For PlayingField
 	@FXML
 	private Slider C_Low;
 	// For PlayingField
 	@FXML
 	private Slider C_Max;
-
 	@FXML
 	private Slider C_Kernel;
-
 	// Coordinates for points
 	@FXML
 	private Slider pf_lb_x;
 	@FXML
 	private Slider pf_lb_y;
-
 	@FXML
 	private Slider pf_lt_x;
 	@FXML
 	private Slider pf_lt_y;
-
 	@FXML
 	private Slider pf_rb_x;
 	@FXML
 	private Slider pf_rb_y;
-
 	@FXML
 	private Slider pf_rt_x;
 	@FXML
@@ -451,37 +436,14 @@ public class FXController {
 			Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
 			// Applying GaussianBlur on the Image (Gives a much cleaner/less noisy result)
 			Imgproc.GaussianBlur(grayImage, blurredImage, new Size(11, 11), 4, 4);
-
-			// Imgproc.adaptiveThreshold(blurredImage, blurredImage, 255,
-			// Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 15, -22);
-			// Imgproc.adaptiveThreshold(blurredImage, blurredImage, 255,
-			// Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 5, 7);
-			// Imgproc.equalizeHist(blurredImage, blurredImage);
 			Core.normalize(blurredImage, blurredImage, 0.0, 255.0 / 2, Core.NORM_MINMAX);
-			// Imgproc.adaptiveThreshold(blurredImage, blurredImage, 255,
-			// Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 11, 12);
-
 			Imgproc.adaptiveThreshold(blurredImage, blurredImage, 255, 0, 0, 51, -25);
-			// Imgproc.adaptiveThreshold(blurredImage, blurredImage, 255,
-			// Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 1);
-
-			// Imgproc.Canny(blurredImage, blurredImage, this.C_Low.getValue(),
-			// this.C_Max.getValue(), 3, true);
-
 			// try to filter everything inside the rectangle
 			Imgproc.medianBlur(blurredImage, blurredImage, 9);
-
 			Imgproc.erode(blurredImage, blurredImage, new Mat());
 			Imgproc.dilate(blurredImage, blurredImage, new Mat(), new Point(-1, -1), 1); // 1
 			Imgproc.dilate(blurredImage, blurredImage, new Mat(), new Point(-1, -1), 1); // 1
 			Imgproc.erode(blurredImage, blurredImage, new Mat());
-			/*
-			 * // canny detector, with ratio of lower:upper threshold of 3:1
-			 * Imgproc.Canny(detectedEdges, edges, this.C_Low.getValue(),
-			 * this.C_Max.getValue(), 3, true); // STEP 5: makes the object in white bigger
-			 * to join nearby lines Imgproc.dilate(edges, dilatedEdges, new Mat(), new
-			 * Point(-1, -1), 2); // 1
-			 */
 			// show the partial output
 			this.updateImageView(this.ballsImage, Utils.mat2Image(blurredImage));
 			/*
@@ -587,9 +549,6 @@ public class FXController {
 			// show the partial output
 			this.updateImageView(this.ballsImage, Utils.mat2Image(grayImage));
 
-			// Imgproc.adaptiveThreshold(grayImage, mask, 125,
-			// Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 11, 12);
-
 			// show the current selected HSV range
 			String valuesToPrint = "Min dist: " + min_dist + ", Upper Threshold: " + uThresh + ", Center Threshold: "
 					+ cTresh + ", Min Radius: " + minRad + ", Max Radius: " + maxRad;
@@ -656,9 +615,6 @@ public class FXController {
 			Point lt = new Point(this.pf_lt_x.getValue(), this.pf_lt_y.getValue());
 			Point rb = new Point(this.pf_rb_x.getValue(), this.pf_rb_y.getValue());
 			Point rt = new Point(this.pf_rt_x.getValue(), this.pf_rt_y.getValue());
-
-			// Mat result = new Mat();
-
 			Point[] arrSrcPoints = { lb, lt, rb, rt };
 
 			// Draws circles around the corners of the found rectangle
@@ -676,12 +632,9 @@ public class FXController {
 			DstPoints.fromArray(arrDstPoints);
 
 			Mat result = Mat.zeros(size, frame.type());
-			// Homography: Use findHomography to find the affine transformation
-			// of the rectangle
+			// Homography: Use findHomography to find the affine transformation of the rectangle
 			Mat h = new Mat();
-
 			h = Calib3d.findHomography(srcPoints, DstPoints);
-
 			// Warp the input image using the computed homography matrix
 			Imgproc.warpPerspective(frame, result, h, size);
 
@@ -1016,7 +969,7 @@ public class FXController {
 	 * @param image
 	 *            the {@link Image} to show
 	 */
-	protected static void updateImageView(ImageView view, Image image) {
+	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
 	}
 
