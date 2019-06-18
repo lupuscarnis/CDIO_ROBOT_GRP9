@@ -10,6 +10,7 @@ import java.util.List;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -190,20 +191,28 @@ public class ImageProssesing implements I_ImageProssesing {
 		Mat output = new Mat();
 		Mat adapted = new Mat();
 		Mat filtered = new Mat();
-//		Scalar minValuese = new Scalar(110,100,100);
-//		Scalar maxValuese = new Scalar(130,255,255);
+		int histSize = 256;
+		float[] range = {0, 256}; //the upper boundary is exclusive
+		boolean accumulate = false;
+		Mat vHist = new Mat(),hHist = new Mat(), sHist = new Mat();
+        MatOfFloat histRange = new MatOfFloat(range);
+		List<Mat> channels = new ArrayList<Mat>();
+		
 		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 		
-		Core.inRange(hsvImage, minValues, maxValues, output);
-
-		Imgproc.adaptiveThreshold(output, adapted, 40, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 11,2);
-		this.output = output;
-		this.output1 = adapted;
 		
+		Imgproc.adaptiveThreshold(hsvImage, adapted, 50, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY,11, 2);
+		
+		
+		Core.inRange(adapted, minValues, maxValues, output);
+		
+
+
+		System.out.println("Size " + channels.size());
+			
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
-
 		// find contours
 		Imgproc.findContours(output, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 
