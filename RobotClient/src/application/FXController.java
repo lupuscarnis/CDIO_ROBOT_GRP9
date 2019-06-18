@@ -183,8 +183,8 @@ public class FXController {
 	 * 
 	 */
 
-	private boolean isStaticDebugMode = true;
-	private boolean isWebcamDebugMode = false;
+	private boolean isStaticDebugMode = false;
+	private boolean isWebcamDebugMode = true;
 
 	// Use HSV or Hough for image analysis?
 	boolean UseHSVImgDetection = false;
@@ -193,7 +193,7 @@ public class FXController {
 	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 0;
+	private int webcamID = 1;
 
 	// Debug image file
 	//private String debugImg = "Debugging/pic01.jpg";
@@ -305,11 +305,12 @@ public class FXController {
 	public void runAnalysis(boolean robot) {
 
 		Mat frame = new Mat();
+		Mat cleanFrame = new Mat();
 
 		frame = grabFrame();
-
+frame.copyTo(cleanFrame);
 		// Find the rectangle of the playing field and crop the image
-		frame = findRectangle(frame);
+		//frame = findRectangle(frame);
 
 		if (UseHSVImgDetection) {
 			frame = findBallsHSV(frame);
@@ -331,13 +332,14 @@ public class FXController {
 
 		// Point p = ip.findColor(frame, minValuesc, maxValuesc);
 		// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
-		// updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+		updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
 
 		// finds the front and back of the robot
 		// slider values
 		List<Scalar> values = new ArrayList<Scalar>();
 		values = getRobotValues();
-		updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame, values, robot)));
+		ip.findBackAndFront(cleanFrame, values, robot);
+		updateImageView(robotImage, Utils.mat2Image(cleanFrame));
 		Graph graph = new Graph();
 
 		// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));

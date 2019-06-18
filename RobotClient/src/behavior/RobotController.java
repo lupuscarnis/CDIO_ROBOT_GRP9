@@ -164,13 +164,14 @@ public class RobotController  implements Runnable{
 			System.out.println("dir:" + dir);
 			System.out.println("Iter: " + iter);
 			iter++;
+			System.out.println("Robotten er i "+cs.robot.get(0).getX()+" "+cs.robot.get(0).getY()+" og back "+cs.robot.get(1).getX()+" "+cs.robot.get(1).getY());
 			/*
 			dto.clearData();
 			dto.setRotation((float) dir);
 			dao.sendData(dto);
-			
-			firsttime = false;
 			*/
+			firsttime = false;
+			
 		} while (!((dir >= 5) && (dir <= -5)) );
 
 		//addcheck for obstacle and if new course
@@ -193,13 +194,14 @@ public class RobotController  implements Runnable{
 		Coordinate nextBall = currentPath.get(0);
 		double ballX = nextBall.getX();
 		double ballY = nextBall.getY();
-
+System.out.println("Ball: "+ ballX + " "+ ballY);
 		// direction needed for robot to move towards ball
 
-		double X = (cs.robot.get(0).getX() + cs.robot.get(0).getX()) / 2;
-		double Y = (cs.robot.get(1).getY() + cs.robot.get(1).getY()) / 2;
+		double X = (cs.robot.get(0).getX() + cs.robot.get(1).getX()) / 2;
+		double Y = (cs.robot.get(0).getY() + cs.robot.get(1).getY()) / 2;
 		Coordinate robotCenter = new Coordinate(X, Y);
-
+		System.out.println("Robot center: "+ robotCenter.getX() + " " + robotCenter.getY());
+		System.out.println();
 		// pixels get converted to cm
 
 		double dir = 4;
