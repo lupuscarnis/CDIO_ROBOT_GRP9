@@ -186,8 +186,8 @@ public class FXController {
 	 * 
 	 */
 
-	private boolean isStaticDebugMode = false;
-	private boolean isWebcamDebugMode = true;
+	private boolean isStaticDebugMode = true;
+	private boolean isWebcamDebugMode = false;
 
 	// Use alternative (manual) mode for detecting the playing field?
 	boolean UseAltPFDetection = false;
@@ -199,7 +199,7 @@ public class FXController {
 	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Debug image file
 	// private String debugImg = "Debugging/pic01.jpg";
@@ -319,21 +319,21 @@ public class FXController {
 		Mat cleanFrame = new Mat();
 
 		frame = grabFrame();
-frame.copyTo(cleanFrame);
+		frame.copyTo(cleanFrame);
 		// Find the rectangle of the playing field and crop the image
 // frame = findRectangle(frame);
 
-if (UseAltPFDetection) {
+		if (UseAltPFDetection) {
 
-	frame = findRectangleAlt(frame);
+			frame = findRectangleAlt(frame);
 
-} else {
+		} else {
 
-	frame = findRectangle(frame);
-}
+			frame = findRectangle(frame);
+		}
 
-if (UseAltHoughDetection) {
-	frame = findBallsHoughAlt(frame, false);
+		if (UseAltHoughDetection) {
+			frame = findBallsHoughAlt(frame, false);
 		} else {
 			frame = findBallsHough(frame, false);
 
@@ -353,14 +353,16 @@ if (UseAltHoughDetection) {
 
 		// Point p = ip.findColor(frame, minValuesc, maxValuesc);
 		// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
-		updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+		
 
 		// finds the front and back of the robot
 		// slider values
 		List<Scalar> values = new ArrayList<Scalar>();
 		values = getRobotValues();
 		ip.findBackAndFront(cleanFrame, values, robot);
-		updateImageView(robotImage, Utils.mat2Image(cleanFrame));
+		updateImageView(robotImage, Utils.mat2Image(ip.getOutput()));
+		updateImageView(cornerImage, Utils.mat2Image(ip.getOutput1()));
+		
 		Graph graph = new Graph();
 
 		// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
@@ -986,10 +988,8 @@ if (UseAltHoughDetection) {
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image
-	 *            the {@link ImageView} to use
-	 * @param dimension
-	 *            the width of the image to set
+	 * @param image     the {@link ImageView} to use
+	 * @param dimension the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -1022,10 +1022,8 @@ if (UseAltHoughDetection) {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view
-	 *            the {@link ImageView} to update
-	 * @param image
-	 *            the {@link Image} to show
+	 * @param view  the {@link ImageView} to update
+	 * @param image the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
