@@ -366,10 +366,10 @@ public class FXController {
 			// finds the front and back of the robot
 			// slider values
 			/*
-			 * List<Scalar> values = new ArrayList<Scalar>(); values = getRobotValues();
-			 * ip.findBackAndFront(cleanFrame, values, robot); updateImageView(robotImage,
-			 * Utils.mat2Image(ip.getOutput())); updateImageView(cornerImage,
-			 * Utils.mat2Image(ip.getOutput1()));
+			  List<Scalar> values = new ArrayList<Scalar>(); values = getRobotValues();
+			  ip.findBackAndFront(cleanFrame, values, robot); updateImageView(robotImage,
+			  Utils.mat2Image(ip.getOutput())); updateImageView(cornerImage,
+			  Utils.mat2Image(ip.getOutput1()));
 			 */
 			Graph graph = new Graph();
 
@@ -384,6 +384,10 @@ public class FXController {
 
 			Image imageToShow = Utils.mat2Image(out);
 			updateImageView(videoFrame, imageToShow);
+			
+			System.out.println("Size of ball list: "+p.size());
+			
+			p.clear();
 			
 			runningAnalysis = false;
 
