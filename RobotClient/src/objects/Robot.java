@@ -9,18 +9,19 @@ public class Robot {
 	public void setPixelToCM(double pixelToCM) {
 		this.pixelToCM = pixelToCM;
 	}
-	private double frontX;
-	private double frontY;
-	private double backX;
-	private double backY;
+	private double frontX = 0;
+	private double frontY = 0;
+	private double backX = 0;
+	private double backY = 0;
 	private Robot() {
 	
 	}
 	public static Robot getInstance() {
 	
 	if(robot == null) {
-		robot = new Robot();
 		
+		
+		robot = new Robot();
 		return robot;
 	}else {
 		return robot;
