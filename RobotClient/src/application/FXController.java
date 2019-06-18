@@ -166,6 +166,8 @@ public class FXController {
 	// Homemade Image prosessing
 	I_ImageProssesing ip = new ImageProssesing();
 
+	private boolean runningAnalysis = false;
+
 	// For access to all the points (balls) found
 	
 	private Mat circlesGUI = new Mat();
@@ -311,64 +313,84 @@ public class FXController {
 	 */
 
 	public void runAnalysis(boolean robot) {
+		if (runningAnalysis) {
 
-		Mat frame = new Mat();
-
-		frame = grabFrame();
-
-		if (UseAltPFDetection) {
-
-			frame = findRectangleAlt(frame);
+			System.out.println("Analysis in progress");
 
 		} else {
 
-			frame = findRectangle(frame);
+			runningAnalysis = true;
+
+			System.out.println("Running Image Analysis...");
+
+			Mat frame = new Mat();
+			Mat cleanFrame = new Mat();
+
+			frame = grabFrame();
+			frame.copyTo(cleanFrame);
+
+			if (UseAltPFDetection) {
+
+				frame = findRectangleAlt(frame);
+
+			} else {
+
+				frame = findRectangle(frame);
+			}
+
+			if (UseAltHoughDetection) {
+
+				frame = findBallsHoughAlt(frame, false);
+
+			} else {
+				frame = findBallsHough(frame, false);
+
+			}
+
+			// finds the pixels to cm Ratio
+
+			/**
+			 * TODO
+			 * 
+			 * De her skal ud i deres egen metode hvis de skal bruges
+			 */
+			Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10), ((S_CORNER.getValue() / 100) * 255 - 10),
+					((V_CORNER.getValue() / 100) * 255 - 10));
+			Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10), ((S_CORNER.getValue() / 100) * 255 + 10),
+					((V_CORNER.getValue() / 100) * 255 + 10));
+
+			// Point p = ip.findColor(frame, minValuesc, maxValuesc);
+			// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
+
+			// finds the front and back of the robot
+			// slider values
+			/*
+			  List<Scalar> values = new ArrayList<Scalar>(); values = getRobotValues();
+			  ip.findBackAndFront(cleanFrame, values, robot); updateImageView(robotImage,
+			  Utils.mat2Image(ip.getOutput())); updateImageView(cornerImage,
+			  Utils.mat2Image(ip.getOutput1()));
+			 */
+			Graph graph = new Graph();
+
+			// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
+
+			frame = updateGUILast(frame, circlesGUI);
+
+			Mat out = new Mat();
+
+			// Check if frame needs to be rotated before displaying it in GUI
+			out = checkRotation(frame);
+
+			Image imageToShow = Utils.mat2Image(out);
+			updateImageView(videoFrame, imageToShow);
+			
+			System.out.println("Size of ball list: "+p.size());
+			
+			p.clear();
+			
+			runningAnalysis = false;
+
 		}
-
-		if (UseAltHoughDetection) {
-			frame = findBallsHoughAlt(frame, robot);
-
-		} else {
-			frame = findBallsHough(frame, robot);
-
-		}
-
-		// finds the pixels to cm Ratio
-
-		Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10), ((S_CORNER.getValue() / 100) * 255 - 10),
-				((V_CORNER.getValue() / 100) * 255 - 10));
-		Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10), ((S_CORNER.getValue() / 100) * 255 + 10),
-				((V_CORNER.getValue() / 100) * 255 + 10));
-
-// Point p = ip.findColor(frame, minValuesc, maxValuesc);
-// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
-
-		/**
-		 * TODO
-		 * 
-		 * De her skal ud i deres egen metode hvis de skal bruges
-		 */
-
-		// finds the front and back of the robot
-		// slider values
-		List<Scalar> values = new ArrayList<Scalar>();
-		values = getRobotValues();
-
-		updateImageView(robotImage, Utils.mat2Image(ip.findBackAndFront(frame, values, robot)));
-		//updateImageView(cornerImage, Utils.mat2Image(ip.getOutput1()));
-		//Graph graph = new Graph();
-
-		// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
-
-		frame = updateGUILast(frame, circlesGUI);
-
-		Mat out = new Mat();
-
-		// Check if frame needs to be rotated before displaying it in GUI
-		out = checkRotation(frame);
-
-		Image imageToShow = Utils.mat2Image(out);
-		updateImageView(videoFrame, imageToShow);
 
 	}
 
@@ -1029,8 +1051,10 @@ public class FXController {
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image     the {@link ImageView} to use
-	 * @param dimension the width of the image to set
+	 * @param image
+	 *            the {@link ImageView} to use
+	 * @param dimension
+	 *            the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -1063,8 +1087,10 @@ public class FXController {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view  the {@link ImageView} to update
-	 * @param image the {@link Image} to show
+	 * @param view
+	 *            the {@link ImageView} to update
+	 * @param image
+	 *            the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
