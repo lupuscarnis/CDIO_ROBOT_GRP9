@@ -47,7 +47,7 @@
 									<children>
 										<HBox>
 											<children>
-												<ImageView fx:id="morphImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+												<ImageView fx:id="pfImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
 													<image>
 														<Image url="@../../Debugging/Default.jpg" />
 													</image>
@@ -55,7 +55,7 @@
 														<Insets right="15.0" />
 													</HBox.margin>
 												</ImageView>
-												<ImageView fx:id="maskImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+												<ImageView fx:id="ballsImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
 													<image>
 														<Image url="@../../Debugging/Default.jpg" />
 													</image>
@@ -202,6 +202,68 @@
 										<Font name="System Bold" size="14.0" />
 									</font>
 								</TitledPane>
+                        <TitledPane animated="false" text="Alt. Playing Field">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="300.0" prefWidth="200.0">
+                                 <children>
+                                    <VBox prefHeight="300.0" prefWidth="200.0">
+                                       <children>
+                                          <Label text="TopLeft (BLUE)" textFill="#000dff" />
+                                          <Slider fx:id="pf_lb_x" blockIncrement="5.0" max="2000.0" value="250.0">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </Slider>
+                                          <Slider fx:id="pf_lb_y" blockIncrement="5.0" max="2000.0" value="250.0">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </Slider>
+                                          <Label text="TopRight (GREEN)" textFill="#04791a" />
+                                          <Slider fx:id="pf_lt_x" blockIncrement="5.0" max="2000.0" value="500.0">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </Slider>
+                                          <Slider fx:id="pf_lt_y" blockIncrement="5.0" max="2000.0" value="250.0">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </Slider>
+                                          <Label text="BottomRight (RED)" textFill="#b50d0d" />
+                                          <Slider fx:id="pf_rb_x" blockIncrement="5.0" max="2000.0" value="500.0">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </Slider>
+                                          <Slider fx:id="pf_rb_y" blockIncrement="5.0" max="2000.0" value="500.0">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </Slider>
+                                          <Label text="BottomLeft (Yellow)" textFill="#b29100" />
+                                          <Slider fx:id="pf_rt_x" blockIncrement="5.0" max="2000.0" value="250">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </Slider>
+                                          <Slider fx:id="pf_rt_y" blockIncrement="5.0" max="2000.0" value="500.0">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </Slider>
+                                       </children>
+                                       <padding>
+                                          <Insets left="10.0" right="10.0" top="15.0" />
+                                       </padding>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
+                          </content>
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </TitledPane>
 								<TitledPane animated="false" text="Balls">
 									<content>
 										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="350.0" prefWidth="200.0">
