@@ -39,6 +39,25 @@ public class RobotController  implements Runnable{
 	public void runningAnalysis() {
 
 	}
+	
+	public int isBallAtWall(Coordinate ball){
+		int output = 0;
+		//checks whether ball is close to x y or neither wall
+		// 0 = ball is out in the open (maybe close to cross)
+		// 1 = ball has large or small x, close to sides with goals
+		// 2 = ball has large or small y close to sides without goals
+		// 3 = ball is in corner
+		
+		//may need to change values getting compared
+		if(ball.getX()<10 || ball.getX()>frameWidth-10) {
+			output = 1;
+		}
+		if(ball.getY()<10 || ball.getY()>frameWidth-10) {
+		output+=2;
+		}
+		
+		return 0;	
+	}
 
 	public void getView() {
 		FXController fx = staticFXCont.getInstance().getfxInstance();
