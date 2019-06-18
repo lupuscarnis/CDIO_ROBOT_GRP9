@@ -193,15 +193,14 @@ public class FXController {
 	// Use alternative (manual) mode for detecting the playing field?
 	boolean UseAltPFDetection = false;
 
-
 	// Use HSV or Hough for image analysis?
-	boolean UseAltHoughDetection = false;
+	boolean UseAltHoughDetection = true;
 
 	// Sets the frames per second (1000 = 1 frame per second*)
 	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Debug image file
 	// private String debugImg = "Debugging/pic01.jpg";
@@ -335,9 +334,9 @@ if (UseAltPFDetection) {
 }
 
 if (UseAltHoughDetection) {
-	frame = findBallsHoughAlt(frame, false);
+	frame = findBallsHoughAlt(frame, robot);
 		} else {
-			frame = findBallsHough(frame, false);
+			frame = findBallsHough(frame, robot);
 
 		}
 
@@ -496,7 +495,7 @@ if (UseAltHoughDetection) {
 				Point center = new Point(Math.round(c[0]), Math.round(c[1]));
 				if (!(center.x == 0 && center.y == 0)) {
 					p.add(center);
-					// System.out.println("fandt bold x " + center.x + " og y er " + center.y);
+					 System.out.println("fandt bold x " + center.x + " og y er " + center.y);
 
 					/*
 					 * Imgproc.putText(frame, "(["+x+"] "+(int)center.x+","+(int)center.y+")",
@@ -526,7 +525,7 @@ if (UseAltHoughDetection) {
 				}
 
 				for (int i = 0; i < p.size(); i++) {
-					// System.out.println("Point (X,Y): "+p.get(i));
+					System.out.println("Point (X,Y): "+p.get(i));
 
 				}
 
@@ -600,7 +599,7 @@ if (UseAltHoughDetection) {
 			}
 			if (robot) {
 				BallList s = BallList.getInstance();
-
+System.out.println("hello");
 				s.clearList();
 
 				for (Point B : p) {
@@ -608,7 +607,7 @@ if (UseAltHoughDetection) {
 				}
 
 				for (int i = 0; i < p.size(); i++) {
-					// System.out.println("Point (X,Y): "+p.get(i));
+					 System.out.println("Point (X,Y): "+p.get(i));
 
 				}
 

@@ -159,7 +159,7 @@ public class RobotController  implements Runnable{
 			if (!firsttime) {
 				dao.reciveData();
 				
-			}else 
+			} 
 			
 			getView();
 			path = findRoute();
@@ -168,21 +168,14 @@ public class RobotController  implements Runnable{
 			System.out.println("Iter: " + iter);
 			iter++;
 			System.out.println("Robotten er i "+cs.robot.get(0).getX()+" "+cs.robot.get(0).getY()+" og back "+cs.robot.get(1).getX()+" "+cs.robot.get(1).getY());
-	/*
->>>>>>> branch '4._Iteration' of https://github.com/lupuscarnis/CDIO_ROBOT_GRP9.git
 			dto.clearData();
 			dto.setRotation((float) dir);
 			dao.sendData(dto);
-<<<<<<< HEAD
 			
 			firsttime = false;
 			
 		} while (!((dir <= 5) && (dir >= -5)) );
-=======
-			*/
-			firsttime = false;
 			
-		} while (!((dir >= 5) && (dir <= -5)) );
 
 
 		//addcheck for obstacle and if new course
