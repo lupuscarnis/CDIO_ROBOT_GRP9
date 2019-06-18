@@ -193,10 +193,10 @@ public class FXController {
 	boolean UseAltPFDetection = false;
 
 	// Use HSV or Hough for image analysis?
-	boolean UseAltHoughDetection = false;
+	boolean UseAltHoughDetection = true;
 
 	// Sets the frames per second (1000 = 1 frame per second*)
-	private int captureRate = 1000;
+	private int captureRate = 1;
 
 	// Sets the id of the systems webcam
 	private int webcamID = 0;
@@ -311,6 +311,15 @@ public class FXController {
 
 	public void runAnalysis(boolean robot) {
 
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("testing123");
+		
 		/*
 		 * if (!testComplete) { runAnalysisTest(); testComplete = true; }
 		 */
