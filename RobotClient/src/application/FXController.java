@@ -331,8 +331,6 @@ public class FXController {
 
 		frame = grabFrame();
 		frame.copyTo(cleanFrame);
-		// Find the rectangle of the playing field and crop the image
-// frame = findRectangle(frame);
 
 		if (UseAltPFDetection) {
 
