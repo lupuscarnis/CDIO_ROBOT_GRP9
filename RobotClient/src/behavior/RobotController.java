@@ -32,8 +32,8 @@ public class RobotController  implements Runnable{
 	List<Ball> ballist;
 
 	public RobotController() {
-		//dao = new DAO();
-		//dto = new DTO();
+		dao = new DAO();
+		dto = new DTO();
 		}
 
 	public void runningAnalysis() {
@@ -104,20 +104,21 @@ public class RobotController  implements Runnable{
 		// distance to in front of goal
 		double distance = getDistance(cs.robot.get(0), frontOfGoal);
 		// pixels get converted to cm
-		distance = distance * ratio;
+		distance = distance / ratio;
 
 		// System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran
 		// maal");
 		// send message to drive in front of goal
 
-		I_DTO dtoo = new DTO();
-
-		dtoo.setRotation((float) dir);
-		dtoo.setDistance((float) distance);
-		System.out.println(dtoo.toString());
-
-		I_DAO data = new DAO();
-		dao.sendData(dtoo);
+		
+		dto.clearData();
+		dto.setRotation((float) dir);
+		dto.setDistance((float) distance);
+		
+		System.out.println(dto.toString());
+		
+		
+		dao.sendData(dto);
 
 		dao.reciveData();
 
@@ -131,22 +132,23 @@ public class RobotController  implements Runnable{
 
 		// send message to drive close to goal and release balls
 
-		I_DTO scoreDTO = new DTO();
+		
 
-		scoreDTO.setRotation((float) dir);
-		scoreDTO.setDistance((float) 5);
+		dto.setRotation((float) dir);
+		dto.setDistance((float) 5);
 		// can't remember which direction is which, but both need to turn the same
 		// direction
-		scoreDTO.setClawMove(360);
-		scoreDTO.setBackClawMove(120);
-		scoreDTO.setBackClawMove(-120);
+		dto.clearData();
+		dto.setClawMove(360);
+		dto.setBackClawMove(120);
+		dto.setBackClawMove(-120);
 
-		System.out.println(scoreDTO.toString());
+		System.out.println(dto.toString());
 
-		I_DAO data2 = new DAO();
-		data2.sendData(scoreDTO);
+		
+		dao.sendData(dto);
 
-		data2.reciveData();
+		dao.reciveData();
 
 	}
 
@@ -156,7 +158,8 @@ public class RobotController  implements Runnable{
 		do {
 			if (!firsttime) {
 				dao.reciveData();
-			}
+				
+			} 
 			
 			getView();
 			path = findRoute();
@@ -164,23 +167,25 @@ public class RobotController  implements Runnable{
 			System.out.println("dir:" + dir);
 			System.out.println("Iter: " + iter);
 			iter++;
-			/*
+			System.out.println("Robotten er i "+cs.robot.get(0).getX()+" "+cs.robot.get(0).getY()+" og back "+cs.robot.get(1).getX()+" "+cs.robot.get(1).getY());
 			dto.clearData();
 			dto.setRotation((float) dir);
 			dao.sendData(dto);
 			
 			firsttime = false;
-			*/
-		} while (!((dir >= 5) && (dir <= -5)) );
+			
+		} while (!((dir <= 5) && (dir >= -5)) );
+			
+
 
 		//addcheck for obstacle and if new course
-		
-		/*
+		float distance = (float)((getDistance(cs.robot.get(0), path.get(0)))/ratio);
+		System.out.println("Im driving, im doing it "+distance);
 		dto.clearData();
-		dto.setDistance(((float)getDistance(cs.robot.get(0), path.get(0))));
+		dto.setDistance(distance);
 		dao.sendData(dto);
 		dao.reciveData();	
-		*/
+		
 		
 	}
 
@@ -193,13 +198,14 @@ public class RobotController  implements Runnable{
 		Coordinate nextBall = currentPath.get(0);
 		double ballX = nextBall.getX();
 		double ballY = nextBall.getY();
-
+System.out.println("Ball: "+ ballX + " "+ ballY);
 		// direction needed for robot to move towards ball
 
-		double X = (cs.robot.get(0).getX() + cs.robot.get(0).getX()) / 2;
-		double Y = (cs.robot.get(1).getY() + cs.robot.get(1).getY()) / 2;
+		double X = (cs.robot.get(0).getX() + cs.robot.get(1).getX()) / 2;
+		double Y = (cs.robot.get(0).getY() + cs.robot.get(1).getY()) / 2;
 		Coordinate robotCenter = new Coordinate(X, Y);
-
+		System.out.println("Robot center: "+ robotCenter.getX() + " " + robotCenter.getY());
+		System.out.println();
 		// pixels get converted to cm
 
 		double dir = 4;
@@ -252,13 +258,62 @@ public class RobotController  implements Runnable{
 		 * I_DAO data2 = new DAO(); data2.sendData(dtooo);
 		 */
 	}
+	
+	public void moveToPoint(Coordinate newPoint) {
+		
+		double X = (cs.robot.get(0).getX() + cs.robot.get(0).getX()) / 2;
+		double Y = (cs.robot.get(1).getY() + cs.robot.get(1).getY()) / 2;
+		Coordinate robotCenter = new Coordinate(X, Y);
 
-	public boolean detectObstacle(Coordinate robotFront, Coordinate robotBack, Coordinate ball) {
+		// pixels get converted to cm
+
+		
+		double dir = calcDirection(cs.robot.get(0), robotCenter, newPoint);
+		
+		dto.clearData();
+		dto.setRotation((float) dir);
+		dao.sendData(dto);
+		dao.reciveData();
+		
+		getView();
+		
+		dto.clearData();
+		dto.setDistance((float)getDistance(robotCenter,newPoint));
+		dao.sendData(dto);
+		dao.reciveData();
+		
+		
+		//some movement, then get new image and get the next ball
+	}
+	
+	
+
+	public Coordinate detectObstacle(Coordinate robotFront, Coordinate robotBack, Coordinate ball) {
 		double dir = calcDirection(robotFront, robotBack, ball);
 		// need working frame sizes, not sure these work
-		Coordinate cross = new Coordinate(frameWidth, frameHeight);
+		Coordinate cross = new Coordinate(frameWidth/2, frameHeight/2);
+		Coordinate robotCenter = new Coordinate(robotFront.getX()+robotBack.getX(),robotFront.getY()+robotBack.getY());
+		for(int i =0; i<frameWidth/2;i++) {
+			
+			if(robotFront.getX()*i>(cross.getX()-30) && robotFront.getX()*i<cross.getX()+30) {
+				
+				if(robotFront.getY()*i>(cross.getY()-30) && robotFront.getY()*i<cross.getY()+30) {
+					//you are on a collision course with the cross
+					
+					if(Math.abs(robotCenter.getX()-cross.getX())>Math.abs(robotCenter.getY()-cross.getY())) {
+						moveToPoint(new Coordinate(ball.getX(),robotCenter.getY()));
+						//if center -x is greater than center-y move to other coordinate
+					}else {moveToPoint(new Coordinate(ball.getY(),robotCenter.getX()));}
+					
+				}
+				
+				//if(robotFront.getX()*i && robotFront.getY()*i)
+				
+			}
+				
+		}
 
-		return true;
+		return robotCenter;
 	}
 
 	public ArrayList<Coordinate> findRoute() {
