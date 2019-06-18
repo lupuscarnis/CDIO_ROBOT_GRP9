@@ -22,6 +22,10 @@ public interface I_ImageProssesing {
 	HashMap<Double, Point> convertPointsToVectorsDistancesFromCenter(List<Point> pointList, Point center);
 
 	Mat findBackAndFront(Mat frame, List<Scalar> values, boolean robot);
+	
+	Mat getOutput1();
 
+	void setOutput1(Mat output);
+	
 
 }

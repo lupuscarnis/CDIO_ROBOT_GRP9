@@ -31,6 +31,15 @@ public class ImageProssesing implements I_ImageProssesing {
 
 	// the FXML area for showing the mask
 	Mat output;
+	Mat output1;
+
+	public Mat getOutput1() {
+		return output1;
+	}
+
+	public void setOutput1(Mat output1) {
+		this.output1 = output1;
+	}
 
 	public ImageProssesing() {
 		
@@ -62,8 +71,12 @@ public class ImageProssesing implements I_ImageProssesing {
 		s.setFrontY(front.y);
 		}
 		
-		Imgproc.line(frame, back, front, new Scalar(350, 255, 255));
 	
+		Imgproc.line(frame, back, front, new Scalar(0, 0, 0));
+		
+		Point centerpoint = new Point(((back.x + front.x)/2),((back.y + front.y)/2)); 
+		
+		Imgproc.circle(frame, centerpoint, 5,new Scalar(0,255,0));
 		return frame;
 
 	}
@@ -160,7 +173,7 @@ public class ImageProssesing implements I_ImageProssesing {
 			}
 			
 		}
-		output = dstNormScaled;
+		
 		return dstNormScaled;
 	}
 
@@ -176,13 +189,17 @@ public class ImageProssesing implements I_ImageProssesing {
 		Mat hsvImage = new Mat();
 		Mat output = new Mat();
 		Mat adapted = new Mat();
-		
 		Mat filtered = new Mat();
-		//Imgproc.adaptiveThreshold(frame, adapted, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11,2);
+//		Scalar minValuese = new Scalar(110,100,100);
+//		Scalar maxValuese = new Scalar(130,255,255);
 		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 		
 		Core.inRange(hsvImage, minValues, maxValues, output);
 
+		Imgproc.adaptiveThreshold(output, adapted, 40, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 11,2);
+		this.output = output;
+		this.output1 = adapted;
+		
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
