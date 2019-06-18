@@ -166,6 +166,8 @@ public class FXController {
 	// Homemade Image prosessing
 	I_ImageProssesing ip = new ImageProssesing();
 
+	private boolean runningAnalysis = false;
+
 	// For access to all the points (balls) found
 	public List<Point> p = new ArrayList<>();
 	private Mat circlesGUI = new Mat();
@@ -190,7 +192,6 @@ public class FXController {
 	private boolean isStaticDebugMode = true;
 	private boolean isWebcamDebugMode = false;
 
-
 	// Use alternative (manual) mode for detecting the playing field?
 	boolean UseAltPFDetection = false;
 
@@ -198,7 +199,7 @@ public class FXController {
 	boolean UseAltHoughDetection = true;
 
 	// Sets the frames per second (1000 = 1 frame per second*)
-	private int captureRate = 1;
+	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
 	private int webcamID = 0;
@@ -313,80 +314,80 @@ public class FXController {
 
 	public void runAnalysis(boolean robot) {
 
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		System.out.println("testing123");
-		
-		/*
-		 * if (!testComplete) { runAnalysisTest(); testComplete = true; }
-		 */
+		if (runningAnalysis) {
 
-		Mat frame = new Mat();
-		Mat cleanFrame = new Mat();
-
-		frame = grabFrame();
-		frame.copyTo(cleanFrame);
-
-		if (UseAltPFDetection) {
-
-			frame = findRectangleAlt(frame);
+			System.out.println("Analysis in progress");
 
 		} else {
 
-			frame = findRectangle(frame);
+			runningAnalysis = true;
+
+			System.out.println("Running Image Analysis...");
+
+			Mat frame = new Mat();
+			Mat cleanFrame = new Mat();
+
+			frame = grabFrame();
+			frame.copyTo(cleanFrame);
+
+			if (UseAltPFDetection) {
+
+				frame = findRectangleAlt(frame);
+
+			} else {
+
+				frame = findRectangle(frame);
+			}
+
+			if (UseAltHoughDetection) {
+
+				frame = findBallsHoughAlt(frame, false);
+
+			} else {
+				frame = findBallsHough(frame, false);
+
+			}
+
+			// finds the pixels to cm Ratio
+
+			/**
+			 * TODO
+			 * 
+			 * De her skal ud i deres egen metode hvis de skal bruges
+			 */
+			Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10), ((S_CORNER.getValue() / 100) * 255 - 10),
+					((V_CORNER.getValue() / 100) * 255 - 10));
+			Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10), ((S_CORNER.getValue() / 100) * 255 + 10),
+					((V_CORNER.getValue() / 100) * 255 + 10));
+
+			// Point p = ip.findColor(frame, minValuesc, maxValuesc);
+			// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
+
+			// finds the front and back of the robot
+			// slider values
+			/*
+			 * List<Scalar> values = new ArrayList<Scalar>(); values = getRobotValues();
+			 * ip.findBackAndFront(cleanFrame, values, robot); updateImageView(robotImage,
+			 * Utils.mat2Image(ip.getOutput())); updateImageView(cornerImage,
+			 * Utils.mat2Image(ip.getOutput1()));
+			 */
+			Graph graph = new Graph();
+
+			// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
+
+			frame = updateGUILast(frame, circlesGUI);
+
+			Mat out = new Mat();
+
+			// Check if frame needs to be rotated before displaying it in GUI
+			out = checkRotation(frame);
+
+			Image imageToShow = Utils.mat2Image(out);
+			updateImageView(videoFrame, imageToShow);
+			
+			runningAnalysis = false;
+
 		}
-
-
-if (UseAltHoughDetection) {
-	frame = findBallsHoughAlt(frame, robot);
-
-		} else {
-			frame = findBallsHough(frame, robot);
-
-		}
-
-		// finds the pixels to cm Ratio
-
-		/**
-		 * TODO
-		 * 
-		 * De her skal ud i deres egen metode hvis de skal bruges
-		 */
-		Scalar minValuesc = new Scalar(((H_CORNER.getValue() / 2) - 10), ((S_CORNER.getValue() / 100) * 255 - 10),
-				((V_CORNER.getValue() / 100) * 255 - 10));
-		Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10), ((S_CORNER.getValue() / 100) * 255 + 10),
-				((V_CORNER.getValue() / 100) * 255 + 10));
-
-		// Point p = ip.findColor(frame, minValuesc, maxValuesc);
-		// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
-		
-
-		// finds the front and back of the robot
-		// slider values
-		List<Scalar> values = new ArrayList<Scalar>();
-		values = getRobotValues();
-		ip.findBackAndFront(cleanFrame, values, robot);
-		updateImageView(robotImage, Utils.mat2Image(ip.getOutput()));
-		updateImageView(cornerImage, Utils.mat2Image(ip.getOutput1()));
-		
-		Graph graph = new Graph();
-
-		// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
-
-		frame = updateGUILast(frame, circlesGUI);
-
-		Mat out = new Mat();
-
-		// Check if frame needs to be rotated before displaying it in GUI
-		out = checkRotation(frame);
-
-		Image imageToShow = Utils.mat2Image(out);
-		updateImageView(videoFrame, imageToShow);
 
 	}
 
@@ -507,7 +508,7 @@ if (UseAltHoughDetection) {
 				Point center = new Point(Math.round(c[0]), Math.round(c[1]));
 				if (!(center.x == 0 && center.y == 0)) {
 					p.add(center);
-					 System.out.println("fandt bold x " + center.x + " og y er " + center.y);
+					System.out.println("fandt bold x " + center.x + " og y er " + center.y);
 
 					/*
 					 * Imgproc.putText(frame, "(["+x+"] "+(int)center.x+","+(int)center.y+")",
@@ -537,7 +538,7 @@ if (UseAltHoughDetection) {
 				}
 
 				for (int i = 0; i < p.size(); i++) {
-					System.out.println("Point (X,Y): "+p.get(i));
+					System.out.println("Point (X,Y): " + p.get(i));
 
 				}
 
@@ -611,7 +612,7 @@ if (UseAltHoughDetection) {
 			}
 			if (robot) {
 				BallList s = BallList.getInstance();
-System.out.println("hello");
+				System.out.println("hello");
 				s.clearList();
 
 				for (Point B : p) {
@@ -619,7 +620,7 @@ System.out.println("hello");
 				}
 
 				for (int i = 0; i < p.size(); i++) {
-					 System.out.println("Point (X,Y): "+p.get(i));
+					System.out.println("Point (X,Y): " + p.get(i));
 
 				}
 
@@ -942,86 +943,75 @@ System.out.println("hello");
 
 	private Mat findAndDrawX(Mat frame) {
 
+		/*
+		 * if(!frame.empty()) {
+		 * 
+		 * System.out.println("JA");
+		 * 
+		 * } else {
+		 * 
+		 * System.out.println("NEJ");
+		 * 
+		 * 
+		 * }
+		 */
 
-		/*	if(!frame.empty()) {
+		// points
+		Point p1 = new Point(frame.width() * 0.25, frame.height() * 0.25);
+		Point p4 = new Point(frame.width() * 0.5, frame.height() * 0.5);
 
-				System.out.println("JA");
+		// crop
+		Rect rectCrop = new Rect((int) p1.x, (int) p1.y, (int) p4.x, (int) p4.y);
+		Mat croppedImage = new Mat(frame, rectCrop);
 
-			} else {
+		Mat blurImg = new Mat();
+		Mat hsv = new Mat();
+		Mat color_range = new Mat();
 
-				System.out.println("NEJ");
+		// bluring image to filter small noises.
+		Imgproc.GaussianBlur(croppedImage, blurImg, new Size(25, 25), 0);
+		// Imgproc.medianBlur(croppedImage, blurImg, 25);
 
+		Imgproc.cvtColor(blurImg, hsv, Imgproc.COLOR_BGR2HSV);
 
-		  }*/
+		// filtering pixels based on given blur color range (RED)
+		Core.inRange(blurImg, new Scalar(0, 0, 220), new Scalar(80, 80, 255), color_range);
 
+		/*
+		 * Mat redMask1 = new Mat(); Mat redMask2 = new Mat(); Mat redMaskf = new Mat();
+		 * 
+		 * /*Core.inRange(hsv, new Scalar(0, 70, 50), new Scalar(10, 255, 255),
+		 * redMask1); Core.inRange(blurImg, new Scalar(170, 70, 50), new Scalar(180,
+		 * 255, 255), redMask2); Core.bitwise_or(redMask1, redMask2, color_range);
+		 */
 
+		// init
+		List<MatOfPoint> contours = new ArrayList<>();
+		Mat hierarchy = new Mat();
 
-			//points
-				Point p1 = new Point(frame.width()*0.25, frame.height()*0.25);
-				Point p4 = new Point(frame.width()*0.5, frame.height()*0.5);
+		// find contours
+		Imgproc.findContours(color_range, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 
-			//crop
-				Rect rectCrop = new Rect((int)p1.x, (int)p1.y ,(int)p4.x, (int)p4.y);
-				Mat croppedImage = new Mat(frame, rectCrop);
+		List<Moments> mu = new ArrayList<Moments>(contours.size());
+		int x = 0;
+		int y = 0;
 
+		for (int i = 0; i < contours.size(); i++) {
+			mu.add(i, Imgproc.moments(contours.get(i), false));
+			Moments p = mu.get(i);
+			x += (int) (p.get_m10() / p.get_m00());
+			y += (int) (p.get_m01() / p.get_m00());
 
-
-				Mat blurImg = new Mat();
-				Mat hsv = new Mat();
-				Mat color_range = new Mat();
-
-
-
-
-				//bluring image to filter small noises.
-				Imgproc.GaussianBlur(croppedImage, blurImg, new Size(25,25),0);
-				//Imgproc.medianBlur(croppedImage, blurImg, 25);
-
-				Imgproc.cvtColor(blurImg, hsv, Imgproc.COLOR_BGR2HSV);
-
-				//filtering pixels based on given blur color range (RED)
-				Core.inRange(blurImg, new Scalar(0,0,220), new Scalar(80,80,255), color_range );
-
-				/*Mat redMask1 = new Mat();
-				Mat redMask2 = new Mat();
-				Mat redMaskf = new Mat();
-
-				/*Core.inRange(hsv, new Scalar(0, 70, 50), new Scalar(10, 255, 255), redMask1);
-				Core.inRange(blurImg, new Scalar(170, 70, 50), new Scalar(180, 255, 255), redMask2);
-				Core.bitwise_or(redMask1, redMask2, color_range);*/
-
-				// init
-			    List<MatOfPoint> contours = new ArrayList<>();
-				Mat hierarchy = new Mat();
-
-
-				// find contours
-				Imgproc.findContours(color_range, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
-
-
-				List<Moments> mu = new ArrayList<Moments>(contours.size());
-				int x = 0;
-				int y = 0;
-
-			    for (int i = 0; i < contours.size(); i++) {
-			        mu.add(i, Imgproc.moments(contours.get(i), false));
-			        Moments p = mu.get(i);
-			        x += (int) (p.get_m10() / p.get_m00());
-			        y += (int) (p.get_m01() / p.get_m00());
-
-			    }
-
-			    Imgproc.circle(color_range, new Point(x,y), 25, new Scalar(125));
-
-
-			    Imgcodecs imageCodecs = new Imgcodecs();
-
-
-			    this.updateImageView(this.crossImage1, Utils.mat2Image(color_range));
-
-			    return frame;
 		}
 
+		Imgproc.circle(color_range, new Point(x, y), 25, new Scalar(125));
+
+		Imgcodecs imageCodecs = new Imgcodecs();
+
+		this.updateImageView(this.crossImage1, Utils.mat2Image(color_range));
+
+		return frame;
+	}
 
 	/**
 	 * Calculates the area of a rectangle based on the points from MatOfPoint2f
@@ -1055,8 +1045,10 @@ System.out.println("hello");
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image     the {@link ImageView} to use
-	 * @param dimension the width of the image to set
+	 * @param image
+	 *            the {@link ImageView} to use
+	 * @param dimension
+	 *            the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -1089,8 +1081,10 @@ System.out.println("hello");
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view  the {@link ImageView} to update
-	 * @param image the {@link Image} to show
+	 * @param view
+	 *            the {@link ImageView} to update
+	 * @param image
+	 *            the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);
