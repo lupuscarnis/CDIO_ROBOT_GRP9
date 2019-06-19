@@ -89,7 +89,7 @@ public class FXController {
 	private Slider HSV_blurSize;
 	@FXML
 	private Slider HSV_dilateSize;
-	
+
 	@FXML
 	private Slider H_CORNER;
 	@FXML
@@ -332,7 +332,6 @@ public class FXController {
 	 */
 
 	public void runAnalysis(boolean robot) {
-
 		if (runningAnalysis) {
 
 			System.out.println("Image Analysis in progress");
@@ -457,6 +456,8 @@ public class FXController {
 	 */
 	private Mat findBallsHSV(Mat frame, boolean robot) {
 
+		System.out.println("Using HSV Ball detection");
+		
 		balls.clear();
 
 		// if the frame is not empty, process it
@@ -469,16 +470,17 @@ public class FXController {
 			Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
 
 			Mat whiteMask = new Mat();
-					
+
 			int sensitivity = (int) this.HSV_sensitivity.getValue();
 			int blurSize = (int) this.HSV_blurSize.getValue();
 			int dilateSize = (int) this.HSV_dilateSize.getValue();
-			
-			Core.inRange(hsvImage, new Scalar(0, 0, (255-sensitivity)), new Scalar(255, sensitivity, 255), whiteMask);
+
+			Core.inRange(hsvImage, new Scalar(0, 0, (255 - sensitivity)), new Scalar(255, sensitivity, 255), whiteMask);
 
 			Imgproc.blur(whiteMask, blurredImage, new Size(blurSize, blurSize));
 			// dilate to remove some black gaps within balls
-			Imgproc.dilate(blurredImage, blurredImage, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(dilateSize, dilateSize)));
+			Imgproc.dilate(blurredImage, blurredImage,
+					Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(dilateSize, dilateSize)));
 
 			// show the partial output
 			this.updateImageView(this.ballsImage, Utils.mat2Image(whiteMask));
@@ -490,32 +492,36 @@ public class FXController {
 			// find contours
 			Imgproc.findContours(blurredImage, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 
-	        List<Moments> mu = new ArrayList<>(contours.size());
-	        for (int i = 0; i < contours.size(); i++) {
-	            mu.add(Imgproc.moments(contours.get(i)));
-	        }
-	        List<Point> mc = new ArrayList<>(contours.size());
-	        for (int i = 0; i < contours.size(); i++) {
-	            //add 1e-5 to avoid division by zero
-	            mc.add(new Point(mu.get(i).m10 / (mu.get(i).m00 + 1e-5), mu.get(i).m01 / (mu.get(i).m00 + 1e-5)));
-	        }
+			List<Moments> mu = new ArrayList<>(contours.size());
+			for (int i = 0; i < contours.size(); i++) {
+				mu.add(Imgproc.moments(contours.get(i)));
+			}
+			List<Point> mc = new ArrayList<>(contours.size());
+			for (int i = 0; i < contours.size(); i++) {
+				// add 1e-5 to avoid division by zero
+				mc.add(new Point(mu.get(i).m10 / (mu.get(i).m00 + 1e-5), mu.get(i).m01 / (mu.get(i).m00 + 1e-5)));
+			}
 
-	        for (int i = 0; i < mc.size(); i++) {
-	        	
-	        	balls.add(mc.get(i));
-	        	
-	        }
+			for (int i = 0; i < mc.size(); i++) {
 
-			if (robot) {
-				BallList s = BallList.getInstance();
-				s.clearList();
+				balls.add(mc.get(i));
 
-				for (Point B : balls) {
-					s.add(new Ball(B.x, B.y));
-				}
+			}
+
+		}
+		// System.out.println("Size of balls list: "+ p.size());
+
+		if (robot)
+
+		{
+			BallList s = BallList.getInstance();
+			s.clearList();
+
+			for (Point B : balls) {
+				s.add(new Ball(B.x, B.y));
 
 				for (int i = 0; i < balls.size(); i++) {
-					System.out.println("Point (X,Y): " + balls.get(i));
+					//System.out.println("Point (X,Y): " + balls.get(i));
 
 				}
 
@@ -537,6 +543,8 @@ public class FXController {
 	 */
 	private Mat findBallsHough(Mat frame, boolean robot) {
 
+		System.out.println("Using Hough Ball detection");
+		
 		balls.clear();
 
 		// if the frame is not empty, process it
@@ -598,7 +606,7 @@ public class FXController {
 				}
 
 				for (int i = 0; i < balls.size(); i++) {
-					System.out.println("Point (X,Y): " + balls.get(i));
+					//System.out.println("Point (X,Y): " + balls.get(i));
 
 				}
 

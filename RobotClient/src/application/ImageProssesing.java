@@ -25,10 +25,7 @@ import objects.Robot;
 import tools.I_Size_Scale;
 import tools.Size_scale;
 
-
-
 public class ImageProssesing implements I_ImageProssesing {
-
 
 	// the FXML area for showing the mask
 	Mat output;
@@ -43,8 +40,7 @@ public class ImageProssesing implements I_ImageProssesing {
 	}
 
 	public ImageProssesing() {
-		
-		  
+
 	}
 
 	/*
@@ -54,30 +50,45 @@ public class ImageProssesing implements I_ImageProssesing {
 	 */
 	@Override
 	public Mat findBackAndFront(Mat frame, List<Scalar> values, boolean robot) {
-		
-		
-	
-	
 
 		Point front = findColor(frame, values.get(0), values.get(1));
-		
-		Point back = findColor(frame,values.get(2), values.get(3));
 
-		if(robot) {
-		
+		Point back = findColor(frame, values.get(2), values.get(3));
+
+		if (robot) {
+
 			Robot s = Robot.getInstance();
-		s.setBackX(back.x);
-		s.setBackY(back.y);
-		s.setFrontX(front.x);
-		s.setFrontY(front.y);
+			if (Double.isNaN(back.x)) {
+				s.setBackX(0);
+			} else {
+				s.setBackX(back.x);
+			}
+
+			if (Double.isNaN(back.y)) {
+				s.setBackY(0);
+			} else {
+				s.setBackY(back.y);
+			}
+
+			if (Double.isNaN(front.x)) {
+				s.setFrontX(0);
+			} else {
+				s.setFrontX(front.x);
+			}
+
+			if (Double.isNaN(front.y)) {
+				s.setFrontY(0);
+			} else {
+				s.setFrontY(front.y);
+			}
+
 		}
-		
-	
+
 		Imgproc.line(frame, back, front, new Scalar(0, 0, 0));
-		
-		Point centerpoint = new Point(((back.x + front.x)/2),((back.y + front.y)/2)); 
-		
-		Imgproc.circle(frame, centerpoint, 5,new Scalar(0,255,0));
+
+		Point centerpoint = new Point(((back.x + front.x) / 2), ((back.y + front.y) / 2));
+
+		Imgproc.circle(frame, centerpoint, 5, new Scalar(0, 255, 0));
 		return frame;
 
 	}
@@ -111,7 +122,6 @@ public class ImageProssesing implements I_ImageProssesing {
 	@Override
 	public Mat findCorners(Mat frame, org.opencv.core.Point center, int threshold) {
 
-		
 		Mat srcGray = new Mat();
 		Mat dst = new Mat();
 		Mat dstNorm = new Mat();
@@ -131,12 +141,12 @@ public class ImageProssesing implements I_ImageProssesing {
 		Core.normalize(dst, dstNorm, 0, 255, Core.NORM_MINMAX);
 		Core.convertScaleAbs(dstNorm, dstNormScaled);
 		lengths.clear();
-		
+
 		float[] dstNormData = new float[(int) (dstNorm.total() * dstNorm.channels())];
 		dstNorm.get(0, 0, dstNormData);
-		
+
 		for (int i = 0; i < dstNorm.rows(); i++) {
-			if(iter > 200) {
+			if (iter > 200) {
 				break;
 			}
 			for (int j = 0; j < dstNorm.cols(); j++) {
@@ -144,13 +154,13 @@ public class ImageProssesing implements I_ImageProssesing {
 					cornors.add(new Point(j, i));
 					Imgproc.circle(dstNormScaled, new Point(j, i), 2, new Scalar(255, 255, 255));
 					iter++;
-					if(iter > 200) {
+					if (iter > 200) {
 						break;
 					}
-				} 
+				}
 			}
 		}
-		
+
 		if (cornors.size() > 4) {
 
 			lengths = convertPointsToVectorsDistancesFromCenter(cornors, center);
@@ -170,11 +180,11 @@ public class ImageProssesing implements I_ImageProssesing {
 
 			ss.pixelToCm(cornors);
 			for (Point p : cornors) {
-				Imgproc.line(dstNormScaled, p, center, new Scalar(350, 255, 255));	
+				Imgproc.line(dstNormScaled, p, center, new Scalar(350, 255, 255));
 			}
-			
+
 		}
-		
+
 		return dstNormScaled;
 	}
 
@@ -192,24 +202,20 @@ public class ImageProssesing implements I_ImageProssesing {
 		Mat adapted = new Mat();
 		Mat filtered = new Mat();
 		int histSize = 256;
-		float[] range = {0, 256}; //the upper boundary is exclusive
+		float[] range = { 0, 256 }; // the upper boundary is exclusive
 		boolean accumulate = false;
-		Mat vHist = new Mat(),hHist = new Mat(), sHist = new Mat();
-        MatOfFloat histRange = new MatOfFloat(range);
+		Mat vHist = new Mat(), hHist = new Mat(), sHist = new Mat();
+		MatOfFloat histRange = new MatOfFloat(range);
 		List<Mat> channels = new ArrayList<Mat>();
-		
+
 		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
-		
-		
-		Imgproc.adaptiveThreshold(hsvImage, adapted, 50, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY,11, 2);
-		
-		
-		Core.inRange(adapted, minValues, maxValues, output);
-		
 
+		// Imgproc.adaptiveThreshold(hsvImage, adapted, 125,
+		// Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY, 11, 12);
+		Core.inRange(hsvImage, minValues, maxValues, output);
 
-		System.out.println("Size " + channels.size());
-			
+		this.output = adapted;
+
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
