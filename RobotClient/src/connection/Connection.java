@@ -11,7 +11,7 @@ import java.util.Scanner;
 public class Connection implements I_Connection {
 	private int port = 4444;
 	private String ip = "192.168.43.69";
-
+// real ip = "192.168.43.69";
 	/* (non-Javadoc)
 	 * @see connection.I_COnnection#Connect()
 	 */

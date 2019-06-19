@@ -330,16 +330,16 @@
 												<VBox prefHeight="350.0" prefWidth="200.0">
 													<children>
 														<Label text="Front Hue(0:360)" />
-														<Slider fx:id="H_FRONT" blockIncrement="1" max="360.0" min="0" value="212.0" />
+														<Slider fx:id="H_FRONT" blockIncrement="1" max="360.0" min="0" value="188.0" />
 														<Label text="Front Saturation (0:100)" />
-														<Slider fx:id="S_FRONT" blockIncrement="1" max="100.0" min="1.0" value="70.0" />
+														<Slider fx:id="S_FRONT" blockIncrement="1" max="100.0" min="1.0" value="45.0" />
 														<Label text="Front Value (0:100)" />
 														<Slider fx:id="V_FRONT" blockIncrement="1" max="100.0" min="1.0" value="99.0" />
 														<Separator prefWidth="150.0" />
 														<Label text="Back Hue (0:360)" />
-														<Slider fx:id="H_BACK" blockIncrement="1" max="360.0" min="1.0" value="188.0" />
+														<Slider fx:id="H_BACK" blockIncrement="1" max="360.0" min="1.0" value="41.0" />
 														<Label text="Back Saturation ( 0:100)" />
-														<Slider fx:id="S_BACK" blockIncrement="1" max="100.0" min="1.0" value="45.0" />
+														<Slider fx:id="S_BACK" blockIncrement="1" max="100.0" min="1.0" value="70.0" />
 														<Label text="Back Value (0:100)" />
 														<Slider fx:id="V_BACK" blockIncrement="1" max="100.0" min="0" value="99.0" />
 														<Label text="Threshold (0:100)" />
