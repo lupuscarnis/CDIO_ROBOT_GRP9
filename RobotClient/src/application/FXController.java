@@ -198,12 +198,12 @@ public class FXController {
 	 * 
 	 */
 
-	private boolean isStaticDebugMode = true;
+	private boolean isStaticDebugMode =false;
 	private boolean isVideoDebugMode = false;
-	private boolean isWebcamDebugMode = false;
+	private boolean isWebcamDebugMode = true;
 
 	// Use alternative (manual) mode for detecting the playing field?
-	boolean UseAltPFDetection = true;
+	boolean UseAltPFDetection = false;
 
 	// Use HSV or Hough for image analysis (balls)?
 	boolean UseHSVDetection = true;
@@ -212,7 +212,7 @@ public class FXController {
 	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 0;
+	private int webcamID = 1;
 
 	// Debug image file
 	// private String debugImg = "Debugging/pic01.jpg";
@@ -383,13 +383,12 @@ public class FXController {
 
 			// finds the front and back of the robot
 			// slider values
-			/*
-			 * List<Scalar> values = new ArrayList<Scalar>(); values = getRobotValues();
-			 * ip.findBackAndFront(cleanFrame, values, robot); updateImageView(robotImage,
-			 * Utils.mat2Image(ip.getOutput())); updateImageView(cornerImage,
-			 * Utils.mat2Image(ip.getOutput1()));
-			 */
-			Graph graph = new Graph();
+			
+			  List<Scalar> values = new ArrayList<Scalar>(); values = getRobotValues();
+			//  updateImageView(robotImage, Utils.mat2Image(); 
+			  // Utils.mat2Image(ip.getOutput1()));
+			  frame = ip.findBackAndFront(frame, values, robot);
+			
 
 			// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
 
@@ -403,7 +402,7 @@ public class FXController {
 			Image imageToShow = Utils.mat2Image(out);
 			updateImageView(videoFrame, imageToShow);
 
-			System.out.println("We found: " + balls.size() + " balls");
+			
 
 			runningAnalysis = false;
 
@@ -456,7 +455,7 @@ public class FXController {
 	 */
 	private Mat findBallsHSV(Mat frame, boolean robot) {
 
-		System.out.println("Using HSV Ball detection");
+		
 		
 		balls.clear();
 
