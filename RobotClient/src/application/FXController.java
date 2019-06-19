@@ -217,7 +217,7 @@ public class FXController {
 	// Debug image file
 	// private String debugImg = "Debugging/pic01.jpg";
 	private String debugImg = "Debugging/Robo_w_Balls.png";
-	private String debugVid = "Debugging/superVideo.mp4";
+	//private String debugVid = "Debugging/superVideo.mp4";
 	// Empty image file
 	private String defaultImg = "Debugging/Default.jpg";
 
@@ -246,15 +246,15 @@ public class FXController {
 		if (!this.cameraActive) {
 			// start the video capture
 
-			if (isVideoDebugMode) {
+			/*if (isVideoDebugMode) {
 
 				this.capture.open(debugVid);
 
-			} else {
+			} else {*/
 
 				this.capture.open(webcamID);
 
-			}
+			/*}*/
 
 			if (this.capture.isOpened()) {
 
