@@ -179,7 +179,8 @@ public class FXController {
 	private boolean runningAnalysis = false;
 
 	// For access to all the points (balls) found
-	public List<Point> balls = new ArrayList<>();
+	public List<Point> p = new ArrayList<>();
+	private Mat circlesGUI = new Mat();
 
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
