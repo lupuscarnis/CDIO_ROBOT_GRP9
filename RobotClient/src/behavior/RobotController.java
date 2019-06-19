@@ -385,26 +385,6 @@ if(!(newCoordinate==robotCenter)) {
 	public Coordinate detectObstacle(Coordinate robotFront, Coordinate robotBack, Coordinate ball) {
 		double dir = calcDirection(robotFront, robotBack, ball);
 		// need working frame sizes, not sure these work
-
-		Coordinate cross = new Coordinate(frameWidth/2, frameHeight/2);
-		Coordinate robotCenter = new Coordinate(robotFront.getX()+robotBack.getX(),robotFront.getY()+robotBack.getY());
-		for(int i =0; i<frameWidth/2;i++) {
-			
-			if(robotFront.getX()*i>(cross.getX()-30) && robotFront.getX()*i<cross.getX()+30) {
-				
-				if(robotFront.getY()*i>(cross.getY()-30) && robotFront.getY()*i<cross.getY()+30) {
-					//you are on a collision course with the cross
-					
-					if(Math.abs(robotCenter.getX()-cross.getX())>Math.abs(robotCenter.getY()-cross.getY())) {
-						return new Coordinate(ball.getX(),robotCenter.getY());
-						
-						//moveToPoint(new Coordinate(ball.getX(),robotCenter.getY()));
-						//if center -x is greater than center-y move to other coordinate
-					}else {return (new Coordinate(ball.getY(),robotCenter.getX()));
-					//moveToPoint(new Coordinate(ball.getY(),robotCenter.getX()));
-					}
-					
-
 		Coordinate cross = new Coordinate(frameWidth / 2, frameHeight / 2);
 		Coordinate robotCenter = new Coordinate(robotFront.getX() + robotBack.getX(),
 				robotFront.getY() + robotBack.getY());
@@ -422,7 +402,6 @@ if(!(newCoordinate==robotCenter)) {
 						moveToPoint(new Coordinate(ball.getY(), robotCenter.getX()));
 					}
 
-
 				}
 
 				// if(robotFront.getX()*i && robotFront.getY()*i)
@@ -430,7 +409,6 @@ if(!(newCoordinate==robotCenter)) {
 			}
 
 		}
-				
 
 		return robotCenter;
 	}
