@@ -266,7 +266,7 @@ public class RobotController implements Runnable {
 
 				firsttime = false;
 
-			} while (!((dir <= 2) && (dir >= -2)));
+			} while (!((dir <= 4) && (dir >= -4)));
 
 			// addcheck for obstacle and if new course
 			float distance = (float) ((getDistance(cs.robot.get(0), path.get(0))) / ratio);
