@@ -40,6 +40,63 @@ public class RobotController  implements Runnable{
 
 	}
 	
+	public void handleBallsToTheWall(int type, Coordinate robotFront,Coordinate robotBack,Coordinate ball){
+		Coordinate intFrontOfBall;
+		if(type==1) {
+			//move to close in front of ball, perpendicular to the wall
+			if(ball.getX()>100){
+				intFrontOfBall = new Coordinate(ball.getX()+10,ball.getY());
+				moveToPoint(intFrontOfBall);
+				
+			}else {
+			intFrontOfBall = new Coordinate(ball.getX()-10,ball.getY());
+			moveToPoint(intFrontOfBall);
+			}
+			moveRobotToBallAtWall(intFrontOfBall);
+		//maybe some kind of move over and fucking get the ball. Needs to get updated position of robot
+		//double dir = getDirection()
+			
+		}else if (type==2) {
+			
+			//move to close in front of ball, perpendicular to the other wall
+			if(ball.getY()>100){
+				intFrontOfBall = new Coordinate(ball.getX(),ball.getY()+10);
+				moveToPoint(intFrontOfBall);
+				
+			}else {
+			intFrontOfBall = new Coordinate(ball.getX(),ball.getY()-10);
+			moveToPoint(intFrontOfBall);
+			}
+			moveRobotToBallAtWall(intFrontOfBall);
+		//maybe some kind of move over and fucking get the ball. Needs to get updated position of robot
+		//double dir = getDirection()
+			
+		}else {
+			//move to close in front of ball, point "directly" towards the corner
+			if(ball.getX()>100 && ball.getY()>100){
+				intFrontOfBall = new Coordinate(ball.getX()+10,ball.getY()+10);
+				moveToPoint(intFrontOfBall);
+				
+			}else if (ball.getX()<100 && ball.getY()>100) {
+				intFrontOfBall = new Coordinate(ball.getX()-10,ball.getY()+10);
+				moveToPoint(intFrontOfBall);
+				
+			}else if (ball.getX()<100 && ball.getY()<100) {
+				intFrontOfBall = new Coordinate(ball.getX()-10,ball.getY()-10);
+				moveToPoint(intFrontOfBall);
+			}else{
+				intFrontOfBall = new Coordinate(ball.getX()+10,ball.getY()-10);
+				moveToPoint(intFrontOfBall);
+				
+			}
+			
+			moveRobotToBallAtWall(intFrontOfBall);
+		//maybe some kind of move over and fucking get the ball. Needs to get updated position of robot
+		//double dir = getDirection()
+			
+		}
+	}
+	
 	public int isBallAtWall(Coordinate ball){
 		int output = 0;
 		//checks whether ball is close to x y or neither wall
@@ -202,6 +259,13 @@ public class RobotController  implements Runnable{
 		System.out.println("Im driving, im doing it "+distance);
 		dto.clearData();
 		dto.setDistance(distance);
+		dto.setClawMove(180);
+		dao.sendData(dto);
+		dao.reciveData();	
+		
+		dto.clearData();
+		dto.setDistance((float)0.15);
+		dto.setClawMove(-180);
 		dao.sendData(dto);
 		dao.reciveData();	
 		
@@ -280,6 +344,8 @@ System.out.println("Ball: "+ ballX + " "+ ballY);
 	
 	public void moveToPoint(Coordinate newPoint) {
 		
+		
+		
 		double X = (cs.robot.get(0).getX() + cs.robot.get(0).getX()) / 2;
 		double Y = (cs.robot.get(1).getY() + cs.robot.get(1).getY()) / 2;
 		Coordinate robotCenter = new Coordinate(X, Y);
@@ -288,6 +354,12 @@ System.out.println("Ball: "+ ballX + " "+ ballY);
 
 		
 		double dir = calcDirection(cs.robot.get(0), robotCenter, newPoint);
+		//notRight, this is a placeholder
+		Coordinate newCoordinate = detectObstacle(cs.robot.get(0),cs.robot.get(1),newPoint);
+if(!(newCoordinate==robotCenter)) {
+	moveToPoint(newCoordinate);
+	return;
+		}
 		
 		dto.clearData();
 		dto.setRotation((float) dir);
@@ -320,9 +392,13 @@ System.out.println("Ball: "+ ballX + " "+ ballY);
 					//you are on a collision course with the cross
 					
 					if(Math.abs(robotCenter.getX()-cross.getX())>Math.abs(robotCenter.getY()-cross.getY())) {
-						moveToPoint(new Coordinate(ball.getX(),robotCenter.getY()));
+						return new Coordinate(ball.getX(),robotCenter.getY());
+						
+						//moveToPoint(new Coordinate(ball.getX(),robotCenter.getY()));
 						//if center -x is greater than center-y move to other coordinate
-					}else {moveToPoint(new Coordinate(ball.getY(),robotCenter.getX()));}
+					}else {return (new Coordinate(ball.getY(),robotCenter.getX()));
+					//moveToPoint(new Coordinate(ball.getY(),robotCenter.getX()));
+					}
 					
 				}
 				
@@ -400,6 +476,18 @@ System.out.println("Ball: "+ ballX + " "+ ballY);
 		System.out.println("signes ankel " + angle);
 		return angle;
 
+	}
+	
+	public void moveRobotToBallAtWall(Coordinate place) {
+		dao.reciveData();
+		getView();
+		
+		double X = (cs.robot.get(0).getX() + cs.robot.get(1).getX()) / 2;
+		double Y = (cs.robot.get(0).getY() + cs.robot.get(1).getY()) / 2;
+		Coordinate robotCenter = new Coordinate(X, Y);
+		double dir = calcDirection(cs.robot.get(0),robotCenter,place);
+		//make sure it gets far enough, you'll hit the wall anyways :)
+		double dist = getDistance(cs.robot.get(0),place)+15;
 	}
 
 }
