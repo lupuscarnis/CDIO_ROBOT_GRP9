@@ -196,7 +196,7 @@ public class RobotController implements Runnable {
 		// distance to in front of goal
 		double distance = getDistance(cs.robot.get(0), frontOfGoal);
 		// pixels get converted to cm
-		distance = distance / ratio;
+		distance = distance ;
 
 		// System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran
 		// maal");
@@ -265,6 +265,8 @@ public class RobotController implements Runnable {
 					firsttime = false;
 					dir =0;
 				}else */{
+					
+					//all this should get replaced with moveToPoint, to get the obstacle detection it offers.
 				dir = getDir(path);
 				System.out.println("dir:" + dir);
 				System.out.println("Iter: " + iter);
@@ -284,9 +286,9 @@ public class RobotController implements Runnable {
 			
 
 			// addcheck for obstacle and if new course
-			float distance = (float) ((getDistance(cs.robot.get(0), path.get(0))) / ratio);
+			float distance = (float) ((getDistance(cs.robot.get(0), path.get(0))) );
 			System.out.println("Im driving, im doing it " + distance);
-			
+			//all this should get replaced with moveToPoint, to get the obstacle detection it offers.
 			dto.clearData();
 			dto.setDistance((float)(distance-0.05));
 			dto.setClawMove(180);
@@ -375,6 +377,8 @@ public class RobotController implements Runnable {
 	}
 
 	public void moveToPoint(Coordinate newPoint) {
+		
+	// maybe needs to getView(); here, maybe it should be left to send or whoever calls it, discuss tomorrow	
 System.out.println("der blev moved to point");
 		double X = (cs.robot.get(0).getX() + cs.robot.get(0).getX()) / 2;
 		double Y = (cs.robot.get(1).getY() + cs.robot.get(1).getY()) / 2;
@@ -483,7 +487,7 @@ if((newCoordinate==robotCenter)) {
 	public double getDistance(Coordinate a, Coordinate b) {
 		double X = a.getX() - b.getX();
 		double Y = a.getY() - b.getY();
-		return Math.sqrt(X * X + Y * Y);
+		return (Math.sqrt(X * X + Y * Y))/2;
 
 	}
 
@@ -539,10 +543,12 @@ if((newCoordinate==robotCenter)) {
 		dao.reciveData();
 		System.out.println("gets the ball from moveRobot");
 		dto.clearData();
-		dto.setClawMove(-180);
+		
 		dto.setDistance((float)(0.15));
 		dao.sendData(dto);
 		dao.reciveData();
+		
+		send(-0.1,0,-180,0);
 		
 		
 	}
