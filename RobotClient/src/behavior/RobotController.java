@@ -19,7 +19,7 @@ import objects.Robot;
 public class RobotController implements Runnable {
 	int nrBalls = 0;
 	int goals = 0;
-	double ratio = 310;
+	double ratio = 280;
 	double robotDirection = 0;
 	double frameHeight = 0;
 	double frameWidth = 0;
@@ -184,60 +184,97 @@ public class RobotController implements Runnable {
 	}
 
 	public void scoreGoal() {
-
-		double goalY = (frameWidth / 2);
+//should perhaps be frameWidth/2
+		double goalY = ((355 / 2))+30;
 		//only want like 10 in front of goal, but the border = 30
-		double goalX = 40;
-		Coordinate frontOfGoal = new Coordinate(goalX-0.3, goalY);
+		double goalX = 80;
+		Coordinate frontOfGoal = new Coordinate(goalX, goalY);
+		double dir = 100;
+		double distance = 0;
 		// calculating direction to drive in front of goal
 		System.out.println("front of goal is at   x "+goalX+" y "+goalY);
-		double dir = calcDirection(cs.robot.get(0),cs.robot.get(1),frontOfGoal);
+		
+		//if you cant find goal, start by placing robot at (in front of) goal and save position
+		
+		// x = 80 y = 210  y gaar fra 30 til 390
+		
+			do {
+			getView();
+		 dir = calcDirection(cs.robot.get(0),cs.robot.get(1),frontOfGoal);
 		
 		send(0,dir,0,0);
+		
+			}while(!((dir <= 10) && (dir >= -10)));
 		getView();
 		// distance to in front of goal
-		double distance = getDistance(cs.robot.get(0), frontOfGoal);
+		
+		 distance = getDistance(cs.robot.get(0), frontOfGoal);
 		// pixels get converted to cm
 		send(distance,0,0,0);
 
+		
 		// System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran
 		// maal");
 		
 		// find direction to point towards goal
-		getView();
 		
-		Coordinate goal = new Coordinate(0, cs.getYLength() / 2);
 		
+		Coordinate goal = new Coordinate(goalX-70, goalY / 2);
+	
+		do {
+			getView();
 		 dir = calcDirection(cs.robot.get(0),cs.robot.get(1),goal);
 		send(0,dir,0,0);
 		// distance to in front of goal
+		}while(!((dir <= 5) && (dir >= -5)));
+		getView();
 		 distance = getDistance(cs.robot.get(0), goal);
 		send(distance,0,180,0);
 		
 		System.out.println(goal.getX() + " goal tal " + goal.getY());
 		// dir = getDirection(goal);
 
-		System.out.println("vi sender " + dir + "distance for at komme parallelt med maalet");
-
 		// send message to drive close to goal and release balls
 		
 		// can't remember which direction is which, but both need to turn the same
 		// direction
-		send(0,0,180,120);
+		send(0,0,0,120);
 		send(0,0,0,-120);
+		send(0,0,0,120);
+		send(0,0,180,-120);
 		send(-0.2,0,0,0);
 		
 	}
 
 	public void run() {
 		//noget man kan soege efter :D
-		boolean firsttime = true;
+		boolean firstTime = true;
 		double dir = 10;
 		int nrBalls =0;
+		//if cant find ball, go back a little, somewhere
+		//Coordinate tempBall = new Coordinate (0,0); 
+		ArrayList<Coordinate> tempBall = new ArrayList<Coordinate>();
+		tempBall.add(new Coordinate (0,0));
 		do {
+			
+		//	if(firstTime) {path = findRoute();}
+			
+			//this makes sure that it keeps trying to get the same ball, as long as it can find it
 			getView();
 			path = findRoute();
-			if(getDistance(cs.robot.get(0),path.get(0))>0.2) {
+			if(!(path.contains(tempBall.get(0)))) {
+				tempBall.clear();
+				tempBall.add( path.get(0));
+			}else {
+			
+			path = tempBall;
+			}
+			// turn on to score goals
+			if(nrBalls>=3) {
+				nrBalls=0;
+				scoreGoal();
+			}else {
+			if(getDistance(cs.robot.get(0),path.get(0))>0.35) {
 				
 				isFar(path);
 				
@@ -246,7 +283,7 @@ public class RobotController implements Runnable {
 				isClose(path);
 				nrBalls++;
 			}
-			
+			}
 		} while(true);
 
 
@@ -450,20 +487,29 @@ if((newCoordinate==robotCenter)) {
 		//if ball is near wall, do something different
 		
 		dir = calcDirection(cs.robot.get(0),cs.robot.get(1),thePath.get(0));
+		
+		if(dir<5 && dir>-5) {
+			if(dir>0) {
+				dir=2;}
+			}else {
+				dir = -2;
+			}
+			
+		
 		send(0,dir,0,0);
 		
-	} while (!((dir <= 4) && (dir >= -4))) ;
+	} while (!((dir <= 2) && (dir >= -2))) ;
 			 
 	float distance = (float) ((getDistance(cs.robot.get(0), thePath.get(0))) );
 	System.out.println("Im driving, im doing it " + distance);
 	
-	send(distance-0.2,0,0,0);	
+	send(distance-0.15,0,0,0);	
 	
-	send(0,0,180,0);
+	send(0,0,120,0);
 	
-	send(0.3,0,0,0);
+	send(0.15,0,0,0);
 	
-	send(0,0,-180,0);
+	send(0.05,0,-120,0);
 			 
 }
 	

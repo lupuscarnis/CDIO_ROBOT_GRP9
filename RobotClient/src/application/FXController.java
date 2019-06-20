@@ -377,7 +377,7 @@ public class FXController {
 			Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10), ((S_CORNER.getValue() / 100) * 255 + 10),
 					((V_CORNER.getValue() / 100) * 255 + 10));
 
-			// Point p = ip.findColor(frame, minValuesc, maxValuesc);
+			 //Point p = ip.findColor(frame, minValuesc, maxValuesc,true);
 			// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
 
 			// finds the front and back of the robot

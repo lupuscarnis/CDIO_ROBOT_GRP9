@@ -190,7 +190,7 @@ public class ImageProssesing implements I_ImageProssesing {
 			}
 
 		}
-
+		
 		return dstNormScaled;
 	}
 
