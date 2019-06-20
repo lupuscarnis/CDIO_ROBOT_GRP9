@@ -58,8 +58,8 @@ public class ImageProssesing implements I_ImageProssesing {
 		/*Point front = findColor(frame, values.get(0), values.get(1), false);
 		Point back = findColor(frame, values.get(2), values.get(3) , true);*/
 		
-		Point front = findColorBG(frame, false);
-		Point back = findColorBG(frame, true);
+		Point front = findColorBG(frame, true);
+		Point back = findColorBG(frame, false);
 
 		if (robot) {
 
