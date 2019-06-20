@@ -19,6 +19,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -54,9 +55,11 @@ public class ImageProssesing implements I_ImageProssesing {
 	@Override
 	public Mat findBackAndFront(Mat frame, List<Scalar> values, boolean robot) {
 
-		Point front = findColor(frame, values.get(0), values.get(1), false);
-		Point back = findColor(frame, values.get(2), values.get(3) , true);
+		/*Point front = findColor(frame, values.get(0), values.get(1), false);
+		Point back = findColor(frame, values.get(2), values.get(3) , true);*/
 		
+		Point front = findColorBG(frame, false);
+		Point back = findColorBG(frame, true);
 
 		if (robot) {
 
@@ -191,6 +194,83 @@ public class ImageProssesing implements I_ImageProssesing {
 		return dstNormScaled;
 	}
 
+
+	public Point findColorBG(Mat frame, boolean front) {
+
+		List<Mat> channels = new ArrayList<Mat>();
+		Mat thresh = new Mat();
+		Mat output = new Mat();
+		Point centroid = new Point();
+
+		Core.split(frame, channels);
+
+		if (front) { // (blue)
+
+			output = channels.get(0);
+
+		} else {
+
+			output = channels.get(1);
+
+		}
+		Imgproc.blur(output, output, new Size(7, 7));
+		// dilate to remove some black gaps within balls
+		Imgproc.dilate(output, output,
+				Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5)));
+		Imgproc.threshold(output, thresh, 200, 255,Imgproc.THRESH_BINARY);
+		
+		
+		if (front) { // (blue)
+
+			this.output = thresh;
+
+		} else {
+
+			this.output1 = thresh;
+
+		}
+		
+		//output = Imgproc.adaptiveThreshold(output, output, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, I.THRESH_BINARY, 15, 40);
+
+		List<MatOfPoint> contours = new ArrayList<>();
+		Imgproc.findContours(thresh, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+		if (contours.size() > 0) {
+			
+			double maxArea = 0;
+			int maxAreaIdx = 0;
+
+			for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
+				double contourArea = Imgproc.contourArea(contours.get(contourIdx));
+				if (maxArea < contourArea) {
+					maxArea = contourArea;
+					maxAreaIdx = contourIdx;
+				}
+			}
+
+			if (maxAreaIdx >= 0) {
+
+				System.out.println("centroid");
+				
+				MatOfPoint largestContour = contours.get(maxAreaIdx);
+
+				Moments moments = Imgproc.moments(largestContour);
+
+				centroid.x = moments.get_m10() / moments.get_m00();
+				centroid.y = moments.get_m01() / moments.get_m00();
+				
+				Imgproc.circle(frame, centroid, 5, new Scalar(0, 255, 0));
+
+				System.out.println(centroid);
+				
+			}
+
+		}
+
+		return centroid;
+	}
+
+	
 	/*
 	 * (non-Javadoc)
 	 * 
