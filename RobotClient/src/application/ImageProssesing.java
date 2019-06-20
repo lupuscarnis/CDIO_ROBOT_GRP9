@@ -7,23 +7,28 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
+import objects.FrameSize;
 import objects.Robot;
 import tools.I_Size_Scale;
+import tools.OpenCVUtil;
 import tools.Size_scale;
 
 public class ImageProssesing implements I_ImageProssesing {
@@ -52,10 +57,12 @@ public class ImageProssesing implements I_ImageProssesing {
 	@Override
 	public Mat findBackAndFront(Mat frame, List<Scalar> values, boolean robot) {
 
-		Point front = findColor(frame, values.get(0), values.get(1), false);
-		Point back = findColor(frame, values.get(2), values.get(3) , true);
-		
+		/*Point front = findColor(frame, values.get(0), values.get(1), false);
+		Point back = findColor(frame, values.get(2), values.get(3), true);*/
 
+		Point front = findColorBG(frame, true);
+		Point back = findColorBG(frame, false);
+		
 		if (robot) {
 
 			Robot s = Robot.getInstance();
@@ -189,6 +196,109 @@ public class ImageProssesing implements I_ImageProssesing {
 		return dstNormScaled;
 	}
 
+	public Point findColorBG(Mat frame, boolean front) {
+
+		List<Mat> channels = new ArrayList<Mat>();
+		Mat thresh = new Mat();
+		Mat output = new Mat();
+		Point centroid = new Point();
+
+		Core.split(frame, channels);
+
+		if (front) { // (blue)
+
+			output = channels.get(0);
+
+		} else {
+
+			output = channels.get(1);
+
+		}
+		Imgproc.blur(output, output, new Size(7, 7));
+		// dilate to remove some black gaps within balls
+		Imgproc.dilate(output, output,
+				Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5)));
+		Imgproc.threshold(output, thresh, 200, 255,Imgproc.THRESH_BINARY);
+		
+		
+		if (front) { // (blue)
+
+			this.output = thresh;
+
+		} else {
+
+			this.output1 = thresh;
+
+		}
+		
+		//output = Imgproc.adaptiveThreshold(output, output, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, I.THRESH_BINARY, 15, 40);
+
+		List<MatOfPoint> contours = new ArrayList<>();
+		Imgproc.findContours(thresh, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+		if (contours.size() > 0) {
+			
+			double maxArea = 0;
+			int maxAreaIdx = 0;
+
+			for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
+				double contourArea = Imgproc.contourArea(contours.get(contourIdx));
+				if (maxArea < contourArea) {
+					maxArea = contourArea;
+					maxAreaIdx = contourIdx;
+				}
+			}
+
+			if (maxAreaIdx >= 0) {
+
+				System.out.println("centroid");
+				
+				MatOfPoint largestContour = contours.get(maxAreaIdx);
+
+				Moments moments = Imgproc.moments(largestContour);
+
+				centroid.x = moments.get_m10() / moments.get_m00();
+				centroid.y = moments.get_m01() / moments.get_m00();
+				
+				Imgproc.circle(frame, centroid, 5, new Scalar(0, 255, 0));
+
+				System.out.println(centroid);
+				
+			}
+
+		}
+
+		return centroid;
+	}
+
+	/**
+	 * Calculates the area of a rectangle based on the points from MatOfPoint2f
+	 * rectangle
+	 * 
+	 * @param rectangle
+	 * @return Size
+	 */
+
+	private Size getRectangleSize(MatOfPoint2f rectangle) {
+		Point[] corners = rectangle.toArray();
+
+		double top = getDistance(corners[0], corners[1]);
+		double right = getDistance(corners[1], corners[2]);
+		double bottom = getDistance(corners[2], corners[3]);
+		double left = getDistance(corners[3], corners[0]);
+
+		double averageWidth = (top + bottom) / 2f;
+		double averageHeight = (right + left) / 2f;
+
+		return new Size(new Point(averageWidth, averageHeight));
+	}
+
+	private double getDistance(Point p1, Point p2) {
+		double dx = p2.x - p1.x;
+		double dy = p2.y - p1.y;
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -196,7 +306,7 @@ public class ImageProssesing implements I_ImageProssesing {
 	 * org.opencv.core.Scalar, org.opencv.core.Scalar)
 	 */
 	@Override
-	public Point findColor(Mat frame, Scalar minValues, Scalar maxValues, boolean c ) {
+	public Point findColor(Mat frame, Scalar minValues, Scalar maxValues, boolean c) {
 
 		Mat hsvImage = new Mat();
 		Mat blur = new Mat();
@@ -204,45 +314,47 @@ public class ImageProssesing implements I_ImageProssesing {
 		Mat adapted = new Mat();
 		Mat filtered = new Mat();
 		Mat grayscale = new Mat();
-		Mat hist  = new Mat();
+		Mat hist = new Mat();
 		Mat mask = new Mat();
 		Mat morphOutput = new Mat();
 		List<Mat> channels = new ArrayList<Mat>();
-	
+
 		Imgproc.GaussianBlur(frame, blur, new Size(25, 25), 0);
 		Imgproc.cvtColor(blur, hsvImage, Imgproc.COLOR_BGR2HSV);
-		
+
 		Core.split(hsvImage, channels);
 
 		/*
-		Imgproc.adaptiveThreshold(channels.get(1), adapted, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
+		 * Imgproc.adaptiveThreshold(channels.get(1), adapted, 255,
+		 * Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
+		 * 
+		 * Imgproc.adaptiveThreshold(channels.get(2), filtered, 255,
+		 * Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
+		 */
 
-		Imgproc.adaptiveThreshold(channels.get(2), filtered, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
-		*/	
-	
-		Imgproc.adaptiveThreshold(channels.get(2), channels.get(2), 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY, 9, 4);
-		Core.merge(channels,hsvImage);			
-		 Core.inRange(hsvImage, minValues, maxValues, output);
+		Imgproc.adaptiveThreshold(channels.get(2), channels.get(2), 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,
+				Imgproc.THRESH_BINARY, 9, 4);
+		Core.merge(channels, hsvImage);
+		Core.inRange(hsvImage, minValues, maxValues, output);
 
-		 // morphological operators
+		// morphological operators
 		// dilate with large element, erode with small ones
-		 Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
-		 Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
+		Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
+		Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
 
-		 Imgproc.erode(output, morphOutput, erodeElement);
-		 Imgproc.erode(output, morphOutput, erodeElement);
+		Imgproc.erode(output, morphOutput, erodeElement);
+		Imgproc.erode(output, morphOutput, erodeElement);
 
-		 Imgproc.dilate(output, morphOutput, dilateElement);
-		 Imgproc.dilate(output, morphOutput, dilateElement);
+		Imgproc.dilate(output, morphOutput, dilateElement);
+		Imgproc.dilate(output, morphOutput, dilateElement);
 
+		if (c) {
+			this.output = morphOutput;
 
-		 if(c) {
-		this.output = morphOutput; 
-			 
-		 }else {
-		this.output1 = morphOutput;
-		 }
-	 
+		} else {
+			this.output1 = morphOutput;
+		}
+
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
