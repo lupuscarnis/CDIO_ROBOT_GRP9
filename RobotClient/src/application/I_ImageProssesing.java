@@ -17,7 +17,8 @@ public interface I_ImageProssesing {
 
 	Mat findCorners(Mat frame, org.opencv.core.Point center, int threshold);
 
-	Point findColor(Mat frame, Scalar minValues, Scalar maxValues);
+
+	
 
 	HashMap<Double, Point> convertPointsToVectorsDistancesFromCenter(List<Point> pointList, Point center);
 
@@ -26,6 +27,8 @@ public interface I_ImageProssesing {
 	Mat getOutput1();
 
 	void setOutput1(Mat output);
+
+	Point findColor(Mat frame, Scalar minValues, Scalar maxValues, boolean c);
 	
 
 }

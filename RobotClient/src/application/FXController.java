@@ -181,7 +181,7 @@ public class FXController {
 	// For access to all the points (balls) found
 	public List<Point> p = new ArrayList<>();
 	private Mat circlesGUI = new Mat();
-
+	List<Point> balls = new ArrayList<Point>();
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
@@ -213,7 +213,7 @@ public class FXController {
 	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 0;
+	private int webcamID = 1;
 
 	// Debug image file
 	// private String debugImg = "Debugging/pic01.jpg";
@@ -384,12 +384,11 @@ public class FXController {
 			// slider values
 			
 			  List<Scalar> values = new ArrayList<Scalar>(); values = getRobotValues();
-			//  updateImageView(robotImage, Utils.mat2Image(); 
-			  // Utils.mat2Image(ip.getOutput1()));
 			  frame = ip.findBackAndFront(frame, values, robot);
-			
+			  updateImageView(robotImage, Utils.mat2Image(ip.getOutput1()));
+			  updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
+			  
 
-			// updateImageView(robotImage, Utils.mat2Image(graph.updateGraph(frame)));
 
 			frame = updateGUILast(frame);
 
@@ -454,6 +453,7 @@ public class FXController {
 	 */
 	private Mat findBallsHSV(Mat frame, boolean robot) {
 
+		
 		
 		
 		balls.clear();
@@ -1107,14 +1107,14 @@ public class FXController {
 		double valFront = ((V_FRONT.getValue() / 100) * 255);
 		double valBack = ((V_BACK.getValue() / 100) * 255);
 
-		Scalar minValuesf = new Scalar((hueFront - threshold), (satFront - threshold), (valFront - threshold));
+		Scalar minValuesf = new Scalar((hueFront - 10), (satFront - threshold), (valFront - threshold));
 		values.add(minValuesf);
-		Scalar maxValuesf = new Scalar((hueFront + threshold), (satFront + threshold), (valFront + threshold));
+		Scalar maxValuesf = new Scalar((hueFront + 10), (satFront + threshold), (valFront + threshold));
 		values.add(maxValuesf);
 
-		Scalar minValuesb = new Scalar((hueBack - threshold), (satBack - threshold), (valBack - threshold));
+		Scalar minValuesb = new Scalar((hueBack - 10), (satBack - threshold), (valBack - threshold));
 		values.add(minValuesb);
-		Scalar maxValuesb = new Scalar((hueBack + threshold), (satBack + threshold), (valBack + threshold));
+		Scalar maxValuesb = new Scalar((hueBack + 10), (satBack + threshold), (valBack + threshold));
 		values.add(maxValuesb);
 		/*
 		 * String valuesToPrint = "Hue range Front: " + df.format(minValuesf.val[0]) +

@@ -52,9 +52,9 @@ public class ImageProssesing implements I_ImageProssesing {
 	@Override
 	public Mat findBackAndFront(Mat frame, List<Scalar> values, boolean robot) {
 
-
-		Point back = findColor(frame, values.get(2), values.get(3));
-		Point front = findColor(frame, values.get(0), values.get(1));
+		Point front = findColor(frame, values.get(0), values.get(1), false);
+		Point back = findColor(frame, values.get(2), values.get(3) , true);
+		
 
 		if (robot) {
 
@@ -196,7 +196,7 @@ public class ImageProssesing implements I_ImageProssesing {
 	 * org.opencv.core.Scalar, org.opencv.core.Scalar)
 	 */
 	@Override
-	public Point findColor(Mat frame, Scalar minValues, Scalar maxValues ) {
+	public Point findColor(Mat frame, Scalar minValues, Scalar maxValues, boolean c ) {
 
 		Mat hsvImage = new Mat();
 		Mat blur = new Mat();
@@ -205,6 +205,8 @@ public class ImageProssesing implements I_ImageProssesing {
 		Mat filtered = new Mat();
 		Mat grayscale = new Mat();
 		Mat hist  = new Mat();
+		Mat mask = new Mat();
+		Mat morphOutput = new Mat();
 		List<Mat> channels = new ArrayList<Mat>();
 	
 		Imgproc.GaussianBlur(frame, blur, new Size(25, 25), 0);
@@ -212,30 +214,46 @@ public class ImageProssesing implements I_ImageProssesing {
 		
 		Core.split(hsvImage, channels);
 
-		
-		
 		/*
 		Imgproc.adaptiveThreshold(channels.get(1), adapted, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
 
 		Imgproc.adaptiveThreshold(channels.get(2), filtered, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
 		*/	
-		
-		
-		
-		Imgproc.adaptiveThreshold(channels.get(2), channels.get(2), 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY, 9, 4);
-			Core.merge(channels,hsvImage);
-		 
+		Imgproc.threshold(channels.get(2), mask,40,256, Imgproc.THRESH_TOZERO);
+		 if(c) {
+				this.output = channels.get(2); 
+					 
+				 }else{
+				this.output1 = channels.get(2);
+				 }
+		//Imgproc.adaptiveThreshold(channels.get(2), channels.get(2), 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY, 9, 4);
+		Core.merge(channels,hsvImage);			
 		 Core.inRange(hsvImage, minValues, maxValues, output);
-		
-		 
-		 
-		this.output = output;	
 
+		 // morphological operators
+		// dilate with large element, erode with small ones
+		 Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
+		 Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
+
+		 Imgproc.erode(output, morphOutput, erodeElement);
+		 Imgproc.erode(output, morphOutput, erodeElement);
+
+		 Imgproc.dilate(output, morphOutput, dilateElement);
+		 Imgproc.dilate(output, morphOutput, dilateElement);
+
+/*
+		 if(c) {
+		this.output = morphOutput; 
+			 
+		 }else {
+		this.output1 = morphOutput;
+		 }
+	*/	 
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
 		// find contours
-		Imgproc.findContours(output, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(morphOutput, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 
 		List<org.opencv.core.Point> point = new ArrayList<>();
 
