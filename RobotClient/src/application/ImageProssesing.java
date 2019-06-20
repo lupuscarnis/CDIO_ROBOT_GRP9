@@ -219,14 +219,8 @@ public class ImageProssesing implements I_ImageProssesing {
 
 		Imgproc.adaptiveThreshold(channels.get(2), filtered, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
 		*/	
-		Imgproc.threshold(channels.get(2), mask,40,256, Imgproc.THRESH_TOZERO);
-		 if(c) {
-				this.output = channels.get(2); 
-					 
-				 }else{
-				this.output1 = channels.get(2);
-				 }
-		//Imgproc.adaptiveThreshold(channels.get(2), channels.get(2), 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY, 9, 4);
+	
+		Imgproc.adaptiveThreshold(channels.get(2), channels.get(2), 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY, 9, 4);
 		Core.merge(channels,hsvImage);			
 		 Core.inRange(hsvImage, minValues, maxValues, output);
 
@@ -241,14 +235,14 @@ public class ImageProssesing implements I_ImageProssesing {
 		 Imgproc.dilate(output, morphOutput, dilateElement);
 		 Imgproc.dilate(output, morphOutput, dilateElement);
 
-/*
+
 		 if(c) {
 		this.output = morphOutput; 
 			 
 		 }else {
 		this.output1 = morphOutput;
 		 }
-	*/	 
+	 
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
