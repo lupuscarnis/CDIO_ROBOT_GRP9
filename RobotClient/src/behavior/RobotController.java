@@ -457,11 +457,11 @@ if((newCoordinate==robotCenter)) {
 	float distance = (float) ((getDistance(cs.robot.get(0), thePath.get(0))) );
 	System.out.println("Im driving, im doing it " + distance);
 	
-	send(distance-0.1,0,0,0);	
+	send(distance-0.2,0,0,0);	
 	
 	send(0,0,180,0);
 	
-	send(0.2,0,0,0);
+	send(0.3,0,0,0);
 	
 	send(0,0,-180,0);
 			 

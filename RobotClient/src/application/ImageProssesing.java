@@ -250,7 +250,7 @@ public class ImageProssesing implements I_ImageProssesing {
 
 			if (maxAreaIdx >= 0) {
 
-				System.out.println("centroid");
+				//System.out.println("centroid");
 				
 				MatOfPoint largestContour = contours.get(maxAreaIdx);
 
@@ -261,7 +261,7 @@ public class ImageProssesing implements I_ImageProssesing {
 				
 				Imgproc.circle(frame, centroid, 5, new Scalar(0, 255, 0));
 
-				System.out.println(centroid);
+				//System.out.println(centroid);
 				
 			}
 
