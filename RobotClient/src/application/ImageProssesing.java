@@ -11,6 +11,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -51,9 +52,9 @@ public class ImageProssesing implements I_ImageProssesing {
 	@Override
 	public Mat findBackAndFront(Mat frame, List<Scalar> values, boolean robot) {
 
-		Point front = findColor(frame, values.get(0), values.get(1));
 
 		Point back = findColor(frame, values.get(2), values.get(3));
+		Point front = findColor(frame, values.get(0), values.get(1));
 
 		if (robot) {
 
@@ -195,26 +196,40 @@ public class ImageProssesing implements I_ImageProssesing {
 	 * org.opencv.core.Scalar, org.opencv.core.Scalar)
 	 */
 	@Override
-	public Point findColor(Mat frame, Scalar minValues, Scalar maxValues) {
+	public Point findColor(Mat frame, Scalar minValues, Scalar maxValues ) {
 
 		Mat hsvImage = new Mat();
+		Mat blur = new Mat();
 		Mat output = new Mat();
 		Mat adapted = new Mat();
 		Mat filtered = new Mat();
-		int histSize = 256;
-		float[] range = { 0, 256 }; // the upper boundary is exclusive
-		boolean accumulate = false;
-		Mat vHist = new Mat(), hHist = new Mat(), sHist = new Mat();
-		MatOfFloat histRange = new MatOfFloat(range);
+		Mat grayscale = new Mat();
+		Mat hist  = new Mat();
 		List<Mat> channels = new ArrayList<Mat>();
+	
+		Imgproc.GaussianBlur(frame, blur, new Size(25, 25), 0);
+		Imgproc.cvtColor(blur, hsvImage, Imgproc.COLOR_BGR2HSV);
+		
+		Core.split(hsvImage, channels);
 
-		Imgproc.cvtColor(frame, hsvImage, Imgproc.COLOR_BGR2HSV);
+		
+		
+		/*
+		Imgproc.adaptiveThreshold(channels.get(1), adapted, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
 
-		// Imgproc.adaptiveThreshold(hsvImage, adapted, 125,
-		// Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY, 11, 12);
-		Core.inRange(hsvImage, minValues, maxValues, output);
-
-		this.output = adapted;
+		Imgproc.adaptiveThreshold(channels.get(2), filtered, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
+		*/	
+		
+		
+		
+		Imgproc.adaptiveThreshold(channels.get(2), channels.get(2), 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY, 9, 4);
+			Core.merge(channels,hsvImage);
+		 
+		 Core.inRange(hsvImage, minValues, maxValues, output);
+		
+		 
+		 
+		this.output = output;	
 
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
