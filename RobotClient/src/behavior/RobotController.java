@@ -188,38 +188,31 @@ public class RobotController implements Runnable {
 		double goalY = (frameWidth / 2);
 		//only want like 10 in front of goal, but the border = 30
 		double goalX = 40;
-		Coordinate frontOfGoal = new Coordinate(goalX, goalY);
+		Coordinate frontOfGoal = new Coordinate(goalX-0.3, goalY);
 		// calculating direction to drive in front of goal
 		System.out.println("front of goal is at   x "+goalX+" y "+goalY);
 		double dir = calcDirection(cs.robot.get(0),cs.robot.get(1),frontOfGoal);
 		
+		send(0,dir,0,0);
+		getView();
 		// distance to in front of goal
 		double distance = getDistance(cs.robot.get(0), frontOfGoal);
 		// pixels get converted to cm
-		distance = distance ;
+		send(distance,0,0,0);
 
 		// System.out.println("vi sender "+dir+"distance"+distance+"for at komme foran
 		// maal");
-		// send message to drive in front of goal
-		getView();
-		dto.clearData();
-		dto.setRotation((float) dir);
-		dto.setDistance((float) distance);
-
-		dao.sendData(dto);
-
-		dao.reciveData();
-
+		
 		// find direction to point towards goal
 		getView();
 		
 		Coordinate goal = new Coordinate(0, cs.getYLength() / 2);
 		
 		 dir = calcDirection(cs.robot.get(0),cs.robot.get(1),goal);
-		
+		send(0,dir,0,0);
 		// distance to in front of goal
 		 distance = getDistance(cs.robot.get(0), goal);
-		
+		send(distance,0,180,0);
 		
 		System.out.println(goal.getX() + " goal tal " + goal.getY());
 		// dir = getDirection(goal);
@@ -227,11 +220,12 @@ public class RobotController implements Runnable {
 		System.out.println("vi sender " + dir + "distance for at komme parallelt med maalet");
 
 		// send message to drive close to goal and release balls
-		send(distance,dir,0,0);
+		
 		// can't remember which direction is which, but both need to turn the same
 		// direction
-		send(0,0,360,120);
+		send(0,0,180,120);
 		send(0,0,0,-120);
+		send(-0.2,0,0,0);
 		
 	}
 
@@ -240,68 +234,18 @@ public class RobotController implements Runnable {
 		boolean firsttime = true;
 		double dir = 10;
 		int nrBalls =0;
-		
-		
-
-			
-			
-			do {
+		do {
+			getView();
+			path = findRoute();
+			if(getDistance(cs.robot.get(0),path.get(0))>0.2) {
 				
-
-				getView();
-				path = findRoute();
-				//if ball is near wall, do something different
-				int isBallAtWall = isBallAtWall(path.get(0));
-				System.out.println("is the ball at the wall ? "+isBallAtWall);
-
 				isFar(path);
-
-				//hopefully works... otherwise easy to just not attempt to get the balls near border
-				/*if(0<isBallAtWall) {
-					System.out.println("du kommer til at se mig meget");
-					handleBallsToTheWall(isBallAtWall,cs.robot.get(0),cs.robot.get(1),path.get(0));
-					firsttime = false;
-					dir =0;
-				}else */{
-					
-					//all this should get replaced with moveToPoint, to get the obstacle detection it offers.
-				dir = getDir(path);
-				System.out.println("dir:" + dir);
-				System.out.println("Iter: " + iter);
-				iter++;
-				System.out.println("Robotten er i " + cs.robot.get(0).getX() + " " + cs.robot.get(0).getY()
-						+ " og back " + cs.robot.get(1).getX() + " " + cs.robot.get(1).getY());
-				dto.clearData();
-				dto.setRotation((float) dir);
-				dao.sendData(dto);
-
+				
 			}else {
 				
 				isClose(path);
 				nrBalls++;
-
 			}
-
-
-			
-			
-
-			// addcheck for obstacle and if new course
-			float distance = (float) ((getDistance(cs.robot.get(0), path.get(0))) );
-			System.out.println("Im driving, im doing it " + distance);
-			//all this should get replaced with moveToPoint, to get the obstacle detection it offers.
-			dto.clearData();
-			dto.setDistance((float)(distance-0.05));
-			dto.setClawMove(180);
-			dao.sendData(dto);
-			dao.reciveData();	
-			
-			dto.clearData();
-			dto.setDistance((float)0.15);
-			dto.setClawMove(-180);
-			dao.sendData(dto);
-			dao.reciveData();	
->>>>>>> branch '4._Iteration' of https://github.com/lupuscarnis/CDIO_ROBOT_GRP9.git
 			
 		} while(true);
 
@@ -324,6 +268,7 @@ public class RobotController implements Runnable {
 		double Y = (cs.robot.get(0).getY() + cs.robot.get(1).getY()) / 2;
 		Coordinate robotCenter = new Coordinate(X, Y);
 		System.out.println("Robot center: " + robotCenter.getX() + " " + robotCenter.getY());
+		System.out.println();
 		System.out.println();
 		// pixels get converted to cm
 
@@ -469,10 +414,11 @@ if((newCoordinate==robotCenter)) {
 		while (!cs.balls.isEmpty()) {
 
 			for (int i = 0; i < cs.balls.size(); i++) {
-
-				if (getDistance(cs.balls.get(i), robotCenter) < min) {
-					min = getDistance(cs.balls.get(i), robotCenter);
+					//used to be getDistance instead of calcDIrection
+				if (getDistance(cs.balls.get(i),robotCenter) < min) {
+					min = getDistance(cs.balls.get(i),robotCenter); //calcDirection(robotFront, robotCenter,cs.balls.get(i));
 					closest = cs.balls.get(i);
+					System.out.println("bolden er "+cs.balls.get(i).getX()+" y "+cs.balls.get(i).getY());
 					closestid = i;
 				}
 
@@ -490,7 +436,9 @@ if((newCoordinate==robotCenter)) {
 	public double getDistance(Coordinate a, Coordinate b) {
 		double X = a.getX() - b.getX();
 		double Y = a.getY() - b.getY();
-		return (Math.sqrt(X * X + Y * Y))/2;
+		return (Math.sqrt(X * X + Y * Y))/ratio;
+		
+		
 
 	}
 	
