@@ -2,7 +2,9 @@
 package application;
 
 import java.io.IOException;
+import java.nio.channels.Channel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -208,41 +210,41 @@ public class ImageProssesing implements I_ImageProssesing {
 		Mat mask = new Mat();
 		Mat morphOutput = new Mat();
 		List<Mat> channels = new ArrayList<Mat>();
+	      
+		MatOfFloat ranges = new MatOfFloat(0f, 256f);
+		 MatOfInt histSize = new MatOfInt(25);
 	
+		 
 		Imgproc.GaussianBlur(frame, blur, new Size(25, 25), 0);
-		Imgproc.cvtColor(blur, hsvImage, Imgproc.COLOR_BGR2HSV);
-		
-		Core.split(hsvImage, channels);
-
+		Imgproc.cvtColor(blur, hsvImage, Imgproc.COLOR_BGR2HSV);		
+		hsvImage.copyTo(mask);
+		Core.split(hsvImage, channels);	
+		channels.get(2).copyTo(grayscale);;
+		Imgproc.equalizeHist(grayscale,channels.get(2));
 		/*
-		Imgproc.adaptiveThreshold(channels.get(1), adapted, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
-
-		Imgproc.adaptiveThreshold(channels.get(2), filtered, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV, 11, 2);
-		*/	
-	
-		Imgproc.adaptiveThreshold(channels.get(2), channels.get(2), 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY, 9, 4);
-		Core.merge(channels,hsvImage);			
-		 Core.inRange(hsvImage, minValues, maxValues, output);
-
-		 // morphological operators
+		Imgproc.threshold(channels.get(1),channels.get(1),51, 255, Imgproc.THRESH_TOZERO);
+		Imgproc.threshold(channels.get(2),channels.get(2),51, 255, Imgproc.THRESH_TOZERO);
+		*/
+		
+		Core.merge(channels,filtered);			
+		Core.inRange(filtered, minValues, maxValues, output);
+		 // morphological operators	
 		// dilate with large element, erode with small ones
-		 Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
-		 Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
+		 Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
+		 Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(6, 6));
 
 		 Imgproc.erode(output, morphOutput, erodeElement);
 		 Imgproc.erode(output, morphOutput, erodeElement);
 
 		 Imgproc.dilate(output, morphOutput, dilateElement);
 		 Imgproc.dilate(output, morphOutput, dilateElement);
-
-
 		 if(c) {
-		this.output = morphOutput; 
-			 
-		 }else {
-		this.output1 = morphOutput;
+		 this.output = morphOutput;
+		 }else{
+			 this.output1 =  morphOutput;			 
 		 }
-	 
+			
+	
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
