@@ -179,7 +179,8 @@ public class FXController {
 	private boolean runningAnalysis = false;
 
 	// For access to all the points (balls) found
-	public List<Point> balls = new ArrayList<>();
+	public List<Point> p = new ArrayList<>();
+	private Mat circlesGUI = new Mat();
 
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
@@ -212,7 +213,7 @@ public class FXController {
 	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Debug image file
 	// private String debugImg = "Debugging/pic01.jpg";
@@ -334,13 +335,11 @@ public class FXController {
 	public void runAnalysis(boolean robot) {
 		if (runningAnalysis) {
 
-			System.out.println("Image Analysis in progress");
+			
 
 		} else {
 
 			runningAnalysis = true;
-
-			System.out.println("Running Image Analysis...");
 
 			Mat frame = new Mat();
 			Mat cleanFrame = new Mat();
@@ -703,9 +702,10 @@ public class FXController {
 			this.updateImageView(this.pfImage, Utils.mat2Image(frame));
 
 			// save frame size for use in robotController
+			// lul robotController wants the size of the wooden frame :D bad choice of name for FrameSize
 			FrameSize fSize = FrameSize.getInstance();
-			fSize.setX(frame.width());
-			fSize.setY(frame.height());
+			//fSize.setX(frame.width());
+			//fSize.setY(frame.height());
 
 			// Check if frame needs to be rotated before displaying it in GUI
 			result = checkRotation(result);
@@ -811,6 +811,7 @@ public class FXController {
 
 				// STEP 8: Generate the convex hull of this contour
 				Mat convexHullMask = Mat.zeros(frame.rows(), frame.cols(), frame.type());
+				
 				MatOfInt hullInt = new MatOfInt();
 				Imgproc.convexHull(largestContour, hullInt);
 				MatOfPoint hullPoint = OpenCVUtil.getNewContourFromIndices(largestContour, hullInt);
@@ -822,7 +823,6 @@ public class FXController {
 				List<MatOfPoint> tmp = new ArrayList<>();
 				tmp.add(OpenCVUtil.convert(polygon));
 				// restoreScaleMatOfPoint(tmp, 0.9);
-
 				Imgproc.drawContours(convexHullMask, tmp, 0, new Scalar(25, 25, 255), 2);
 
 				// show the partial output
@@ -851,7 +851,7 @@ public class FXController {
 							new Point(0, 0), new Point(result.cols(), 0) };
 					dstPoints.fromArray(arrDstPoints);
 					homography = Calib3d.findHomography(maxCurve, dstPoints);
-
+					//System.out.println("banens raekker "+result.rows()+" kolonner  "+result.cols());
 					// Warp the input image using the computed homography matrix
 					Imgproc.warpPerspective(frame, result, homography, size);
 
@@ -879,9 +879,9 @@ public class FXController {
 
 					// save frame size for use in robotController
 					FrameSize fSize = FrameSize.getInstance();
-					fSize.setX(frame.width());
-					fSize.setY(frame.height());
-
+					fSize.setX(result.cols());
+					fSize.setY(result.rows());
+					
 					// Check if frame needs to be rotated before displaying it in GUI
 					result = checkRotation(result);
 
