@@ -3,7 +3,7 @@ package objects;
 public class Robot {
 	private static Robot robot;
 	private double pixelToCM;
-	boolean stopRobot = false;
+	boolean stopRobot = true;
 	public boolean isStopRobot() {
 		return stopRobot;
 	}

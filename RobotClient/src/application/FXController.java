@@ -204,7 +204,7 @@ public class FXController {
 	private boolean isWebcamDebugMode = true;
 
 	// Use alternative (manual) mode for detecting the playing field?
-	boolean UseAltPFDetection = false;
+	boolean UseAltPFDetection = true;
 
 	// Use HSV or Hough for image analysis (balls)?
 	boolean UseHSVDetection = true;
@@ -213,7 +213,7 @@ public class FXController {
 	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 1;
+	private int webcamID = 0;
 
 	// Debug image file
 	// private String debugImg = "Debugging/pic01.jpg";

@@ -1,7 +1,15 @@
 package application;
 
 public class Coordinate {
-	
+	boolean isAtWall = false;
+	public boolean isAtWall() {
+		return isAtWall;
+	}
+
+	public void setAtWall(boolean isAtWall) {
+		this.isAtWall = isAtWall;
+	}
+
 	double x,y;
 	enum type{	BALL, ROBOT, FENCE, GOAL, X	};
 

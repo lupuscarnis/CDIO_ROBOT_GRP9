@@ -20,7 +20,7 @@ import objects.Robot;
 		  
 		  
 	    public void run() {
-	      Robot.getInstance().setStopRobot(true);
+	      Robot.getInstance().setStopRobot(false);
 	      timer.cancel(); //Terminate the timer thread
 	    
 	    }
