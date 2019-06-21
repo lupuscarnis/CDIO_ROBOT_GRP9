@@ -46,6 +46,6 @@ public class Size_scale implements I_Size_Scale {
 		}
 		this.Ratio = (double)pixellengths/7;
 		Robot.getInstance().setPixelToCM(Ratio);
-		//System.out.println("Pixels for 1cm: "+Ratio);
+		System.out.println("Pixels for 1cm: "+Ratio);
 	}
 }

@@ -199,9 +199,9 @@ public class FXController {
 	 * 
 	 */
 
-	private boolean isStaticDebugMode =false;
+	private boolean isStaticDebugMode = true;
 	private boolean isVideoDebugMode = false;
-	private boolean isWebcamDebugMode = true;
+	private boolean isWebcamDebugMode = false;
 
 	// Use alternative (manual) mode for detecting the playing field?
 	boolean UseAltPFDetection = false;
@@ -218,7 +218,7 @@ public class FXController {
 	// Debug image file
 	// private String debugImg = "Debugging/pic01.jpg";
 	private String debugImg = "Debugging/Robo_w_Balls.png";
-	//private String debugVid = "Debugging/superVideo.mp4";
+	// private String debugVid = "Debugging/superVideo.mp4";
 	// Empty image file
 	private String defaultImg = "Debugging/Default.jpg";
 
@@ -247,15 +247,17 @@ public class FXController {
 		if (!this.cameraActive) {
 			// start the video capture
 
-			/*if (isVideoDebugMode) {
+			/*
+			 * if (isVideoDebugMode) {
+			 * 
+			 * this.capture.open(debugVid);
+			 * 
+			 * } else {
+			 */
 
-				this.capture.open(debugVid);
+			this.capture.open(webcamID);
 
-			} else {*/
-
-				this.capture.open(webcamID);
-
-			/*}*/
+			/* } */
 
 			if (this.capture.isOpened()) {
 
@@ -335,8 +337,6 @@ public class FXController {
 	public void runAnalysis(boolean robot) {
 		if (runningAnalysis) {
 
-			
-
 		} else {
 
 			runningAnalysis = true;
@@ -376,19 +376,18 @@ public class FXController {
 					((V_CORNER.getValue() / 100) * 255 - 10));
 			Scalar maxValuesc = new Scalar(((H_CORNER.getValue() / 2) + 10), ((S_CORNER.getValue() / 100) * 255 + 10),
 					((V_CORNER.getValue() / 100) * 255 + 10));
-
-			 //Point p = ip.findColor(frame, minValuesc, maxValuesc,true);
-			// ip.findCorners(frame, p, (int) C_THRESHOLD.getValue());
-
+			/*
+			  Point point = ip.findColor(frame, minValuesc, maxValuesc,true);
+			  updateImageView(cornerImage, Utils.mat2Image( ip.findCorners(frame, point,
+			  (int) C_THRESHOLD.getValue())));
+			 */
 			// finds the front and back of the robot
 			// slider values
-			
-			  List<Scalar> values = new ArrayList<Scalar>(); values = getRobotValues();
-			  frame = ip.findBackAndFront(frame, values, robot);
-			  updateImageView(robotImage, Utils.mat2Image(ip.getOutput1()));
-			  updateImageView(cornerImage, Utils.mat2Image(ip.getOutput()));
-			  
 
+			List<Scalar> values = new ArrayList<Scalar>();
+			values = getRobotValues();
+			frame = ip.findBackAndFront(frame, values, robot);
+			updateImageView(robotImage, Utils.mat2Image(ip.getOutput1()));
 
 			frame = updateGUILast(frame);
 
@@ -399,8 +398,6 @@ public class FXController {
 
 			Image imageToShow = Utils.mat2Image(out);
 			updateImageView(videoFrame, imageToShow);
-
-			
 
 			runningAnalysis = false;
 
@@ -453,9 +450,6 @@ public class FXController {
 	 */
 	private Mat findBallsHSV(Mat frame, boolean robot) {
 
-		
-		
-		
 		balls.clear();
 
 		// if the frame is not empty, process it
@@ -519,7 +513,7 @@ public class FXController {
 				s.add(new Ball(B.x, B.y));
 
 				for (int i = 0; i < balls.size(); i++) {
-					//System.out.println("Point (X,Y): " + balls.get(i));
+					// System.out.println("Point (X,Y): " + balls.get(i));
 
 				}
 
@@ -542,7 +536,7 @@ public class FXController {
 	private Mat findBallsHough(Mat frame, boolean robot) {
 
 		System.out.println("Using Hough Ball detection");
-		
+
 		balls.clear();
 
 		// if the frame is not empty, process it
@@ -604,7 +598,7 @@ public class FXController {
 				}
 
 				for (int i = 0; i < balls.size(); i++) {
-					//System.out.println("Point (X,Y): " + balls.get(i));
+					// System.out.println("Point (X,Y): " + balls.get(i));
 
 				}
 
@@ -702,10 +696,11 @@ public class FXController {
 			this.updateImageView(this.pfImage, Utils.mat2Image(frame));
 
 			// save frame size for use in robotController
-			// lul robotController wants the size of the wooden frame :D bad choice of name for FrameSize
+			// lul robotController wants the size of the wooden frame :D bad choice of name
+			// for FrameSize
 			FrameSize fSize = FrameSize.getInstance();
-			//fSize.setX(frame.width());
-			//fSize.setY(frame.height());
+			// fSize.setX(frame.width());
+			// fSize.setY(frame.height());
 
 			// Check if frame needs to be rotated before displaying it in GUI
 			result = checkRotation(result);
@@ -811,7 +806,7 @@ public class FXController {
 
 				// STEP 8: Generate the convex hull of this contour
 				Mat convexHullMask = Mat.zeros(frame.rows(), frame.cols(), frame.type());
-				
+
 				MatOfInt hullInt = new MatOfInt();
 				Imgproc.convexHull(largestContour, hullInt);
 				MatOfPoint hullPoint = OpenCVUtil.getNewContourFromIndices(largestContour, hullInt);
@@ -851,7 +846,8 @@ public class FXController {
 							new Point(0, 0), new Point(result.cols(), 0) };
 					dstPoints.fromArray(arrDstPoints);
 					homography = Calib3d.findHomography(maxCurve, dstPoints);
-					//System.out.println("banens raekker "+result.rows()+" kolonner  "+result.cols());
+					// System.out.println("banens raekker "+result.rows()+" kolonner
+					// "+result.cols());
 					// Warp the input image using the computed homography matrix
 					Imgproc.warpPerspective(frame, result, homography, size);
 
@@ -881,7 +877,7 @@ public class FXController {
 					FrameSize fSize = FrameSize.getInstance();
 					fSize.setX(result.cols());
 					fSize.setY(result.rows());
-					
+
 					// Check if frame needs to be rotated before displaying it in GUI
 					result = checkRotation(result);
 
@@ -1034,10 +1030,8 @@ public class FXController {
 	 * Set typical {@link ImageView} properties: a fixed width and the information
 	 * to preserve the original image ration
 	 * 
-	 * @param image
-	 *            the {@link ImageView} to use
-	 * @param dimension
-	 *            the width of the image to set
+	 * @param image     the {@link ImageView} to use
+	 * @param dimension the width of the image to set
 	 */
 	private void imageViewProperties(ImageView image, int dimension) {
 		// set a fixed width for the given ImageView
@@ -1070,10 +1064,8 @@ public class FXController {
 	/**
 	 * Update the {@link ImageView} in the JavaFX main thread
 	 * 
-	 * @param view
-	 *            the {@link ImageView} to update
-	 * @param image
-	 *            the {@link Image} to show
+	 * @param view  the {@link ImageView} to update
+	 * @param image the {@link Image} to show
 	 */
 	private void updateImageView(ImageView view, Image image) {
 		Utils.onFXThread(view.imageProperty(), image);

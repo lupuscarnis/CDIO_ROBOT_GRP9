@@ -55,9 +55,11 @@ public class ImageProssesing implements I_ImageProssesing {
 	@Override
 	public Mat findBackAndFront(Mat frame, List<Scalar> values, boolean robot) {
 
-		/*Point front = findColor(frame, values.get(0), values.get(1), false);
-		Point back = findColor(frame, values.get(2), values.get(3) , true);*/
-		
+		/*
+		 * Point front = findColor(frame, values.get(0), values.get(1), false); Point
+		 * back = findColor(frame, values.get(2), values.get(3) , true);
+		 */
+
 		Point front = findColorBG(frame, true);
 		Point back = findColorBG(frame, false);
 
@@ -138,7 +140,7 @@ public class ImageProssesing implements I_ImageProssesing {
 		HashMap<Double, Point> lengths = new HashMap<Double, Point>();
 
 		dst = Mat.zeros(srcGray.size(), CvType.CV_32F);
-		int blockSize = 2;
+		int blockSize = 4;
 		int iter = 0;
 		int apertureSize = 3;
 		double k = 0.04;
@@ -160,10 +162,8 @@ public class ImageProssesing implements I_ImageProssesing {
 					cornors.add(new Point(j, i));
 					Imgproc.circle(dstNormScaled, new Point(j, i), 2, new Scalar(255, 255, 255));
 					iter++;
-					if (iter > 200) {
-						break;
-					}
 				}
+
 			}
 		}
 
@@ -190,10 +190,9 @@ public class ImageProssesing implements I_ImageProssesing {
 			}
 
 		}
-		
+
 		return dstNormScaled;
 	}
-
 
 	public Point findColorBG(Mat frame, boolean front) {
 
@@ -215,11 +214,9 @@ public class ImageProssesing implements I_ImageProssesing {
 		}
 		Imgproc.blur(output, output, new Size(7, 7));
 		// dilate to remove some black gaps within balls
-		Imgproc.dilate(output, output,
-				Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5)));
-		Imgproc.threshold(output, thresh, 200, 255,Imgproc.THRESH_BINARY);
-		
-		
+		Imgproc.dilate(output, output, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5)));
+		Imgproc.threshold(output, thresh, 200, 255, Imgproc.THRESH_BINARY);
+
 		if (front) { // (blue)
 
 			this.output = thresh;
@@ -229,14 +226,15 @@ public class ImageProssesing implements I_ImageProssesing {
 			this.output1 = thresh;
 
 		}
-		
-		//output = Imgproc.adaptiveThreshold(output, output, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, I.THRESH_BINARY, 15, 40);
+
+		// output = Imgproc.adaptiveThreshold(output, output, 255,
+		// Imgproc.ADAPTIVE_THRESH_MEAN_C, I.THRESH_BINARY, 15, 40);
 
 		List<MatOfPoint> contours = new ArrayList<>();
 		Imgproc.findContours(thresh, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
 		if (contours.size() > 0) {
-			
+
 			double maxArea = 0;
 			int maxAreaIdx = 0;
 
@@ -250,19 +248,19 @@ public class ImageProssesing implements I_ImageProssesing {
 
 			if (maxAreaIdx >= 0) {
 
-				//System.out.println("centroid");
-				
+				// System.out.println("centroid");
+
 				MatOfPoint largestContour = contours.get(maxAreaIdx);
 
 				Moments moments = Imgproc.moments(largestContour);
 
 				centroid.x = moments.get_m10() / moments.get_m00();
 				centroid.y = moments.get_m01() / moments.get_m00();
-				
+
 				Imgproc.circle(frame, centroid, 5, new Scalar(0, 255, 0));
 
-				//System.out.println(centroid);
-				
+				// System.out.println(centroid);
+
 			}
 
 		}
@@ -270,7 +268,6 @@ public class ImageProssesing implements I_ImageProssesing {
 		return centroid;
 	}
 
-	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -278,7 +275,7 @@ public class ImageProssesing implements I_ImageProssesing {
 	 * org.opencv.core.Scalar, org.opencv.core.Scalar)
 	 */
 	@Override
-	public Point findColor(Mat frame, Scalar minValues, Scalar maxValues, boolean c ) {
+	public Point findColor(Mat frame, Scalar minValues, Scalar maxValues, boolean c) {
 
 		Mat hsvImage = new Mat();
 		Mat blur = new Mat();
@@ -286,45 +283,45 @@ public class ImageProssesing implements I_ImageProssesing {
 		Mat adapted = new Mat();
 		Mat filtered = new Mat();
 		Mat grayscale = new Mat();
-		Mat hist  = new Mat();
+		Mat hist = new Mat();
 		Mat mask = new Mat();
 		Mat morphOutput = new Mat();
 		List<Mat> channels = new ArrayList<Mat>();
-	      
+
 		MatOfFloat ranges = new MatOfFloat(0f, 256f);
-		 MatOfInt histSize = new MatOfInt(25);
-	
-		 
+		MatOfInt histSize = new MatOfInt(25);
+
 		Imgproc.GaussianBlur(frame, blur, new Size(25, 25), 0);
-		Imgproc.cvtColor(blur, hsvImage, Imgproc.COLOR_BGR2HSV);		
+		Imgproc.cvtColor(blur, hsvImage, Imgproc.COLOR_BGR2HSV);
 		hsvImage.copyTo(mask);
-		Core.split(hsvImage, channels);	
-		channels.get(2).copyTo(grayscale);;
-		Imgproc.equalizeHist(grayscale,channels.get(2));
+		Core.split(hsvImage, channels);
+		channels.get(2).copyTo(grayscale);
+		;
+		Imgproc.equalizeHist(grayscale, channels.get(2));
 		/*
-		Imgproc.threshold(channels.get(1),channels.get(1),51, 255, Imgproc.THRESH_TOZERO);
-		Imgproc.threshold(channels.get(2),channels.get(2),51, 255, Imgproc.THRESH_TOZERO);
-		*/
-		
-		Core.merge(channels,filtered);			
+		 * Imgproc.threshold(channels.get(1),channels.get(1),51, 255,
+		 * Imgproc.THRESH_TOZERO); Imgproc.threshold(channels.get(2),channels.get(2),51,
+		 * 255, Imgproc.THRESH_TOZERO);
+		 */
+
+		Core.merge(channels, filtered);
 		Core.inRange(filtered, minValues, maxValues, output);
-		 // morphological operators	
+		// morphological operators
 		// dilate with large element, erode with small ones
-		 Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
-		 Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(6, 6));
+		Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
+		Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(6, 6));
 
-		 Imgproc.erode(output, morphOutput, erodeElement);
-		 Imgproc.erode(output, morphOutput, erodeElement);
+		Imgproc.erode(output, morphOutput, erodeElement);
+		Imgproc.erode(output, morphOutput, erodeElement);
 
-		 Imgproc.dilate(output, morphOutput, dilateElement);
-		 Imgproc.dilate(output, morphOutput, dilateElement);
-		 if(c) {
-		 this.output = morphOutput;
-		 }else{
-			 this.output1 =  morphOutput;			 
-		 }
-			
-	
+		Imgproc.dilate(output, morphOutput, dilateElement);
+		Imgproc.dilate(output, morphOutput, dilateElement);
+		if (c) {
+			this.output = morphOutput;
+		} else {
+			this.output1 = morphOutput;
+		}
+
 		// init
 		List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
@@ -332,7 +329,7 @@ public class ImageProssesing implements I_ImageProssesing {
 		Imgproc.findContours(morphOutput, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 
 		List<org.opencv.core.Point> point = new ArrayList<>();
-
+		if(contours.size() > 0) {
 		for (MatOfPoint s : contours) {
 			for (int i = 0; i < s.toList().size(); i++)
 				point.add(s.toList().get(i));
@@ -349,8 +346,10 @@ public class ImageProssesing implements I_ImageProssesing {
 
 		}
 		org.opencv.core.Point zonecenter = new org.opencv.core.Point((x / iter), (y / iter));
-
 		return zonecenter;
+		}
+		System.out.println("Couldn't Find a Point");
+		return new Point(0,0);
 
 	}
 
