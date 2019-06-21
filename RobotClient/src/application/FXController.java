@@ -199,9 +199,9 @@ public class FXController {
 	 * 
 	 */
 
-	private boolean isStaticDebugMode = true;
+	private boolean isStaticDebugMode = false;
 	private boolean isVideoDebugMode = false;
-	private boolean isWebcamDebugMode = false;
+	private boolean isWebcamDebugMode = true;
 
 	// Use alternative (manual) mode for detecting the playing field?
 	boolean UseAltPFDetection = false;
