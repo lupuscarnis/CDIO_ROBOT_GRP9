@@ -205,7 +205,7 @@ public class FXController {
 	private boolean isWebcamDebugMode = true;
 
 	// Use alternative (manual) mode for detecting the playing field?
-	boolean UseAltPFDetection = true;
+	boolean UseAltPFDetection = false;
 
 	// Use HSV or Hough for image analysis (balls)?
 	boolean UseHSVDetection = true;
@@ -700,14 +700,15 @@ public class FXController {
 			// lul robotController wants the size of the wooden frame :D bad choice of name
 			// for FrameSize
 			FrameSize fSize = FrameSize.getInstance();
-			// fSize.setX(frame.width());
-			// fSize.setY(frame.height());
+			 
 
 			// Check if frame needs to be rotated before displaying it in GUI
 			result = checkRotation(result);
+			fSize.setX(frame.width());
+			fSize.setY(frame.height());
 
 			frame = result;
-
+				
 		}
 		return frame;
 	}
