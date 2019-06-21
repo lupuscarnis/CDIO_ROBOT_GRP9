@@ -156,6 +156,13 @@ public class FXController {
 	@FXML
 	private Slider pf_rt_y;
 
+	//Coordinates for center point for cross
+	
+	@FXML
+	private Slider crossCenterX;
+	@FXML
+	private Slider crossCenterY;
+	
 	boolean robotest = false;
 
 	// a timer for acquiring the video stream
@@ -200,12 +207,12 @@ public class FXController {
 	 * 
 	 */
 
-	private boolean isStaticDebugMode = false;
+	private boolean isStaticDebugMode = true;
 	private boolean isVideoDebugMode = false;
-	private boolean isWebcamDebugMode = true;
+	private boolean isWebcamDebugMode = false;
 
 	// Use alternative (manual) mode for detecting the playing field?
-	boolean UseAltPFDetection = true;
+	boolean UseAltPFDetection = false;
 
 	// Use HSV or Hough for image analysis (balls)?
 	boolean UseHSVDetection = true;
@@ -366,6 +373,9 @@ public class FXController {
 
 			}
 
+			// Get center point of cross
+			frame = findAndDrawX(frame);
+			
 			// finds the pixels to cm Ratio
 
 			/**
@@ -942,27 +952,53 @@ public class FXController {
 		 * }
 		 */
 
+		Point ccXY = new Point((int)this.crossCenterX.getValue(), (int)this.crossCenterY.getValue());
+
+		// Draws circles around the corners of the found rectangle
+		Imgproc.circle(frame, new Point(ccXY.x, ccXY.y), 20, new Scalar(255, 255, 0), -1);
+
+		crossCenter = ccXY;
+		
+		
+		
+		
+	/*	
+		List<Mat> channels = new ArrayList<Mat>();
+		Core.split(frame, channels);
+		
+		Mat red = new Mat();
+		Mat thresh = new Mat();
+		red = channels.get(2);
+		
+		Imgproc.blur(red, red, new Size(7, 7));
+		// dilate to remove some black gaps within balls
+		Imgproc.dilate(red, red, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5)));
+		Imgproc.threshold(red, thresh, 200, 255, Imgproc.THRESH_BINARY);
+		
 		// points
 		Point p1 = new Point(frame.width() * 0.25, frame.height() * 0.25);
 		Point p4 = new Point(frame.width() * 0.5, frame.height() * 0.5);
 
 		// crop
-		Rect rectCrop = new Rect((int) p1.x, (int) p1.y, (int) p4.x, (int) p4.y);
-		Mat croppedImage = new Mat(frame, rectCrop);
-
+		//Rect rectCrop = new Rect((int) p1.x, (int) p1.y, (int) p4.x, (int) p4.y);
+		//Mat croppedImage = new Mat(frame, rectCrop);
+/*
 		Mat blurImg = new Mat();
 		Mat hsv = new Mat();
 		Mat color_range = new Mat();
 
 		// bluring image to filter small noises.
-		Imgproc.GaussianBlur(croppedImage, blurImg, new Size(25, 25), 0);
+		Imgproc.GaussianBlur(frame, blurImg, new Size(25, 25), 0);
 		// Imgproc.medianBlur(croppedImage, blurImg, 25);
 
 		Imgproc.cvtColor(blurImg, hsv, Imgproc.COLOR_BGR2HSV);
 
 		// filtering pixels based on given blur color range (RED)
 		Core.inRange(blurImg, new Scalar(0, 0, 220), new Scalar(80, 80, 255), color_range);
-
+*/
+		// show the partial output
+		//this.updateImageView(this.crossImage1, Utils.mat2Image(thresh));
+		
 		/*
 		 * Mat redMask1 = new Mat(); Mat redMask2 = new Mat(); Mat redMaskf = new Mat();
 		 * 
@@ -972,11 +1008,11 @@ public class FXController {
 		 */
 
 		// init
-		List<MatOfPoint> contours = new ArrayList<>();
+		/*List<MatOfPoint> contours = new ArrayList<>();
 		Mat hierarchy = new Mat();
 
 		// find contours
-		Imgproc.findContours(color_range, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(thresh, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 
 		List<Moments> mu = new ArrayList<Moments>(contours.size());
 		int x = 0;
@@ -987,16 +1023,18 @@ public class FXController {
 			Moments p = mu.get(i);
 			x += (int) (p.get_m10() / p.get_m00());
 			y += (int) (p.get_m01() / p.get_m00());
+			//System.out.println(p.get_m10());
 
 		}
 		crossCenter = new Point(x,y);
+		//System.out.println(crossCenter);
 		
-		Imgproc.circle(color_range, new Point(x, y), 25, new Scalar(125));
+		Imgproc.circle(thresh, new Point(x, y), 6, new Scalar(0,0,255), -1);
 
 		Imgcodecs imageCodecs = new Imgcodecs();
 
-		this.updateImageView(this.crossImage1, Utils.mat2Image(color_range));
-
+		this.updateImageView(this.crossImage1, Utils.mat2Image(thresh));
+*/
 		return frame;
 	}
 
