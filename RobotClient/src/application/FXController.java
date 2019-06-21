@@ -1126,7 +1126,7 @@ public class FXController {
 		return values;
 	}
 
-	Point getCrossCenter( ) {
+	public Point getCrossCenter( ) {
 		
 		return crossCenter;
 		

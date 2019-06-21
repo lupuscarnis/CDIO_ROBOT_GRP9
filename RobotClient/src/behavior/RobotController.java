@@ -457,6 +457,7 @@ public class RobotController implements Runnable {
 		double X = (cs.robot.get(0).getX() + cs.robot.get(0).getX()) / 2;
 		double Y = (cs.robot.get(1).getY() + cs.robot.get(1).getY()) / 2;
 		Coordinate robotCenter = new Coordinate(X, Y);
+		Coordinate crossCenter = new Coordinate(fx.getCrossCenter().x, fx.getCrossCenter().y);
 
 		// pixels get converted to cm
 
