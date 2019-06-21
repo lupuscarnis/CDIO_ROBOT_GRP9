@@ -29,7 +29,7 @@ public class RobotController implements Runnable {
 	DTO dto;
 	int iter = 0;
 	double startTime = 0;
-
+	FXController fx = null;
 	CSystem cs;
 	ArrayList<Coordinate> path;
 	List<Ball> ballist;
@@ -37,6 +37,7 @@ public class RobotController implements Runnable {
 	public RobotController() {
 		dao = new DAO();
 		dto = new DTO();
+		fx = staticFXCont.getInstance().getfxInstance();
 	}
 	
 	public void startTime() {
@@ -189,7 +190,7 @@ public class RobotController implements Runnable {
 	}
 
 	public void getView() {
-		FXController fx = staticFXCont.getInstance().getfxInstance();
+		
 		boolean robotFound = false, ballsFound = false, frameFound = false;
 		int noneFound = 0;
 
