@@ -469,18 +469,24 @@ public class RobotController implements Runnable {
 		if ((newCoordinate == robotCenter)) {
 			// moveToPoint(newCoordinate); just move to the point you should
 			dir = calcDirection(cs.robot.get(0), robotCenter, newPoint);
+			send (0,dir,0,0);
+			getView();
 			dist = getDistance(cs.robot.get(0), newPoint);
-			send(dist, dir, 0, 0);
+			send(dist, 0, 0, 0);
 		} else {
 			// first move to the stop on the way, coordinate to avoid obstacle
 			dir = calcDirection(cs.robot.get(0), robotCenter, newCoordinate);
+			send(0,dir,0,0);
+			getView();
 			dist = getDistance(cs.robot.get(0), newCoordinate);
-			send(dist, dir, 0, 0);
+			send(dist, 0, 0, 0);
 
 			// now move to the point you wanted
 			dir = calcDirection(cs.robot.get(0), robotCenter, newPoint);
+			send(0,dir,0,0);
+			getView();
 			dist = getDistance(cs.robot.get(0), newPoint);
-			send(dist, dir, 0, 0);
+			send(dist, 0, 0, 0);
 
 		}
 	}
