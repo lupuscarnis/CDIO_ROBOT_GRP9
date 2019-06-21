@@ -3,6 +3,13 @@ package objects;
 public class Robot {
 	private static Robot robot;
 	private double pixelToCM;
+	boolean stopRobot = false;
+	public boolean isStopRobot() {
+		return stopRobot;
+	}
+	public void setStopRobot(boolean stopRobot) {
+		this.stopRobot = stopRobot;
+	}
 	public double getPixelToCM() {
 		return pixelToCM;
 	}

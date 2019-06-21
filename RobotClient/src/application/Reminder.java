@@ -2,6 +2,8 @@ package application;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import objects.Robot;
+
 
 
 	public class Reminder {
@@ -14,9 +16,13 @@ import java.util.TimerTask;
 	  }
 
 	  class RemindTask extends TimerTask {
+		  
+		  
+		  
 	    public void run() {
-	      System.out.println("biiiiiiiiiiiiiib time's up dude!");
+	      Robot.getInstance().setStopRobot(true);
 	      timer.cancel(); //Terminate the timer thread
+	    
 	    }
 	  }
 

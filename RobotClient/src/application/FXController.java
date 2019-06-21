@@ -213,7 +213,7 @@ public class FXController {
 	private int captureRate = 1000;
 
 	// Sets the id of the systems webcam
-	private int webcamID = 0;
+	private int webcamID = 1;
 
 	// Debug image file
 	// private String debugImg = "Debugging/pic01.jpg";

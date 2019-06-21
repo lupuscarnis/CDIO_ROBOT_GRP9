@@ -507,7 +507,7 @@ if((newCoordinate==robotCenter)) {
 	
 	send(0,0,120,0);
 	
-	send(0.15,0,0,0);
+	send(0.20,0,0,0);
 	
 	send(0.05,0,-120,0);
 			 
