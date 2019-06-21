@@ -182,6 +182,7 @@ public class FXController {
 	public List<Point> p = new ArrayList<>();
 	private Mat circlesGUI = new Mat();
 	List<Point> balls = new ArrayList<Point>();
+	public Point crossCenter = new Point();
 	/******************************************
 	 * * MAIN CONTROLS AND SETUP * *
 	 ******************************************/
@@ -988,7 +989,8 @@ public class FXController {
 			y += (int) (p.get_m01() / p.get_m00());
 
 		}
-
+		crossCenter = new Point(x,y);
+		
 		Imgproc.circle(color_range, new Point(x, y), 25, new Scalar(125));
 
 		Imgcodecs imageCodecs = new Imgcodecs();
@@ -1124,4 +1126,10 @@ public class FXController {
 		return values;
 	}
 
+	Point getCrossCenter( ) {
+		
+		return crossCenter;
+		
+	}
+	
 }
