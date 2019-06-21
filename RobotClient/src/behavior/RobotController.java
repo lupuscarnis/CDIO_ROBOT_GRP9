@@ -191,7 +191,7 @@ public class RobotController implements Runnable {
 
 	public void getView() {
 		
-		boolean robotFound = false, ballsFound = false, frameFound = false;
+		boolean robotFound = false, ballsFound = false, frameFound = false, crossFound = false;
 		int noneFound = 0;
 
 		do {
@@ -210,6 +210,20 @@ public class RobotController implements Runnable {
 			} else {
 				robotFound = true;
 			}
+			
+			if (FrameSize.getInstance().getX() == 0 || FrameSize.getInstance().getY() == 0) {
+                System.err.println("Couldn't find framesize");
+                frameFound = false;
+            } else {
+                frameFound = true;
+            }
+
+			if (fx.getCrossCenter().x == 0 || fx.getCrossCenter().y == 0) {
+                System.err.println("Couldn't find Cross");
+                crossFound = true;
+            } else {
+                crossFound = true;
+            }
 
 
 			if (BallList.getInstance().getBallList().size() < 1) {
@@ -229,7 +243,7 @@ public class RobotController implements Runnable {
 				ballsFound = true;
 			}
 
-		} while (!(robotFound && ballsFound ));
+		} while (!(robotFound && ballsFound && frameFound && crossFound));
 		FrameSize framesize = FrameSize.getInstance();
 		path = new ArrayList<Coordinate>();
 		Robot rob = Robot.getInstance();
@@ -259,7 +273,7 @@ public class RobotController implements Runnable {
 
 	public void scoreGoal() {
 		// should perhaps be frameWidth/2
-		double goalY =((304)) ;
+		double goalY =((292)) ;
 		// only want like 10 in front of goal, but the border = 30
 		double goalX = 80;
 		Coordinate frontOfGoal = new Coordinate(goalX, goalY);
@@ -335,10 +349,12 @@ public class RobotController implements Runnable {
 		do {
 
 			// if(firstTime) {path = findRoute();}
-
+			
 			// this makes sure that it keeps trying to get the same ball, as long as it can
 			// find it
 			getView();
+			Coordinate cross = new Coordinate(fx.getCrossCenter().x, fx.getCrossCenter().y);
+			System.out.println("her er krydset x "+cross.getX()+" y "+cross.getY());
 			path = findRoute();
 			System.out.println("route er"+path.size());
 			if (!(path.isEmpty())) {
@@ -355,6 +371,9 @@ public class RobotController implements Runnable {
 					nrBalls = 0;
 					scoreGoal();
 				} else {
+					
+					
+					
 					if (getDistance(cs.robot.get(0), path.get(0)) > 0.35) {
 
 						isFar(path);
@@ -457,7 +476,7 @@ public class RobotController implements Runnable {
 		double X = (cs.robot.get(0).getX() + cs.robot.get(0).getX()) / 2;
 		double Y = (cs.robot.get(1).getY() + cs.robot.get(1).getY()) / 2;
 		Coordinate robotCenter = new Coordinate(X, Y);
-		Coordinate crossCenter = new Coordinate(fx.getCrossCenter().x, fx.getCrossCenter().y);
+		
 
 		// pixels get converted to cm
 
@@ -497,8 +516,10 @@ public class RobotController implements Runnable {
 		double dir = calcDirection(robotFront, robotBack, ball);
 		// need working frame sizes, not sure these work
 		Coordinate cross = new Coordinate(frameWidth / 2, frameHeight / 2);
+		//Coordinate cross = new Coordinate(fx.getCrossCenter().x, fx.getCrossCenter().y);
 		Coordinate robotCenter = new Coordinate(robotFront.getX() + robotBack.getX(),
 				robotFront.getY() + robotBack.getY());
+		System.out.println("her er krydset x "+cross.getX()+" y "+cross.getY());
 		for (int i = 0; i < frameWidth / 2; i++) {
 
 			if (robotFront.getX() * i > (cross.getX() - 30) && robotFront.getX() * i < cross.getX() + 30) {
@@ -589,7 +610,8 @@ public class RobotController implements Runnable {
 			getView();
 
 			// if ball is near wall, do something different
-
+			
+			
 			dir = calcDirection(cs.robot.get(0), cs.robot.get(1), thePath.get(0));
 
 			if (dir < 5 && dir > -5) {
@@ -607,6 +629,7 @@ public class RobotController implements Runnable {
 		float distance = (float) ((getDistance(cs.robot.get(0), thePath.get(0))));
 		System.out.println("Im driving, im doing it " + distance);
 
+		
 		send(distance - 0.2, 0, 0, 0);
 
 		send(0, 0, 120, 0);
@@ -624,11 +647,15 @@ public class RobotController implements Runnable {
 
 			// if ball is near wall, do something different
 
+			
+
 			dir = calcDirection(cs.robot.get(0), cs.robot.get(1), thePath.get(0));
 			send(0, dir, 0, 0);
 
 		} while (!((dir <= 20) && (dir >= -20)));
 
+		Coordinate almostBall = new Coordinate (thePath.get(0).getX()-10,thePath.get(0).getY()-10);
+		moveToPoint(almostBall);
 		double distance = ((getDistance(cs.robot.get(0), thePath.get(0))));
 		System.out.println("Im driving, im doing it " + distance);
 		if (distance > 30) {
