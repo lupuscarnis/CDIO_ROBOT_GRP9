@@ -30,6 +30,7 @@ public class RobotController implements Runnable {
 	int iter = 0;
 	double startTime = 0;
 	FXController fx = null;
+
 	CSystem cs;
 	ArrayList<Coordinate> path;
 	List<Ball> ballist;
@@ -37,7 +38,7 @@ public class RobotController implements Runnable {
 	public RobotController() {
 		dao = new DAO();
 		dto = new DTO();
-		fx = staticFXCont.getInstance().getfxInstance();
+		 fx = staticFXCont.getInstance().getfxInstance();
 	}
 	
 	public void startTime() {
@@ -139,6 +140,7 @@ public class RobotController implements Runnable {
 	}
 
 	public int isBallAtWall(Coordinate ball) {
+		Coordinate cross = new Coordinate(fx.getCrossCenter().x, fx.getCrossCenter().y);
 		int output = 0;
 		int xMin = 30;
 		int	xMax = 530;
@@ -147,22 +149,25 @@ public class RobotController implements Runnable {
 		int threshold = 10;
 		int y = (xMax - xMin-threshold);
 		int x = (yMax - yMin-threshold);
-		double hardX = 570;
-		double hardY = 650;
-		System.out.println(" x saa y "+x+" "+y);
-		
-		if (ball.getX() < 30 || ball.getX() > hardX ){
+		double hardX = 500;
+		double hardY = 397;
+	
+		if (ball.getX() < 30 || ball.getX() > hardX-30 ){
 			output = 1;
 		}
-		if (ball.getY() < 30 || ball.getY() > hardY ){
+		if (ball.getY() < 30 || ball.getY() > hardY-30 ){
 			output += 2;
 		}
-		
+		/*
 		if(ball.getX()>(hardX/2-50) && (ball.getY()>(hardY/2)-50) && (ball.getX()<(hardX/2)+50) && (ball.getY()<(hardY/2)+50)){
 			output = 4;
 			
 		}
+		*/
 		
+		if(ball.getX() > cross.getX()) {
+			output = 3;
+		}
 		System.out.println("x nedre graense "+(xMin+threshold)+" x oevre graense "+(xMax - xMin-threshold) );
 		System.out.println();
 		System.out.println("y nedre graense "+(yMin+threshold)+" y oevre graense "+(yMax - yMin-threshold) );
@@ -191,7 +196,7 @@ public class RobotController implements Runnable {
 
 	public void getView() {
 		
-		boolean robotFound = false, ballsFound = false, frameFound = false, crossFound = false;
+		boolean robotFound = false, ballsFound = false, frameFound = false;
 		int noneFound = 0;
 
 		do {
@@ -210,20 +215,6 @@ public class RobotController implements Runnable {
 			} else {
 				robotFound = true;
 			}
-			
-			if (FrameSize.getInstance().getX() == 0 || FrameSize.getInstance().getY() == 0) {
-                System.err.println("Couldn't find framesize");
-                frameFound = false;
-            } else {
-                frameFound = true;
-            }
-
-			if (fx.getCrossCenter().x == 0 || fx.getCrossCenter().y == 0) {
-                System.err.println("Couldn't find Cross");
-                crossFound = true;
-            } else {
-                crossFound = true;
-            }
 
 
 			if (BallList.getInstance().getBallList().size() < 1) {
@@ -243,7 +234,7 @@ public class RobotController implements Runnable {
 				ballsFound = true;
 			}
 
-		} while (!(robotFound && ballsFound && frameFound && crossFound));
+		} while (!(robotFound && ballsFound ));
 		FrameSize framesize = FrameSize.getInstance();
 		path = new ArrayList<Coordinate>();
 		Robot rob = Robot.getInstance();
@@ -273,7 +264,7 @@ public class RobotController implements Runnable {
 
 	public void scoreGoal() {
 		// should perhaps be frameWidth/2
-		double goalY =((292)) ;
+		double goalY =((218)) ;
 		// only want like 10 in front of goal, but the border = 30
 		double goalX = 80;
 		Coordinate frontOfGoal = new Coordinate(goalX, goalY);
@@ -349,12 +340,10 @@ public class RobotController implements Runnable {
 		do {
 
 			// if(firstTime) {path = findRoute();}
-			
+
 			// this makes sure that it keeps trying to get the same ball, as long as it can
 			// find it
 			getView();
-			Coordinate cross = new Coordinate(fx.getCrossCenter().x, fx.getCrossCenter().y);
-			System.out.println("her er krydset x "+cross.getX()+" y "+cross.getY());
 			path = findRoute();
 			System.out.println("route er"+path.size());
 			if (!(path.isEmpty())) {
@@ -371,9 +360,6 @@ public class RobotController implements Runnable {
 					nrBalls = 0;
 					scoreGoal();
 				} else {
-					
-					
-					
 					if (getDistance(cs.robot.get(0), path.get(0)) > 0.35) {
 
 						isFar(path);
@@ -390,9 +376,9 @@ public class RobotController implements Runnable {
 			}
 		} while (Robot.getInstance().isStopRobot() && counter < 3);
 		scoreGoal();
-		
-		System.out.println("hue hue hue tiden er"+TakeTime(false)/1000+" "+startTime/1000);
 		send(-0.2,1080,0,0);
+		System.out.println("hue hue hue tiden er"+" "+startTime/1000);
+		
 		
 
 	}
@@ -476,7 +462,6 @@ public class RobotController implements Runnable {
 		double X = (cs.robot.get(0).getX() + cs.robot.get(0).getX()) / 2;
 		double Y = (cs.robot.get(1).getY() + cs.robot.get(1).getY()) / 2;
 		Coordinate robotCenter = new Coordinate(X, Y);
-		
 
 		// pixels get converted to cm
 
@@ -490,24 +475,18 @@ public class RobotController implements Runnable {
 		if ((newCoordinate == robotCenter)) {
 			// moveToPoint(newCoordinate); just move to the point you should
 			dir = calcDirection(cs.robot.get(0), robotCenter, newPoint);
-			send (0,dir,0,0);
-			getView();
 			dist = getDistance(cs.robot.get(0), newPoint);
-			send(dist, 0, 0, 0);
+			send(dist, dir, 0, 0);
 		} else {
 			// first move to the stop on the way, coordinate to avoid obstacle
 			dir = calcDirection(cs.robot.get(0), robotCenter, newCoordinate);
-			send(0,dir,0,0);
-			getView();
 			dist = getDistance(cs.robot.get(0), newCoordinate);
-			send(dist, 0, 0, 0);
+			send(dist, dir, 0, 0);
 
 			// now move to the point you wanted
 			dir = calcDirection(cs.robot.get(0), robotCenter, newPoint);
-			send(0,dir,0,0);
-			getView();
 			dist = getDistance(cs.robot.get(0), newPoint);
-			send(dist, 0, 0, 0);
+			send(dist, dir, 0, 0);
 
 		}
 	}
@@ -516,10 +495,8 @@ public class RobotController implements Runnable {
 		double dir = calcDirection(robotFront, robotBack, ball);
 		// need working frame sizes, not sure these work
 		Coordinate cross = new Coordinate(frameWidth / 2, frameHeight / 2);
-		//Coordinate cross = new Coordinate(fx.getCrossCenter().x, fx.getCrossCenter().y);
 		Coordinate robotCenter = new Coordinate(robotFront.getX() + robotBack.getX(),
 				robotFront.getY() + robotBack.getY());
-		System.out.println("her er krydset x "+cross.getX()+" y "+cross.getY());
 		for (int i = 0; i < frameWidth / 2; i++) {
 
 			if (robotFront.getX() * i > (cross.getX() - 30) && robotFront.getX() * i < cross.getX() + 30) {
@@ -610,18 +587,17 @@ public class RobotController implements Runnable {
 			getView();
 
 			// if ball is near wall, do something different
-			
-			
-			dir = calcDirection(cs.robot.get(0), cs.robot.get(1), thePath.get(0));
 
-			if (dir < 5 && dir > -5) {
+			dir = calcDirection(cs.robot.get(0), cs.robot.get(1), thePath.get(0));
+/*
+			if (dir < 3 && dir > -3) {
 				if (dir > 0) {
 					dir = 2;
 				}
 			} else {
 				dir = -2;
 			}
-
+*/
 			send(0, dir, 0, 0);
 
 		} while (!((dir <= 2) && (dir >= -2)));
@@ -629,7 +605,6 @@ public class RobotController implements Runnable {
 		float distance = (float) ((getDistance(cs.robot.get(0), thePath.get(0))));
 		System.out.println("Im driving, im doing it " + distance);
 
-		
 		send(distance - 0.2, 0, 0, 0);
 
 		send(0, 0, 120, 0);
@@ -647,15 +622,11 @@ public class RobotController implements Runnable {
 
 			// if ball is near wall, do something different
 
-			
-
 			dir = calcDirection(cs.robot.get(0), cs.robot.get(1), thePath.get(0));
 			send(0, dir, 0, 0);
 
 		} while (!((dir <= 20) && (dir >= -20)));
 
-		Coordinate almostBall = new Coordinate (thePath.get(0).getX()-10,thePath.get(0).getY()-10);
-		moveToPoint(almostBall);
 		double distance = ((getDistance(cs.robot.get(0), thePath.get(0))));
 		System.out.println("Im driving, im doing it " + distance);
 		if (distance > 30) {

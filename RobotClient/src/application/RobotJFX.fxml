@@ -386,8 +386,8 @@
                                  <children>
                                     <VBox prefHeight="200.0" prefWidth="100.0">
                                        <children>
-                                          <Slider fx:id="crossCenterX" max="1500.0" value="500.0" />
-                                          <Slider fx:id="crossCenterY" max="1500.0" value="500.0" />
+                                          <Slider fx:id="crossCenterX"  min="-1000.0" max="1500.0" value="500.0" />
+                                          <Slider fx:id="crossCenterY" min="-1000.0" max="1500.0" value="500.0" />
                                        </children>
                                     </VBox>
                                  </children>

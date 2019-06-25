@@ -207,9 +207,9 @@ public class FXController {
 	 * 
 	 */
 
-	private boolean isStaticDebugMode = true;
+	private boolean isStaticDebugMode = false;
 	private boolean isVideoDebugMode = false;
-	private boolean isWebcamDebugMode = false;
+	private boolean isWebcamDebugMode = true;
 
 	// Use alternative (manual) mode for detecting the playing field?
 	boolean UseAltPFDetection = false;
@@ -956,7 +956,7 @@ public class FXController {
 		Point ccXY = new Point((int)this.crossCenterX.getValue(), (int)this.crossCenterY.getValue());
 
 		// Draws circles around the corners of the found rectangle
-		Imgproc.circle(frame, new Point(ccXY.x, ccXY.y), 20, new Scalar(255, 255, 0), -1);
+		Imgproc.circle(frame, new Point(ccXY.x, ccXY.y), 20, new Scalar(0, 0, 0), -1);
 
 		crossCenter = ccXY;
 		
